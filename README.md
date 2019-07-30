@@ -36,8 +36,9 @@ export BOT_TOKEN=YOUR_TOKEN_HERE
 ```
 * Run the python script as:
 
-`python3.7 unibotimetablesbot.py`
-
+```
+python3.7 unibotimetablesbot.py
+```
 
 
 **An instance of bot it's now running!** You can find it on Telegram searching `@unibotimetablesbot`
