@@ -29,10 +29,10 @@ python3.7 -m pip install -r requirements.txt
 ```
 
 
-* Create a file with a telegram bot token in a single line *(es: bot.tk)*
+* Set BOT_TOKEN environment variable with bot's token
 * Run the python script as:
 
-`python3.7 unibotimetablesbot.py bot.tk`
+`python3.7 unibotimetablesbot.py`
 
 
 
