@@ -30,6 +30,10 @@ python3.7 -m pip install -r requirements.txt
 
 
 * Set BOT_TOKEN environment variable with bot's token
+
+```
+export BOT_TOKEN=YOUR_TOKEN_HERE
+```
 * Run the python script as:
 
 `python3.7 unibotimetablesbot.py`
