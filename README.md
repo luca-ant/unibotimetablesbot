@@ -1,4 +1,4 @@
-# unibotimetablebot
+# unibotimetablesbot
 
 
 A Telegram bot for Unibo lessons timetables in Bologna.
@@ -8,7 +8,7 @@ A Telegram bot for Unibo lessons timetables in Bologna.
 * Create a file with a telegram bot token in a single line *(es: bot.tk)*
 * Run the python script as:
 
-`python3 unibotimetablebot.py bot.tk`
+`python3 unibotimetablesbot.py bot.tk`
 
 
-**An instance of bot it's now running!** You can find it on Telegram searching `@unibotimetablebot`
+**An instance of bot it's now running!** You can find it on Telegram searching `@unibotimetablesbot`
