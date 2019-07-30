@@ -17,9 +17,9 @@ git clone git@github.com:luca-ant/unibotimetablesbot.git
 
 * Install dependencies, create a virtual environment and install requirements modules
 ```
-sudo apt install python3-setuptools
-sudo apt install python3-pip
-sudo apt install python3-venv
+sudo apt install python3.7-setuptools
+sudo apt install python3.7-pip
+sudo apt install python3.7-venv
 
 cd unibotimetablesbot
 python3.7 -m venv venv
@@ -32,7 +32,7 @@ python3.7 -m pip install -r requirements.txt
 * Create a file with a telegram bot token in a single line *(es: bot.tk)*
 * Run the python script as:
 
-`python3 unibotimetablesbot.py bot.tk`
+`python3.7 unibotimetablesbot.py bot.tk`
 
 
 
