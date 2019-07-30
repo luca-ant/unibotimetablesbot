@@ -5,8 +5,7 @@ A Telegram bot for Unibo lessons timetables in Bologna.
 
 ## Getting started
 
-### Linux
-Clonare il repository
+* Clone repository
 ```
 git clone https://github.com/luca-ant/unibotimetablesbot.git
 ```
@@ -28,7 +27,6 @@ source venv/bin/activate
 
 python3.7 -m pip install -r requirements.txt
 ```
-
 
 
 * Create a file with a telegram bot token in a single line *(es: bot.tk)*
