@@ -17,6 +17,7 @@ emo_address = u'\U0001F3EB'
 emo_gps = u'\U0001F4CD'
 emo_help = u'\U00002139'
 
+
 class Teaching:
     def __init__(self, corso_codice, materia_codice, materia_descrizione, docente_nome, componente_id, url):
         self.componente_id = componente_id
@@ -60,6 +61,15 @@ class Plan:
     def add_teaching(self, t):
         self.teachings.append(t)
 
+    def remove_teaching(self, teaching):
+        index_to_remove = -1
+        for i in range(0, len(self.teachings), 1):
+            t = self.teachings[i]
+            if t.componente_id == teaching.componente_id:
+                index_to_remove = i
+        if index_to_remove >= 0:
+            del self.teachings[index_to_remove]
+
     def set_teachings(self, t):
         self.teachings = t
 
@@ -70,7 +80,7 @@ class Plan:
         return None
 
     def __str__(self):
-        result = emo_plan + " YOUR PLAN\n\n"
+        result = emo_plan + " YOUR STUDY PLAN\n\n"
         for t in self.teachings:
             result += t.materia_codice + " - " + t.materia_descrizione
             if t.docente_nome != "":
@@ -132,7 +142,7 @@ class Timetable:
                 result += "\n"
                 result += emo_gps + " " + str(a.lat) + ", " + str(a.lon)
                 result += "\n"
-            result += "\n\n"
+            result += "\n"
         return result
 
 

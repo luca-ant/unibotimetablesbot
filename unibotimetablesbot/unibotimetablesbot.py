@@ -41,8 +41,8 @@ emo_help = u'\U00002139'
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
 MY_PLAN = emo_plan + " " + "MY STUDY PLAN"
-MAKE_PLAN = emo_make + " " + "MAKE MY STUDY PLAN"
-DEL_PLAN = emo_del + " " + "DELETE MY STUDY PLAN"
+MAKE_PLAN = emo_make + " " + "UPDATE MY STUDY PLAN"
+DEL_PLAN = emo_del + " " + "DELETE STUDY PLAN"
 END_PLAN = emo_end_plan + " " + "SAVE STUDY PLAN"
 BACK_TO_AREAS = emo_back + " " + "BACK TO AREAS"
 BACK_TO_MAIN = emo_back + " " + "BACK TO MAIN"
@@ -191,14 +191,14 @@ def make_main_keyboard(chat_id, mode):
     buttonLists.append(list())
     buttonLists.append(list())
     buttonLists.append(list())
+    buttonLists.append(list())
 
     buttonLists[0].append(ALL_COURSES)
+    buttonLists[1].append(MAKE_PLAN)
     if chat_id in users_plans.keys():
-        buttonLists[1].append(MY_TIMETABLE)
-        buttonLists[2].append(MY_PLAN)
-        buttonLists[3].append(DEL_PLAN)
-    else:
-        buttonLists[1].append(MAKE_PLAN)
+        buttonLists[2].append(MY_TIMETABLE)
+        buttonLists[3].append(MY_PLAN)
+        buttonLists[4].append(DEL_PLAN)
     keyboard = ReplyKeyboardMarkup(keyboard=buttonLists, resize_keyboard=True)
     return keyboard
 
@@ -210,11 +210,11 @@ def make_area_keyboard(mode):
         buttonLists.append(list())
 
     for i in range(0, len(all_courses_group_by_area.keys()), 1):
-        buttonLists[i].append(list(all_courses_group_by_area.keys())[i])
+        buttonLists[i + 1].append(list(all_courses_group_by_area.keys())[i])
 
-    buttonLists[len(all_courses_group_by_area.keys())].append(BACK_TO_MAIN)
+    buttonLists[len(all_courses_group_by_area.keys()) + 1].append(BACK_TO_MAIN)
     if mode == Mode.MAKE_PLAN:
-        buttonLists[len(all_courses_group_by_area.keys())].append(END_PLAN)
+        buttonLists[0].append(END_PLAN)
 
     keyboard = ReplyKeyboardMarkup(keyboard=buttonLists, resize_keyboard=True)
     return keyboard
@@ -227,15 +227,64 @@ def make_courses_keyboard(area, mode):
         buttonLists.append(list())
 
     for i in range(0, len(all_courses_group_by_area[area]), 1):
-        buttonLists[i].append(str(all_courses_group_by_area[area][i]))
+        buttonLists[i + 1].append(str(all_courses_group_by_area[area][i]))
 
-    buttonLists[len(all_courses_group_by_area[area])].append(BACK_TO_AREAS)
-    buttonLists[len(all_courses_group_by_area[area])].append(BACK_TO_MAIN)
+    buttonLists[len(all_courses_group_by_area[area]) + 1].append(BACK_TO_AREAS)
+    buttonLists[len(all_courses_group_by_area[area]) + 1].append(BACK_TO_MAIN)
     if mode == Mode.MAKE_PLAN:
-        buttonLists[len(all_courses_group_by_area[area]) + 1].append(END_PLAN)
+        buttonLists[0].append(END_PLAN)
 
     keyboard = ReplyKeyboardMarkup(keyboard=buttonLists, resize_keyboard=True)
     return keyboard
+
+
+def print_plan(chat_id):
+    result = emo_plan + " YOUR STUDY PLAN\n\n"
+    for t in users_plans[chat_id].teachings:
+        result += t.materia_codice + " - " + t.materia_descrizione
+        if t.docente_nome != "":
+            result += " (" + t.docente_nome + ")"
+        if users_plans[chat_id].find_teaching_by_componente_id(t.componente_id) != None:
+            cmd = "remove"
+            result += " [ /" + cmd + "_" + t.componente_id + " ]"
+        result += "\n\n"
+
+    return result
+
+
+def print_teachings_message(chat_id, code, mode):
+    result = list()
+    if mode == Mode.NORMAL:
+
+        for t in all_courses[code].teachings:
+            t_string = t.materia_codice + " - " + t.materia_descrizione
+            if t.docente_nome != "":
+                t_string += " (" + t.docente_nome + ")"
+            t_string += " [ /schedule_" + t.componente_id + " ]"
+            t_string += "\n\n"
+            result.append(t_string)
+
+
+
+    elif mode == Mode.MAKE_PLAN:
+
+        for t in all_courses[code].teachings:
+            t_string = t.materia_codice + " - " + t.materia_descrizione
+            if t.docente_nome != "":
+                t_string += " (" + t.docente_nome + ")"
+            if users_plans[chat_id].find_teaching_by_componente_id(t.componente_id) == None:
+                cmd = "add"
+            else:
+                cmd = "remove"
+            t_string += " [ /" + cmd + "_" + t.componente_id + " ]"
+            t_string += "\n\n"
+            result.append(t_string)
+
+
+    else:
+        result.clear()
+
+    return result
 
 
 def make_teachings_keyboard(code, mode):
@@ -245,13 +294,13 @@ def make_teachings_keyboard(code, mode):
         buttonLists.append(list())
 
     for i in range(0, len(all_courses[code].teachings), 1):
-        buttonLists[i].append(str(all_courses[code].teachings[i]))
+        buttonLists[i + 1].append(str(all_courses[code].teachings[i]))
 
-    buttonLists[len(all_courses[code].teachings)].append(BACK_TO_AREAS)
-    buttonLists[len(all_courses[code].teachings)].append(BACK_TO_MAIN)
+    buttonLists[len(all_courses[code].teachings) + 1].append(BACK_TO_AREAS)
+    buttonLists[len(all_courses[code].teachings) + 1].append(BACK_TO_MAIN)
 
     if mode == Mode.MAKE_PLAN:
-        buttonLists[len(all_courses[code].teachings) + 1].append(END_PLAN)
+        buttonLists[0].append(END_PLAN)
 
     keyboard = ReplyKeyboardMarkup(keyboard=buttonLists, resize_keyboard=True)
     return keyboard
@@ -354,8 +403,7 @@ def on_chat_message(msg):
                 users_mode[chat_id] = Mode.NORMAL
 
                 if chat_id in users_plans.keys():
-                    plan = users_plans[chat_id]
-                    output_string = str(plan)
+                    output_string = print_plan(chat_id)
                     bot.sendMessage(chat_id, donation_string)
                     bot.sendMessage(chat_id, output_string,
                                     reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
@@ -403,52 +451,60 @@ def on_chat_message(msg):
 
             elif msg["text"].split()[0] in all_courses.keys():
 
-                if users_mode[chat_id] == Mode.NORMAL:
-                    output_string = "Choose a teaching!"
-                    bot.sendMessage(chat_id, output_string,
-                                    reply_markup=make_teachings_keyboard(msg["text"].split()[0], users_mode[chat_id]))
+                string_list = print_teachings_message(chat_id, msg["text"].split()[0], users_mode[chat_id])
+                for s in string_list:
+                    output_string = s
+                    bot.sendMessage(chat_id, output_string)
+
+            elif msg["text"].startswith("/add"):
+
+                array = msg["text"].split("_")
+                componente_id = array[1]
+
+                if componente_id in all_teachings.keys():
+                    teaching = all_teachings[componente_id]
+                    users_plans[chat_id].add_teaching(teaching)
+                    store_user_plan(chat_id, users_plans[chat_id])
+                    output_string = "Teaching added!"
+                    bot.sendMessage(chat_id, output_string)
 
 
-                elif users_mode[chat_id] == Mode.MAKE_PLAN:
+            elif msg["text"].startswith("/remove"):
 
-                    output_string = "Choose a teaching to add to your plan!"
-                    bot.sendMessage(chat_id, output_string,
-                                    reply_markup=make_teachings_keyboard(msg["text"].split()[0], users_mode[chat_id]))
+                array = msg["text"].split("_")
+                componente_id = array[1]
+
+                teaching = all_teachings[componente_id]
+
+                users_plans[chat_id].remove_teaching(teaching)
+                store_user_plan(chat_id, users_plans[chat_id])
+
+                output_string = "Teaching removed!"
+                bot.sendMessage(chat_id, output_string)
+
+            elif msg["text"].startswith("/schedule"):
+
+                array = msg["text"].split("_")
+                componente_id = array[1]
+
+                plan = Plan()
+                teaching = all_teachings[componente_id]
+
+                plan.add_teaching(teaching)
+
+                now = datetime.datetime.now()
+                timetable = get_plan_timetable(now, plan)
+
+                output_string = emo_calendar + " " + now.strftime("%d/%m/%Y") + "\n\n"
+                output_string += print_output_timetable(timetable)
+                bot.sendMessage(chat_id, output_string)
 
             else:
 
-                array = msg["text"].split()
-                s = array[len(array) - 1]
-                componente_id = s.replace("[", "").replace("]", "")
+                output_string = "Sorry.. I don't understand.."
 
-                if users_mode[chat_id] == Mode.NORMAL:
-
-                    plan = Plan()
-                    teaching = all_teachings[componente_id]
-
-                    plan.add_teaching(teaching)
-
-                    now = datetime.datetime.now()
-                    timetable = get_plan_timetable(now, plan)
-
-                    output_string = emo_calendar + " " + now.strftime("%d/%m/%Y") + "\n\n"
-                    output_string += print_output_timetable(timetable)
-                    bot.sendMessage(chat_id, output_string)
-
-                elif users_mode[chat_id] == Mode.MAKE_PLAN:
-
-                    if componente_id in all_teachings.keys():
-                        teaching = all_teachings[componente_id]
-                        users_plans[chat_id].add_teaching(teaching)
-                        output_string = "Choose your area!"
-                        bot.sendMessage(chat_id, output_string, reply_markup=make_area_keyboard(users_mode[chat_id]))
-
-                    else:
-
-                        output_string = "Sorry.. I don't understand.."
-
-                        bot.sendMessage(chat_id, output_string,
-                                        reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                bot.sendMessage(chat_id, output_string,
+                                reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
         else:
 
             users_mode[chat_id] = Mode.NORMAL
