@@ -1,7 +1,21 @@
 from enum import Enum
 
-from unibotimetablesbot import emo_money, emo_clock, emo_arrow_back, emo_arrow_forward, emo_courses, emo_plan, emo_end_plan, emo_make, emo_timetable, emo_back, emo_del, emo_calendar, emo_room, emo_address, emo_gps, emo_help
-
+emo_money = u'\U0001F4B5'
+emo_clock = u'\U0001F552'
+emo_arrow_back = u'\U00002B05'
+emo_arrow_forward = u'\U000027A1'
+emo_courses = u'\U0001F4CE'
+emo_plan = u'\U0001F4D8'
+emo_end_plan = u'\U00002705'
+emo_make = u'\U0001F4DD'
+emo_timetable = u'\U0000231B'
+emo_back = u'\U0001F519'
+emo_del = u'\U0000274C'
+emo_calendar = u'\U0001F4C5'
+emo_room = u'\U0001F3C1'
+emo_address = u'\U0001F3EB'
+emo_gps = u'\U0001F4CD'
+emo_help = u'\U00002139'
 
 class Teaching:
     def __init__(self, corso_codice, materia_codice, materia_descrizione, docente_nome, componente_id, url):
@@ -56,15 +70,13 @@ class Plan:
         return None
 
     def __str__(self):
-        result = "YOUR PLAN"
+        result = emo_plan + " YOUR PLAN\n\n"
         for t in self.teachings:
             result += t.materia_codice + " - " + t.materia_descrizione
             if t.docente_nome != "":
                 result += " (" + t.docente_nome + ")"
             result += "\n\n"
 
-        if result == "YOUR PLAN":
-            return "YOUR PLAN IS EMPTY"
         return result
 
 
