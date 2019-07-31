@@ -47,7 +47,7 @@ END_PLAN = emo_end_plan + " " + "SAVE STUDY PLAN"
 BACK_TO_AREAS = emo_back + " " + "BACK TO AREAS"
 BACK_TO_MAIN = emo_back + " " + "BACK TO MAIN"
 
-donation_string =  emo_money +" Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
+donation_string = emo_money + " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
 help_string = "Use:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n" + MAKE_PLAN + " to build your study plan\n\nThen you can use:\n\n" + MY_PLAN + " to see your study plan\n\n" + MY_TIMETABLE + " to get your personal lesson's schedules\n\n" + DEL_PLAN + " to delete your plan" + "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail."
 
 current_dir = "./"
@@ -232,7 +232,7 @@ def make_courses_keyboard(area, mode):
     buttonLists[len(all_courses_group_by_area[area])].append(BACK_TO_AREAS)
     buttonLists[len(all_courses_group_by_area[area])].append(BACK_TO_MAIN)
     if mode == Mode.MAKE_PLAN:
-        buttonLists[len(all_courses_group_by_area[area])+1].append(END_PLAN)
+        buttonLists[len(all_courses_group_by_area[area]) + 1].append(END_PLAN)
 
     keyboard = ReplyKeyboardMarkup(keyboard=buttonLists, resize_keyboard=True)
     return keyboard
@@ -251,7 +251,7 @@ def make_teachings_keyboard(code, mode):
     buttonLists[len(all_courses[code].teachings)].append(BACK_TO_MAIN)
 
     if mode == Mode.MAKE_PLAN:
-        buttonLists[len(all_courses[code].teachings)+1].append(END_PLAN)
+        buttonLists[len(all_courses[code].teachings) + 1].append(END_PLAN)
 
     keyboard = ReplyKeyboardMarkup(keyboard=buttonLists, resize_keyboard=True)
     return keyboard
@@ -269,7 +269,7 @@ def make_inline_keyboard(day):
     prec_day = day - datetime.timedelta(days=1)
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=emo_arrow_back + " " + 'Back', callback_data=prec_day.strftime("%d/%m/%YT%H:%M:%S")),
-         InlineKeyboardButton(text='Next '+emo_arrow_forward,
+         InlineKeyboardButton(text='Next ' + emo_arrow_forward,
                               callback_data=next_day.strftime("%d/%m/%YT%H:%M:%S"))]
     ])
     return keyboard
@@ -344,7 +344,7 @@ def on_chat_message(msg):
                 ############################################################################
 
                 timetable = get_plan_timetable(now, users_plans[chat_id])
-                output_string = emo_calendar +" "+now.strftime("%d/%m/%Y") + "\n\n"
+                output_string = emo_calendar + " " + now.strftime("%d/%m/%Y") + "\n\n"
                 output_string += print_output_timetable(timetable)
 
                 bot.sendMessage(chat_id, donation_string)
@@ -370,7 +370,6 @@ def on_chat_message(msg):
 
                 output_string = "Your study plan was deleted!"
                 bot.sendMessage(chat_id, output_string, reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
-
 
             elif msg["text"] == MAKE_PLAN:
                 users_mode[chat_id] = Mode.MAKE_PLAN
@@ -414,7 +413,7 @@ def on_chat_message(msg):
 
                     output_string = "Choose a teaching to add to your plan!"
                     bot.sendMessage(chat_id, output_string,
-                                reply_markup=make_teachings_keyboard(msg["text"].split()[0], users_mode[chat_id]))
+                                    reply_markup=make_teachings_keyboard(msg["text"].split()[0], users_mode[chat_id]))
 
             else:
 
@@ -432,7 +431,7 @@ def on_chat_message(msg):
                     now = datetime.datetime.now()
                     timetable = get_plan_timetable(now, plan)
 
-                    output_string = emo_calendar +" "+now.strftime("%d/%m/%Y") + "\n\n"
+                    output_string = emo_calendar + " " + now.strftime("%d/%m/%Y") + "\n\n"
                     output_string += print_output_timetable(timetable)
                     bot.sendMessage(chat_id, output_string)
 
