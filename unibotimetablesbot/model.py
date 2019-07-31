@@ -1,5 +1,7 @@
 from enum import Enum
 
+from unibotimetablesbot import emo_money, emo_clock, emo_arrow_back, emo_arrow_forward, emo_courses, emo_plan, emo_end_plan, emo_make, emo_timetable, emo_back, emo_del, emo_calendar, emo_room, emo_address, emo_gps, emo_help
+
 
 class Teaching:
     def __init__(self, corso_codice, materia_codice, materia_descrizione, docente_nome, componente_id, url):
@@ -13,14 +15,16 @@ class Teaching:
     def __str__(self):
         result = self.materia_codice + " - " + self.materia_descrizione
         if self.docente_nome != "":
-            result += " (" + self.docente_nome + ") "
-
+            result += " (" + self.docente_nome + ")"
+        result += " [" + self.componente_id + "]"
+        result += "\n"
         return result
 
 
 class Course:
 
-    def __init__(self, corso_codice, corso_descrizione, tipologia, sededidattica, ambiti):
+    def __init__(self, corso_codice, corso_descrizione, tipologia, sededidattica, ambiti, url):
+        self.url = url
         self.ambiti = ambiti
         self.tipologia = tipologia
         self.corso_descrizione = corso_descrizione
@@ -50,6 +54,18 @@ class Plan:
             if t.componente_id == componente_id:
                 return t
         return None
+
+    def __str__(self):
+        result = "YOUR PLAN"
+        for t in self.teachings:
+            result += t.materia_codice + " - " + t.materia_descrizione
+            if t.docente_nome != "":
+                result += " (" + t.docente_nome + ")"
+            result += "\n\n"
+
+        if result == "YOUR PLAN":
+            return "YOUR PLAN IS EMPTY"
+        return result
 
 
 class Aula:
@@ -89,21 +105,21 @@ class Timetable:
                 result += " (" + l.docente_nome + ") "
             result += "\n"
 
-            result += l.inizio.strftime("%d/%m/%Y")
+            result += emo_calendar + " " + l.inizio.strftime("%d/%m/%Y")
             result += "\n"
-            result += l.inizio.strftime("%H:%M")
+            result += emo_clock + " " + l.inizio.strftime("%H:%M")
             result += " - "
             result += l.fine.strftime("%H:%M")
             result += "\n"
             for a in l.lista_aule:
-
-                result += a.aula_nome
+                result += emo_room + " " + a.aula_nome
                 result += "\n"
-                result += a.aula_indirizzo
-                result += "\n"
+                result += emo_address + " " + a.aula_indirizzo
+                result += " - "
                 result += a.aula_piano
                 result += "\n"
-                result += str(a.lat)+", "+str(a.lon)
+                result += emo_gps + " " + str(a.lat) + ", " + str(a.lon)
+                result += "\n"
             result += "\n\n"
         return result
 
