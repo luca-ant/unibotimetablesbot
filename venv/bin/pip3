@@ -1,4 +1,5 @@
-#!/media/luca/DATA/GitHub/TELEGRAM_BOT/unibotimetablesbot/unibotimetablesbot/venv/bin/python3
+#!/media/luca/DATA/GitHub/TELEGRAM_BOT/unibotimetablesbot/venv/bin/python
+
 # -*- coding: utf-8 -*-
 import re
 import sys

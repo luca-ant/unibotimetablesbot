@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/media/luca/DATA/GitHub/TELEGRAM_BOT/unibotimetablesbot/unibotimetablesbot/venv"
+VIRTUAL_ENV="/media/luca/DATA/GitHub/TELEGRAM_BOT/unibotimetablesbot/venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
