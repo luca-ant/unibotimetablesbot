@@ -59,7 +59,8 @@ class Plan:
         self.teachings = list()
 
     def add_teaching(self, t):
-        self.teachings.append(t)
+        if t not in self.teachings:
+            self.teachings.append(t)
 
     def remove_teaching(self, teaching):
         index_to_remove = -1
@@ -140,9 +141,11 @@ class Timetable:
                 result += " - "
                 result += a.aula_piano
                 result += "\n"
-                result += emo_gps + " " + str(a.lat) + ", " + str(a.lon)
-                result += "\n"
+                if a.lat != "" and a.lon!="":
+                    result += emo_gps + " " + a.lat + ", " + a.lon
+                    result += "\n"
             result += "\n"
+
         return result
 
 

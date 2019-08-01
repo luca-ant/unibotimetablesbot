@@ -1,6 +1,7 @@
 import operator
 import os
 import collections
+import random
 import sys
 import traceback
 import datetime
@@ -37,6 +38,7 @@ emo_room = u'\U0001F3C1'
 emo_address = u'\U0001F3EB'
 emo_gps = u'\U0001F4CD'
 emo_help = u'\U00002139'
+emo_no_less=u'\U0001F389'
 
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
@@ -53,7 +55,7 @@ help_string = "Use:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n"
 current_dir = "./"
 # current_dir = "/bot/unibotimetablesbot/"
 
-logging.basicConfig(filename=current_dir + "unibotimetablesbot.log", level=logging.INFO)
+logging.basicConfig(filename=current_dir + "unibotimetablesbot.log", level=logging.DEBUG)
 
 dir_plans_name = current_dir + 'plans/'
 users_file = current_dir + 'users'
@@ -131,6 +133,9 @@ def get_plan_timetable(day, plan):
         json_orari = requests.get(url_o + sql_orari).text
         orari = json.loads(json_orari)["result"]["records"]
     except:
+
+        now = datetime.datetime.now()
+        logging.debug("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
         return timetable
 
     for o in orari:
@@ -172,7 +177,7 @@ def load_users_plans():
                 except:
                     traceback.print_exc()
                     now = datetime.datetime.now()
-                    logging.info("TIMESTAMP = " + now.strftime(
+                    logging.debug("TIMESTAMP = " + now.strftime(
                         "%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
 
 
@@ -309,7 +314,7 @@ def make_teachings_keyboard(code, mode):
 def print_output_timetable(timetable):
     output_string = str(timetable)
     if output_string == "":
-        output_string = "NO LESSONS FOR TODAY"
+        output_string = emo_no_less +" NO LESSONS FOR TODAY"
     return output_string
 
 
@@ -332,8 +337,7 @@ def on_callback_query(msg):
 
         day = datetime.datetime.strptime(query_data, "%d/%m/%YT%H:%M:%S")
         timetable = get_plan_timetable(day, users_plans[chat_id])
-        print(day)
-        print(users_plans[chat_id])
+
         output_string = day.strftime("%d/%m/%Y") + "\n\n"
         output_string += print_output_timetable(timetable)
         try:
@@ -452,9 +456,17 @@ def on_chat_message(msg):
             elif msg["text"].split()[0] in all_courses.keys():
 
                 string_list = print_teachings_message(chat_id, msg["text"].split()[0], users_mode[chat_id])
+                i = 0
+                output_string = ""
                 for s in string_list:
-                    output_string = s
-                    bot.sendMessage(chat_id, output_string)
+                    output_string += s
+                    i += 13
+                    if i % 20 == 0:
+                        bot.sendMessage(chat_id, output_string)
+                        output_string = ""
+                bot.sendMessage(chat_id, output_string)
+
+
 
             elif msg["text"].startswith("/add"):
 
@@ -484,6 +496,8 @@ def on_chat_message(msg):
 
             elif msg["text"].startswith("/schedule"):
 
+                users_mode[chat_id] = Mode.NORMAL
+
                 array = msg["text"].split("_")
                 componente_id = array[1]
 
@@ -493,6 +507,11 @@ def on_chat_message(msg):
                 plan.add_teaching(teaching)
 
                 now = datetime.datetime.now()
+
+                ############################# DEBUG ########################################
+                now = datetime.datetime.strptime("2019-05-29T09:00:00", "%Y-%m-%dT%H:%M:%S")
+                ############################################################################
+
                 timetable = get_plan_timetable(now, plan)
 
                 output_string = emo_calendar + " " + now.strftime("%d/%m/%Y") + "\n\n"
@@ -514,7 +533,8 @@ def on_chat_message(msg):
             bot.sendMessage(chat_id, output_string, reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
     except:
         traceback.print_exc()
-        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
+        now = datetime.datetime.now()
+        logging.debug("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
         output_string = traceback.format_exc()
         bot.sendMessage(chat_id, output_string, reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
