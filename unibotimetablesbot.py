@@ -384,7 +384,7 @@ def on_callback_query(msg):
             day = datetime.datetime.strptime(query_data, "%d/%m/%YT%H:%M:%S")
             timetable = get_plan_timetable(day, users_plans[chat_id])
 
-            output_string = day.strftime("%d/%m/%Y") + "\n\n"
+            output_string = emo_calendar + " " + day.strftime("%d/%m/%Y") + "\n\n"
             output_string += print_output_timetable(timetable)
             try:
                 bot.editMessageText(msg_edited, output_string, reply_markup=make_inline_timetable_keyboard(day))
