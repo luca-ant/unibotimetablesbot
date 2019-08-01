@@ -53,7 +53,7 @@ help_string = "Use:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n"
 current_dir = "./"
 # current_dir = "/bot/unibotimetablesbot/"
 
-logging.basicConfig(filename=current_dir + "unibotimetablesbot.log", level=logging.DEBUG)
+logging.basicConfig(filename=current_dir + "unibotimetablesbot.log", level=logging.INFO)
 
 dir_plans_name = current_dir + 'plans/'
 users_file = current_dir + 'users'
@@ -133,7 +133,7 @@ def get_plan_timetable(day, plan):
     except:
 
         now = datetime.datetime.now()
-        logging.debug("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
         return timetable
 
     for o in orari:
@@ -176,7 +176,7 @@ def load_users_plans():
                     except:
                         traceback.print_exc()
                         now = datetime.datetime.now()
-                        logging.debug("TIMESTAMP = " + now.strftime(
+                        logging.info("TIMESTAMP = " + now.strftime(
                             "%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
                 users_plans[int(filename)] = plan
 
@@ -602,7 +602,7 @@ def on_chat_message(msg):
     except:
         traceback.print_exc()
         now = datetime.datetime.now()
-        logging.debug("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
         output_string = traceback.format_exc()
         bot.sendMessage(chat_id, output_string, reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
