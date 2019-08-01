@@ -58,9 +58,16 @@ class Plan:
     def __init__(self):
         self.teachings = list()
 
-    def add_teaching(self, t):
-        if t not in self.teachings:
-            self.teachings.append(t)
+    def add_teaching(self, teaching):
+
+        index = -1
+        for i in range(0, len(self.teachings), 1):
+            t = self.teachings[i]
+            if t.componente_id == teaching.componente_id:
+                index = i
+                break
+        if index < 0:
+            self.teachings.append(teaching)
 
     def remove_teaching(self, teaching):
         index_to_remove = -1
@@ -141,7 +148,7 @@ class Timetable:
                 result += " - "
                 result += a.aula_piano
                 result += "\n"
-                if a.lat != "" and a.lon!="":
+                if a.lat != "" and a.lon != "":
                     result += emo_gps + " " + a.lat + ", " + a.lon
                     result += "\n"
             result += "\n"

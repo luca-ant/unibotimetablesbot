@@ -16,9 +16,7 @@ from telepot.namedtuple import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboar
 from threading import Lock
 from model import Course, Teaching, Mode, Plan, Lesson, Aula, Timetable
 
-# token = os.environ['BOT_TOKEN']
-
-token = "868250356:AAE2ZsD4zwgr6y3K4vboCA57CNaO3ZPMFrs"
+token = os.environ['BOT_TOKEN']
 
 bot = telepot.Bot(token)
 
@@ -38,7 +36,7 @@ emo_room = u'\U0001F3C1'
 emo_address = u'\U0001F3EB'
 emo_gps = u'\U0001F4CD'
 emo_help = u'\U00002139'
-emo_no_less=u'\U0001F389'
+emo_no_less = u'\U0001F389'
 
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
@@ -167,18 +165,20 @@ def load_users_plans():
     if os.path.isdir(dir_plans_name):
         for filename in os.listdir(dir_plans_name):
             with open(dir_plans_name + filename) as f:
-                try:
-                    plan_dict = json.load(f)
-                    plan = Plan()
-                    for t in plan_dict["teachings"]:
-                        teaching = collections.namedtuple("Teaching", t.keys())(*t.values())
+                plan_dict = json.load(f)
+                plan = Plan()
+                for t in plan_dict["teachings"]:
+                    try:
+                        teaching = Teaching(t["corso_codice"], t["materia_codice"], t["materia_descrizione"],
+                                            t["docente_nome"], t["componente_id"], t["url"])
                         plan.add_teaching(teaching)
-                    users_plans[int(filename)] = plan
-                except:
-                    traceback.print_exc()
-                    now = datetime.datetime.now()
-                    logging.debug("TIMESTAMP = " + now.strftime(
-                        "%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
+
+                    except:
+                        traceback.print_exc()
+                        now = datetime.datetime.now()
+                        logging.debug("TIMESTAMP = " + now.strftime(
+                            "%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
+                users_plans[int(filename)] = plan
 
 
 def store_user_plan(chat_id, plan):
@@ -257,8 +257,9 @@ def print_plan(chat_id):
     return result
 
 
-def print_teachings_message(chat_id, code, mode):
+def print_teachings_message(chat_id, code):
     result = list()
+    mode = users_mode[chat_id]
     if mode == Mode.NORMAL:
 
         for t in all_courses[code].teachings:
@@ -314,11 +315,11 @@ def make_teachings_keyboard(code, mode):
 def print_output_timetable(timetable):
     output_string = str(timetable)
     if output_string == "":
-        output_string = emo_no_less +" NO LESSONS FOR TODAY"
+        output_string = emo_no_less + " NO LESSONS FOR TODAY"
     return output_string
 
 
-def make_inline_keyboard(day):
+def make_inline_timetable_keyboard(day):
     next_day = day + datetime.timedelta(days=1)
     prec_day = day - datetime.timedelta(days=1)
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -329,22 +330,68 @@ def make_inline_keyboard(day):
     return keyboard
 
 
+def make_inline_keyboard(chat_id, day, componente_id):
+    mode = users_mode[chat_id]
+    if mode == Mode.NORMAL:
+        next_day = day + datetime.timedelta(days=1)
+        prec_day = day - datetime.timedelta(days=1)
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text=emo_arrow_back + " " + 'Back',
+                                  callback_data="schedule_" + componente_id + "_" + prec_day.strftime(
+                                      "%d/%m/%YT%H:%M:%S")),
+             InlineKeyboardButton(text='Next ' + emo_arrow_forward,
+                                  callback_data="schedule_" + componente_id + "_" + next_day.strftime(
+                                      "%d/%m/%YT%H:%M:%S"))]
+        ])
+
+    else:
+        return None
+    return keyboard
+
+
 def on_callback_query(msg):
     query_id, chat_id, query_data = telepot.glance(msg, flavor='callback_query')
     try:
-
         msg_edited = (chat_id, msg['message']['message_id'])
 
-        day = datetime.datetime.strptime(query_data, "%d/%m/%YT%H:%M:%S")
-        timetable = get_plan_timetable(day, users_plans[chat_id])
+        if (query_data.startswith("schedule")):
 
-        output_string = day.strftime("%d/%m/%Y") + "\n\n"
-        output_string += print_output_timetable(timetable)
-        try:
-            bot.editMessageText(msg_edited, output_string, reply_markup=make_inline_keyboard(day))
-            # bot.answerCallbackQuery(query_id, text="TRACKING STARTED!")
-        except telepot.exception.TelegramError:
-            pass
+            array = query_data.split("_")
+            componente_id = array[1]
+            day_string = array[len(array) - 1]
+
+            day = datetime.datetime.strptime(day_string, "%d/%m/%YT%H:%M:%S")
+
+            plan = Plan()
+            teaching = all_teachings[componente_id]
+
+            plan.add_teaching(teaching)
+
+            timetable = get_plan_timetable(day, plan)
+
+            output_string = emo_calendar + " " + day.strftime("%d/%m/%Y") + "\n\n"
+            output_string += print_output_timetable(timetable)
+
+            try:
+                bot.editMessageText(msg_edited, output_string,
+                                    reply_markup=make_inline_keyboard(chat_id, day, teaching.componente_id))
+                # bot.answerCallbackQuery(query_id, text="TRACKING STARTED!")
+            except telepot.exception.TelegramError:
+                pass
+
+
+        else:
+            day = datetime.datetime.strptime(query_data, "%d/%m/%YT%H:%M:%S")
+            timetable = get_plan_timetable(day, users_plans[chat_id])
+
+            output_string = day.strftime("%d/%m/%Y") + "\n\n"
+            output_string += print_output_timetable(timetable)
+            try:
+                bot.editMessageText(msg_edited, output_string, reply_markup=make_inline_timetable_keyboard(day))
+                # bot.answerCallbackQuery(query_id, text="TRACKING STARTED!")
+            except telepot.exception.TelegramError:
+                pass
+
 
     except:
         traceback.print_exc()
@@ -390,18 +437,27 @@ def on_chat_message(msg):
             elif msg["text"] == MY_TIMETABLE:
                 users_mode[chat_id] = Mode.NORMAL
 
-                now = datetime.datetime.now()
+                if chat_id in users_plans.keys():
 
-                ############################# DEBUG ########################################
-                now = datetime.datetime.strptime("2019-05-29T09:00:00", "%Y-%m-%dT%H:%M:%S")
-                ############################################################################
+                    now = datetime.datetime.now()
 
-                timetable = get_plan_timetable(now, users_plans[chat_id])
-                output_string = emo_calendar + " " + now.strftime("%d/%m/%Y") + "\n\n"
-                output_string += print_output_timetable(timetable)
+                    ############################# DEBUG ########################################
+                    now = datetime.datetime.strptime("2019-05-29T09:00:00", "%Y-%m-%dT%H:%M:%S")
+                    ############################################################################
 
-                bot.sendMessage(chat_id, donation_string)
-                bot.sendMessage(chat_id, output_string, reply_markup=make_inline_keyboard(now))
+                    timetable = get_plan_timetable(now, users_plans[chat_id])
+                    output_string = emo_calendar + " " + now.strftime("%d/%m/%Y") + "\n\n"
+                    output_string += print_output_timetable(timetable)
+
+                    bot.sendMessage(chat_id, donation_string)
+                    bot.sendMessage(chat_id, output_string, reply_markup=make_inline_timetable_keyboard(now))
+
+                else:
+                    output_string = "Choose your action!"
+
+                    bot.sendMessage(chat_id, output_string,
+                                    reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+
 
             elif msg["text"] == MY_PLAN:
                 users_mode[chat_id] = Mode.NORMAL
@@ -411,6 +467,12 @@ def on_chat_message(msg):
                     bot.sendMessage(chat_id, donation_string)
                     bot.sendMessage(chat_id, output_string,
                                     reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                else:
+                    output_string = "Choose your action!"
+                    bot.sendMessage(chat_id, output_string,
+                                    reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+
+
 
             elif msg["text"] == DEL_PLAN:
 
@@ -455,7 +517,7 @@ def on_chat_message(msg):
 
             elif msg["text"].split()[0] in all_courses.keys():
 
-                string_list = print_teachings_message(chat_id, msg["text"].split()[0], users_mode[chat_id])
+                string_list = print_teachings_message(chat_id, msg["text"].split()[0])
                 i = 0
                 output_string = ""
                 for s in string_list:
@@ -464,7 +526,8 @@ def on_chat_message(msg):
                     if i % 20 == 0:
                         bot.sendMessage(chat_id, output_string)
                         output_string = ""
-                bot.sendMessage(chat_id, output_string)
+                if output_string != "":
+                    bot.sendMessage(chat_id, output_string)
 
 
 
@@ -477,7 +540,7 @@ def on_chat_message(msg):
                     teaching = all_teachings[componente_id]
                     users_plans[chat_id].add_teaching(teaching)
                     store_user_plan(chat_id, users_plans[chat_id])
-                    output_string = "Teaching added!"
+                    output_string = "ADDED " + str(teaching)
                     bot.sendMessage(chat_id, output_string)
 
 
@@ -491,7 +554,7 @@ def on_chat_message(msg):
                 users_plans[chat_id].remove_teaching(teaching)
                 store_user_plan(chat_id, users_plans[chat_id])
 
-                output_string = "Teaching removed!"
+                output_string = "REMOVED " + str(teaching)
                 bot.sendMessage(chat_id, output_string)
 
             elif msg["text"].startswith("/schedule"):
@@ -516,7 +579,12 @@ def on_chat_message(msg):
 
                 output_string = emo_calendar + " " + now.strftime("%d/%m/%Y") + "\n\n"
                 output_string += print_output_timetable(timetable)
-                bot.sendMessage(chat_id, output_string)
+
+                bot.sendMessage(chat_id, donation_string)
+                bot.sendMessage(chat_id, output_string,
+                                reply_markup=make_inline_keyboard(chat_id, now, teaching.componente_id))
+
+
 
             else:
 
