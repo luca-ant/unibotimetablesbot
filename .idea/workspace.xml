@@ -15,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="186">
-              <caret line="625" column="39" selection-start-line="625" selection-start-column="39" selection-end-line="625" selection-end-column="39" />
+            <state relative-caret-position="336">
+              <caret line="625" column="43" lean-forward="true" selection-start-line="625" selection-end-line="626" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -240,8 +240,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="186">
-          <caret line="625" column="39" selection-start-line="625" selection-start-column="39" selection-end-line="625" selection-end-column="39" />
+        <state relative-caret-position="336">
+          <caret line="625" column="43" lean-forward="true" selection-start-line="625" selection-end-line="626" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
