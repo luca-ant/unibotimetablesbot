@@ -623,7 +623,10 @@ def on_chat_message(msg):
 
             else:
 
+                users_mode[chat_id] = Mode.NORMAL
+
                 output_string = emo_confused + " Sorry.. I don't understand.."
+                output_string += "\n\n" + help_string
 
                 bot.sendMessage(chat_id, output_string,
                                 reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
