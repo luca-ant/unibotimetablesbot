@@ -189,7 +189,7 @@ def load_users_plans():
 def store_user_plan(chat_id):
     if chat_id in users_plans.keys():
         now = datetime.datetime.now()
-        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### STORE PLAN OF USER" + str(chat_id))
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### STORE PLAN OF USER " + str(chat_id))
         plan = users_plans[chat_id]
         if not os.path.isdir(dir_plans_name):
             os.mkdir(dir_plans_name)
