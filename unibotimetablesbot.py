@@ -38,7 +38,7 @@ emo_gps = u'\U0001F4CD'
 emo_help = u'\U00002139'
 emo_no_less = u'\U0001F389'
 emo_url = u'\U0001F517'
-emo_confused = u'\U0000F615'
+emo_confused = u'\U0001F615'
 
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
