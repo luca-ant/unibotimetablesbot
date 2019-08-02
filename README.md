@@ -15,7 +15,7 @@ git clone git@github.com:luca-ant/unibotimetablesbot.git
 ```
 
 
-* Install dependencies, create a virtual environment and install requirements modules
+* Install dependencies
 ```
 sudo apt install python3.7-setuptools
 sudo apt install python3.7-pip
@@ -27,6 +27,7 @@ sudo pacman -S python-pip
 python-virtualenv
 ```
 
+* Create a virtual environment and install requirements modules
 ```
 cd unibotimetablesbot
 python3.7 -m venv venv
