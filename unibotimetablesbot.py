@@ -498,7 +498,7 @@ def on_chat_message(msg):
             elif msg["text"] == MAKE_PLAN:
                 users_mode[chat_id] = Mode.MAKE_PLAN
 
-                output_string = "Navigate menu and choose your teachings to make your study plan. Send " + END_PLAN + " when you have finisched!"
+                output_string = "Find your teachings and add them to your study plan. Send " + END_PLAN + " when you have finished!"
                 bot.sendMessage(chat_id, output_string, reply_markup=make_area_keyboard(users_mode[chat_id]))
 
             elif msg["text"] == END_PLAN:
