@@ -37,6 +37,7 @@ emo_address = u'\U0001F3EB'
 emo_gps = u'\U0001F4CD'
 emo_help = u'\U00002139'
 emo_no_less = u'\U0001F389'
+emo_url=u'\U0001F517'
 
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
@@ -274,6 +275,9 @@ def print_teachings_message(chat_id, code):
             if t.docente_nome != "":
                 t_string += " (" + t.docente_nome + ")"
             t_string += " [ /schedule_" + t.componente_id + " ]"
+            if t.url != "":
+                t_string += " [ /url_" + t.componente_id + " ]"
+
             t_string += "\n\n"
             result.append(t_string)
 
@@ -290,6 +294,9 @@ def print_teachings_message(chat_id, code):
             else:
                 cmd = "remove"
             t_string += " [ /" + cmd + "_" + t.componente_id + " ]"
+            if t.url != "":
+                t_string += " [ /url_" + t.componente_id + " ]"
+
             t_string += "\n\n"
             result.append(t_string)
 
@@ -527,7 +534,12 @@ def on_chat_message(msg):
 
             elif msg["text"].split()[0] in all_courses.keys():
 
-                string_list = print_teachings_message(chat_id, msg["text"].split()[0])
+                course = all_courses[msg["text"].split()[0]]
+                if course.url != "":
+                    bot.sendMessage(chat_id, course.url)
+
+                string_list = print_teachings_message(chat_id, course.corso_codice)
+
                 i = 0
                 output_string = ""
                 for s in string_list:
@@ -594,6 +606,15 @@ def on_chat_message(msg):
                 bot.sendMessage(chat_id, output_string,
                                 reply_markup=make_inline_keyboard(chat_id, now, teaching.componente_id))
 
+
+            elif msg["text"].startswith("/url"):
+
+                array = msg["text"].split("_")
+                componente_id = array[1]
+
+                output_string = emo_url + " " + all_teachings[componente_id].url
+
+                bot.sendMessage(chat_id, output_string)
 
 
             else:
