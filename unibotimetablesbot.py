@@ -37,7 +37,7 @@ emo_address = u'\U0001F3EB'
 emo_gps = u'\U0001F4CD'
 emo_help = u'\U00002139'
 emo_no_less = u'\U0001F389'
-emo_url=u'\U0001F517'
+emo_url = u'\U0001F517'
 
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
@@ -52,7 +52,7 @@ donation_string = emo_money + " Do you like this bot? If you want to support it 
 help_string = "Use:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n" + MAKE_PLAN + " to build your study plan\n\nThen you can use:\n\n" + MY_PLAN + " to see your study plan\n\n" + MY_TIMETABLE + " to get your personal lesson's schedules\n\n" + DEL_PLAN + " to delete your plan" + "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail."
 
 current_dir = "./"
-#current_dir = "/bot/unibotimetablesbot/"
+# current_dir = "/bot/unibotimetablesbot/"
 
 logging.basicConfig(filename=current_dir + "unibotimetablesbot.log", level=logging.INFO)
 
@@ -536,7 +536,7 @@ def on_chat_message(msg):
 
                 course = all_courses[msg["text"].split()[0]]
                 if course.url != "":
-                    bot.sendMessage(chat_id, course.url)
+                    bot.sendMessage(chat_id, emo_url + " " + course.url)
 
                 string_list = print_teachings_message(chat_id, course.corso_codice)
 
