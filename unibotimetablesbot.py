@@ -52,7 +52,7 @@ donation_string = emo_money + " Do you like this bot? If you want to support it 
 help_string = "Use:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n" + MAKE_PLAN + " to build your study plan\n\nThen you can use:\n\n" + MY_PLAN + " to see your study plan\n\n" + MY_TIMETABLE + " to get your personal lesson's schedules\n\n" + DEL_PLAN + " to delete your plan" + "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail."
 
 current_dir = "./"
-#current_dir = "/bot/unibotimetablesbot/"
+# current_dir = "/bot/unibotimetablesbot/"
 
 logging.basicConfig(filename=current_dir + "unibotimetablesbot.log", level=logging.INFO)
 
@@ -587,25 +587,26 @@ def on_chat_message(msg):
                 array = msg["text"].split("_")
                 componente_id = array[1]
 
-                plan = Plan()
-                teaching = all_teachings[componente_id]
+                if componente_id in all_teachings.keys():
+                    plan = Plan()
+                    teaching = all_teachings[componente_id]
 
-                plan.add_teaching(teaching)
+                    plan.add_teaching(teaching)
 
-                now = datetime.datetime.now()
+                    now = datetime.datetime.now()
 
-                ############################# DEBUG ########################################
-                # now = datetime.datetime.strptime("2019-05-29T09:00:00", "%Y-%m-%dT%H:%M:%S")
-                ############################################################################
+                    ############################# DEBUG ########################################
+                    # now = datetime.datetime.strptime("2019-05-29T09:00:00", "%Y-%m-%dT%H:%M:%S")
+                    ############################################################################
 
-                timetable = get_plan_timetable(now, plan)
+                    timetable = get_plan_timetable(now, plan)
 
-                output_string = emo_calendar + " " + now.strftime("%d/%m/%Y") + "\n\n"
-                output_string += print_output_timetable(timetable)
+                    output_string = emo_calendar + " " + now.strftime("%d/%m/%Y") + "\n\n"
+                    output_string += print_output_timetable(timetable)
 
-                bot.sendMessage(chat_id, donation_string)
-                bot.sendMessage(chat_id, output_string,
-                                reply_markup=make_inline_keyboard(chat_id, now, teaching.componente_id))
+                    bot.sendMessage(chat_id, donation_string)
+                    bot.sendMessage(chat_id, output_string,
+                                    reply_markup=make_inline_keyboard(chat_id, now, teaching.componente_id))
 
 
             elif msg["text"].startswith("/url"):
@@ -613,9 +614,10 @@ def on_chat_message(msg):
                 array = msg["text"].split("_")
                 componente_id = array[1]
 
-                output_string = emo_url + " " + all_teachings[componente_id].url
+                if componente_id in all_teachings.keys():
+                    output_string = emo_url + " " + all_teachings[componente_id].url
 
-                bot.sendMessage(chat_id, output_string)
+                    bot.sendMessage(chat_id, output_string)
 
 
             else:
