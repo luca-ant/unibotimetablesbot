@@ -1,7 +1,7 @@
-import operator
 import os
 import collections
 import random
+import schedule
 import sys
 import traceback
 import datetime
@@ -66,10 +66,12 @@ all_teachings = dict()
 all_courses_group_by_area = collections.defaultdict(list)
 users_mode = collections.defaultdict(Mode)
 
-accademic_year = "2018"
+accademic_year = ""
 
 
 def get_all_courses():
+    now = datetime.datetime.now()
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### GETTING ALL COURSES")
     url = "https://dati.unibo.it/api/action/datastore_search_sql?sql="
     corsi_table = "corsi_" + accademic_year + "_it"
     insegnamenti_table = "insegnamenti_" + accademic_year + "_it"
@@ -82,6 +84,11 @@ def get_all_courses():
 
     corsi = json.loads(json_corsi)["result"]["records"]
     insegnamenti = json.loads(json_insegnamenti)["result"]["records"]
+
+    all_courses.clear()
+    all_teachings.clear()
+    all_courses_group_by_area.clear()
+
     for c in corsi:
         course = Course(c["corso_codice"], c["corso_descrizione"], c["tipologia"], c["sededidattica"], c["ambiti"],
                         c["url"])
@@ -97,12 +104,6 @@ def get_all_courses():
             all_courses[teaching.corso_codice].add_teaching(teaching)
         except KeyError:
             pass
-
-
-#    for c in all_courses.values():
-#        print("\n\n"+str(c))
-#        for i in c.teachings:
-#            print(i)
 
 
 def get_plan_timetable(day, plan):
@@ -131,7 +132,7 @@ def get_plan_timetable(day, plan):
         json_orari = requests.get(url_o + sql_orari).text
         orari = json.loads(json_orari)["result"]["records"]
     except:
-
+        traceback.print_exc()
         now = datetime.datetime.now()
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
         return timetable
@@ -157,6 +158,8 @@ def get_plan_timetable(day, plan):
 
 
 def load_users_plans():
+    now = datetime.datetime.now()
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### LOADING USERS PLANS")
     if os.path.isfile(users_file):
         with open(users_file) as f:
             chat_id = int(f.readline().replace("'", " ").strip())
@@ -181,12 +184,16 @@ def load_users_plans():
                 users_plans[int(filename)] = plan
 
 
-def store_user_plan(chat_id, plan):
-    if not os.path.isdir(dir_plans_name):
-        os.mkdir(dir_plans_name)
+def store_user_plan(chat_id):
+    if chat_id in users_plans.keys():
+        now = datetime.datetime.now()
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### STORE PLAN OF USER" + str(chat_id))
+        plan = users_plans[chat_id]
+        if not os.path.isdir(dir_plans_name):
+            os.mkdir(dir_plans_name)
 
-    with open(dir_plans_name + str(chat_id), 'w') as outfile:
-        outfile.write(json.dumps(plan, default=lambda x: x.__dict__))
+        with open(dir_plans_name + str(chat_id), 'w') as outfile:
+            outfile.write(json.dumps(plan, default=lambda x: x.__dict__))
 
 
 def make_main_keyboard(chat_id, mode):
@@ -395,6 +402,9 @@ def on_callback_query(msg):
 
     except:
         traceback.print_exc()
+        now = datetime.datetime.now()
+        logging.info("TIMESTAMP = " + now.strftime(
+            "%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
         output_string = traceback.format_exc()
         bot.sendMessage(chat_id, output_string, reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
@@ -442,7 +452,7 @@ def on_chat_message(msg):
                     now = datetime.datetime.now()
 
                     ############################# DEBUG ########################################
-                    now = datetime.datetime.strptime("2019-05-29T09:00:00", "%Y-%m-%dT%H:%M:%S")
+                    # now = datetime.datetime.strptime("2019-05-29T09:00:00", "%Y-%m-%dT%H:%M:%S")
                     ############################################################################
 
                     timetable = get_plan_timetable(now, users_plans[chat_id])
@@ -572,7 +582,7 @@ def on_chat_message(msg):
                 now = datetime.datetime.now()
 
                 ############################# DEBUG ########################################
-                now = datetime.datetime.strptime("2019-05-29T09:00:00", "%Y-%m-%dT%H:%M:%S")
+                # now = datetime.datetime.strptime("2019-05-29T09:00:00", "%Y-%m-%dT%H:%M:%S")
                 ############################################################################
 
                 timetable = get_plan_timetable(now, plan)
@@ -607,11 +617,33 @@ def on_chat_message(msg):
         bot.sendMessage(chat_id, output_string, reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
 
-get_all_courses()
+def update():
+    now = datetime.datetime.now()
+    global accademic_year
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### RUNNING UPDATE")
+
+    year = now.strftime("%Y")
+    update_day = datetime.datetime.strptime(year + "-08-31T00:00:00", "%Y-%m-%dT%H:%M:%S")
+
+    if now > update_day:
+        accademic_year = year
+    else:
+        accademic_year = str(int(year) - 1)
+
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SET ACCADEMIC YEAR TO " + accademic_year)
+
+    print("SET ACCADEMIC YEAR TO " + accademic_year)
+
+    get_all_courses()
+
+
+update()
 load_users_plans()
+schedule.every().saturday.at("04:00").do(update)
 MessageLoop(bot, {'chat': on_chat_message, 'callback_query': on_callback_query}).run_as_thread()
 
 print('Listening ...')
 # Keep the program running.
 while 1:
+    schedule.run_pending()
     time.sleep(10)

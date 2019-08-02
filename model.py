@@ -31,7 +31,7 @@ class Teaching:
         result = self.materia_codice + " - " + self.materia_descrizione
         if self.docente_nome != "":
             result += " (" + self.docente_nome + ")"
-        result += " [" + self.componente_id + "]"
+        result += " [ " + self.componente_id + " ]"
         result += "\n"
         return result
 
