@@ -15,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3636">
-              <caret line="556" column="46" selection-start-line="556" selection-start-column="46" selection-end-line="556" selection-end-column="46" />
+            <state relative-caret-position="186">
+              <caret line="625" column="39" selection-start-line="625" selection-start-column="39" selection-end-line="625" selection-end-column="39" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -56,6 +56,7 @@
       <find>get_plan_timetable</find>
       <find>Naviga</find>
       <find>store_user_plan</find>
+      <find>Sorry</find>
     </findStrings>
     <replaceStrings>
       <replace>all_courses_group_by_area</replace>
@@ -239,8 +240,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3636">
-          <caret line="556" column="46" selection-start-line="556" selection-start-column="46" selection-end-line="556" selection-end-column="46" />
+        <state relative-caret-position="186">
+          <caret line="625" column="39" selection-start-line="625" selection-start-column="39" selection-end-line="625" selection-end-column="39" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>

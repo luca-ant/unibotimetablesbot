@@ -38,6 +38,7 @@ emo_gps = u'\U0001F4CD'
 emo_help = u'\U00002139'
 emo_no_less = u'\U0001F389'
 emo_url = u'\U0001F517'
+emo_confused = u'\U0000F615'
 
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
@@ -622,7 +623,7 @@ def on_chat_message(msg):
 
             else:
 
-                output_string = "Sorry.. I don't understand.."
+                output_string = emo_con1fused + " Sorry.. I don't understand.."
 
                 bot.sendMessage(chat_id, output_string,
                                 reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
@@ -630,7 +631,7 @@ def on_chat_message(msg):
 
             users_mode[chat_id] = Mode.NORMAL
 
-            output_string = "Sorry.. I don't understand.."
+            output_string = emo_confused + " Sorry.. I don't understand.."
             output_string += "\n\n" + help_string
             bot.sendMessage(chat_id, output_string, reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
     except:
