@@ -52,7 +52,7 @@ donation_string = emo_money + " Do you like this bot? If you want to support it 
 help_string = "Use:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n" + MAKE_PLAN + " to build your study plan\n\nThen you can use:\n\n" + MY_PLAN + " to see your study plan\n\n" + MY_TIMETABLE + " to get your personal lesson's schedules\n\n" + DEL_PLAN + " to delete your plan" + "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail."
 
 current_dir = "./"
-# current_dir = "/bot/unibotimetablesbot/"
+#current_dir = "/bot/unibotimetablesbot/"
 
 logging.basicConfig(filename=current_dir + "unibotimetablesbot.log", level=logging.INFO)
 
