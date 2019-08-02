@@ -536,7 +536,8 @@ def on_chat_message(msg):
 
                 course = all_courses[msg["text"].split()[0]]
                 if course.url != "":
-                    bot.sendMessage(chat_id, emo_url + " " + course.url)
+                    output_string = emo_url + " " + course.url
+                    bot.sendMessage(chat_id, output_string)
 
                 string_list = print_teachings_message(chat_id, course.corso_codice)
 
