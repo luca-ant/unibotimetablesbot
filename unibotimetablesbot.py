@@ -258,9 +258,10 @@ def print_plan(chat_id):
         result += t.materia_codice + " - " + t.materia_descrizione
         if t.docente_nome != "":
             result += " (" + t.docente_nome + ")"
-        if users_plans[chat_id].find_teaching_by_componente_id(t.componente_id) != None:
-            cmd = "remove"
-            result += " [ /" + cmd + "_" + t.componente_id + " ]"
+        result += " [ /remove_" + t.componente_id + " ]"
+        if t.url != "":
+            result += " [ /url_" + t.componente_id + " ]"
+
         result += "\n\n"
 
     return result
