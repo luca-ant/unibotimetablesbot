@@ -23,8 +23,9 @@ sudo apt install python3.7-venv
 ```
 or
 ```
+sudo pacman -S python-setuptools 
 sudo pacman -S python-pip
-python-virtualenv
+sudo pacman -S python-virtualenv
 ```
 
 * Create a virtual environment and install requirements modules
