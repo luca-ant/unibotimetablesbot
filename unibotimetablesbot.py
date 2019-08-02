@@ -554,7 +554,7 @@ def on_chat_message(msg):
 
 
 
-            elif msg["text"].startswith("/add"):
+            elif msg["text"].startswith("/add_"):
 
                 array = msg["text"].split("_")
                 componente_id = array[1]
@@ -567,7 +567,7 @@ def on_chat_message(msg):
                     bot.sendMessage(chat_id, output_string)
 
 
-            elif msg["text"].startswith("/remove"):
+            elif msg["text"].startswith("/remove_"):
 
                 array = msg["text"].split("_")
                 componente_id = array[1]
@@ -580,7 +580,7 @@ def on_chat_message(msg):
                 output_string = "REMOVED " + str(teaching)
                 bot.sendMessage(chat_id, output_string)
 
-            elif msg["text"].startswith("/schedule"):
+            elif msg["text"].startswith("/schedule_"):
 
                 users_mode[chat_id] = Mode.NORMAL
 
@@ -609,7 +609,7 @@ def on_chat_message(msg):
                                     reply_markup=make_inline_keyboard(chat_id, now, teaching.componente_id))
 
 
-            elif msg["text"].startswith("/url"):
+            elif msg["text"].startswith("/url_"):
 
                 array = msg["text"].split("_")
                 componente_id = array[1]
