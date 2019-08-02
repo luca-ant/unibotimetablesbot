@@ -653,6 +653,8 @@ def update():
     year = now.strftime("%Y")
     update_day = datetime.datetime.strptime(year + "-08-31T00:00:00", "%Y-%m-%dT%H:%M:%S")
 
+    # add check existance table
+
     if now > update_day:
         accademic_year = year
     else:
