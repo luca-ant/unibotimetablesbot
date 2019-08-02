@@ -20,7 +20,14 @@ git clone git@github.com:luca-ant/unibotimetablesbot.git
 sudo apt install python3.7-setuptools
 sudo apt install python3.7-pip
 sudo apt install python3.7-venv
+```
+or
+```
+sudo pacman -S python-pip
+python-virtualenv
+```
 
+```
 cd unibotimetablesbot
 python3.7 -m venv venv
 source venv/bin/activate
