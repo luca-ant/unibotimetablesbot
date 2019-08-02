@@ -15,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1435">
-              <caret line="500" column="130" selection-start-line="500" selection-start-column="130" selection-end-line="500" selection-end-column="130" />
+            <state relative-caret-position="292">
+              <caret line="186" column="19" selection-start-line="186" selection-start-column="4" selection-end-line="186" selection-end-column="19" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -55,6 +55,7 @@
       <find>print_teachings_message</find>
       <find>get_plan_timetable</find>
       <find>Naviga</find>
+      <find>store_user_plan</find>
     </findStrings>
     <replaceStrings>
       <replace>all_courses_group_by_area</replace>
@@ -79,7 +80,7 @@
   <component name="ProjectFrameBounds">
     <option name="y" value="-21" />
     <option name="width" value="1920" />
-    <option name="height" value="1078" />
+    <option name="height" value="1077" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
@@ -89,6 +90,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -100,7 +102,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -179,7 +180,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="-21" width="1920" height="1078" extended-state="0" />
+    <frame x="0" y="-21" width="1920" height="1077" extended-state="0" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.06965699" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -230,8 +231,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1435">
-          <caret line="500" column="130" selection-start-line="500" selection-start-column="130" selection-end-line="500" selection-end-column="130" />
+        <state relative-caret-position="292">
+          <caret line="186" column="19" selection-start-line="186" selection-start-column="4" selection-end-line="186" selection-end-column="19" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>

@@ -503,7 +503,7 @@ def on_chat_message(msg):
 
             elif msg["text"] == END_PLAN:
                 users_mode[chat_id] = Mode.NORMAL
-                store_user_plan(chat_id, users_plans[chat_id])
+                store_user_plan(chat_id)
                 output_string = "Well done! Now you can use " + MY_PLAN + " to see your study plan and " + MY_TIMETABLE + " to get your lessons shedules!"
                 bot.sendMessage(chat_id, output_string, reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
@@ -549,7 +549,7 @@ def on_chat_message(msg):
                 if componente_id in all_teachings.keys():
                     teaching = all_teachings[componente_id]
                     users_plans[chat_id].add_teaching(teaching)
-                    store_user_plan(chat_id, users_plans[chat_id])
+                    store_user_plan(chat_id)
                     output_string = "ADDED " + str(teaching)
                     bot.sendMessage(chat_id, output_string)
 
@@ -562,7 +562,7 @@ def on_chat_message(msg):
                 teaching = all_teachings[componente_id]
 
                 users_plans[chat_id].remove_teaching(teaching)
-                store_user_plan(chat_id, users_plans[chat_id])
+                store_user_plan(chat_id)
 
                 output_string = "REMOVED " + str(teaching)
                 bot.sendMessage(chat_id, output_string)
