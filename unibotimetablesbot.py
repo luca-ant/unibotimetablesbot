@@ -39,8 +39,9 @@ emo_help = u'\U00002139'
 emo_no_less = u'\U0001F389'
 emo_url = u'\U0001F517'
 emo_confused = u'\U0001F615'
-emo_ay = u'\U0001F615'
-emo_bad = u'\U0001F615'
+emo_ay = u'\U00002712'
+emo_404 = u'\U00000034' + u'\U000020E3' + u'\U00000030' + u'\U000020E3' +   u'\U00000034' + u'\U000020E3'
+
 
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
@@ -350,7 +351,7 @@ def print_output_timetable(timetable):
         if output_string == "":
             output_string = emo_no_less + " NO LESSONS FOR TODAY"
     else:
-        output_string = emo_bad + " SCHEDULE DATA NOT FOUND!"
+        output_string = emo_404 + " SCHEDULES DATA NOT FOUND!"
 
     return output_string
 
@@ -707,7 +708,7 @@ def update():
     logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SET ACCADEMIC YEAR TO " + accademic_year)
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SET ACCADEMIC YEAR TO " + accademic_year)
 
-    # check existance table
+    # check existence table
 
     corsi_table = "corsi_" + accademic_year + "_it"
     insegnamenti_table = "insegnamenti_" + accademic_year + "_it"
@@ -723,7 +724,8 @@ def update():
 
 update()
 load_users_plans()
-schedule.every().saturday.at("04:00").do(update)
+schedule.every().day.at("04:00").do(update)
+#schedule.every().sunday.at("04:00").do(update)
 MessageLoop(bot, {'chat': on_chat_message, 'callback_query': on_callback_query}).run_as_thread()
 
 print('Listening ...')

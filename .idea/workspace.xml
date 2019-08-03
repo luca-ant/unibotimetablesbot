@@ -15,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="246">
-              <caret line="142" column="4" selection-start-line="142" selection-start-column="4" selection-end-line="142" selection-end-column="4" />
+            <state relative-caret-position="366">
+              <caret line="700" column="57" selection-start-line="700" selection-start-column="57" selection-end-line="700" selection-end-column="57" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -59,6 +59,7 @@
       <find>Sorry</find>
       <find>logging</find>
       <find>print_pla</find>
+      <find>emo_bad</find>
     </findStrings>
     <replaceStrings>
       <replace>all_courses_group_by_area</replace>
@@ -184,7 +185,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="-21" width="1920" height="1077" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.06965699" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -242,8 +242,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="246">
-          <caret line="142" column="4" selection-start-line="142" selection-start-column="4" selection-end-line="142" selection-end-column="4" />
+        <state relative-caret-position="366">
+          <caret line="700" column="57" selection-start-line="700" selection-start-column="57" selection-end-line="700" selection-end-column="57" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
