@@ -39,6 +39,7 @@ emo_help = u'\U00002139'
 emo_no_less = u'\U0001F389'
 emo_url = u'\U0001F517'
 emo_confused = u'\U0001F615'
+emo_ay = u'\U0001F615'
 
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
@@ -85,12 +86,18 @@ def get_all_courses():
     json_corsi = requests.get(url + sql_corsi).text
     json_insegnamenti = requests.get(url + sql_insegnamenti).text
 
-    corsi = json.loads(json_corsi)["result"]["records"]
-    insegnamenti = json.loads(json_insegnamenti)["result"]["records"]
-
     all_courses.clear()
     all_teachings.clear()
     all_courses_group_by_area.clear()
+
+    try:
+        corsi = json.loads(json_corsi)["result"]["records"]
+        insegnamenti = json.loads(json_insegnamenti)["result"]["records"]
+    except:
+        traceback.print_exc()
+        now = datetime.datetime.now()
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
+        return
 
     for c in corsi:
         course = Course(c["corso_codice"], c["corso_descrizione"], c["tipologia"], c["sededidattica"], c["ambiti"],
@@ -256,7 +263,8 @@ def make_courses_keyboard(area, mode):
 
 
 def print_plan(chat_id):
-    result = emo_plan + " YOUR STUDY PLAN\n\n"
+    result = emo_ay + " A.Y. " + accademic_year + "/" + str(int(accademic_year) + 1) + "\n"
+    result += emo_plan + " YOUR STUDY PLAN" + "\n\n"
     for t in users_plans[chat_id].teachings:
         result += t.materia_codice + " - " + t.materia_descrizione
         if t.docente_nome != "":
@@ -468,7 +476,9 @@ def on_chat_message(msg):
                     ############################################################################
 
                     timetable = get_plan_timetable(now, users_plans[chat_id])
-                    output_string = emo_calendar + " " + now.strftime("%d/%m/%Y") + "\n\n"
+                    output_string = emo_ay + " A.Y. " + accademic_year + "/" + str(int(accademic_year) + 1) + "\n"
+                    output_string += emo_calendar + " " + now.strftime("%d/%m/%Y") + "\n\n"
+
                     output_string += print_output_timetable(timetable)
 
                     bot.sendMessage(chat_id, donation_string)
@@ -485,6 +495,7 @@ def on_chat_message(msg):
                 users_mode[chat_id] = Mode.NORMAL
 
                 if chat_id in users_plans.keys():
+
                     output_string = print_plan(chat_id)
                     bot.sendMessage(chat_id, donation_string)
                     bot.sendMessage(chat_id, output_string,
@@ -606,7 +617,9 @@ def on_chat_message(msg):
 
                     timetable = get_plan_timetable(now, plan)
 
-                    output_string = emo_calendar + " " + now.strftime("%d/%m/%Y") + "\n\n"
+                    output_string = emo_ay + " A.Y. " + accademic_year + "/" + str(int(accademic_year) + 1) + "\n"
+                    output_string += emo_calendar + " " + now.strftime("%d/%m/%Y") + "\n\n"
+
                     output_string += print_output_timetable(timetable)
 
                     bot.sendMessage(chat_id, donation_string)
@@ -675,41 +688,28 @@ def update():
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### RUNNING UPDATE")
 
     year = now.strftime("%Y")
-    update_day = datetime.datetime.strptime(year + "-08-31T00:00:00", "%Y-%m-%dT%H:%M:%S")
+    update_day = datetime.datetime.strptime(year + "-08-01T00:00:00", "%Y-%m-%dT%H:%M:%S")
 
     if now > update_day:
         accademic_year = year
     else:
         accademic_year = str(int(year) - 1)
 
-    # check existance table
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SET ACCADEMIC YEAR TO " + accademic_year)
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SET ACCADEMIC YEAR TO " + accademic_year)
 
-    stop_year= "2017"
+    # check existance table
 
     corsi_table = "corsi_" + accademic_year + "_it"
     insegnamenti_table = "insegnamenti_" + accademic_year + "_it"
     orari_table = "orari_" + accademic_year
     aule_table = "aule_" + accademic_year
 
-    while not (check_table(corsi_table) and check_table(insegnamenti_table) and check_table(
+    if not (check_table(corsi_table) and check_table(insegnamenti_table) and check_table(
             orari_table) and check_table(aule_table)):
-        accademic_year = str(int(accademic_year) - 1)
-        corsi_table = "corsi_" + accademic_year + "_it"
-        insegnamenti_table = "insegnamenti_" + accademic_year + "_it"
-        orari_table = "orari_" + accademic_year
-        aule_table = "aule_" + accademic_year
-
-        if accademic_year == stop_year:
-            if now > update_day:
-                accademic_year = year
-            else:
-                accademic_year = str(int(year) - 1)
-            break
-
-
-
-    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SET ACCADEMIC YEAR TO " + accademic_year)
-    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SET ACCADEMIC YEAR TO " + accademic_year)
+        logging.info(
+            "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### TABLES ERROR")
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### TABLES ERROR")
 
     get_all_courses()
 
