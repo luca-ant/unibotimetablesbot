@@ -74,6 +74,7 @@ accademic_year = ""
 def get_all_courses():
     now = datetime.datetime.now()
     logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### GETTING ALL COURSES")
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### GETTING ALL COURSES")
     url = "https://dati.unibo.it/api/action/datastore_search_sql?sql="
     corsi_table = "corsi_" + accademic_year + "_it"
     insegnamenti_table = "insegnamenti_" + accademic_year + "_it"
@@ -162,6 +163,7 @@ def get_plan_timetable(day, plan):
 def load_users_plans():
     now = datetime.datetime.now()
     logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### LOADING USERS PLANS")
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### LOADING USERS PLANS")
     if os.path.isfile(users_file):
         with open(users_file) as f:
             chat_id = int(f.readline().replace("'", " ").strip())
@@ -190,6 +192,7 @@ def store_user_plan(chat_id):
     if chat_id in users_plans.keys():
         now = datetime.datetime.now()
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### STORE PLAN OF USER " + str(chat_id))
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### STORE PLAN OF USER " + str(chat_id))
         plan = users_plans[chat_id]
         if not os.path.isdir(dir_plans_name):
             os.mkdir(dir_plans_name)
@@ -421,9 +424,9 @@ def on_callback_query(msg):
 def on_chat_message(msg):
     try:
         content_type, chat_type, chat_id = telepot.glance(msg)
-        print(msg)
         now = datetime.datetime.now()
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### MESSAGGIO = " + str(msg))
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### MESSAGGIO = " + str(msg))
         if content_type == "text":
             if msg["text"] == '/start':
                 users_mode[chat_id] = Mode.NORMAL
@@ -657,9 +660,11 @@ def check_table(table):
     now = datetime.datetime.now()
     if ok:
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### TABLE " + table + " PRESENT")
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### TABLE " + table + " PRESENT")
         return True
     else:
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### TABLE " + table + " NOT PRESENT")
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### TABLE " + table + " NOT PRESENT")
         return False
 
 
@@ -667,6 +672,7 @@ def update():
     now = datetime.datetime.now()
     global accademic_year
     logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### RUNNING UPDATE")
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### RUNNING UPDATE")
 
     year = now.strftime("%Y")
     update_day = datetime.datetime.strptime(year + "-08-31T00:00:00", "%Y-%m-%dT%H:%M:%S")
@@ -676,20 +682,34 @@ def update():
     else:
         accademic_year = str(int(year) - 1)
 
-    # add check existance table
+    # check existance table
+
+    stop_year= "2017"
 
     corsi_table = "corsi_" + accademic_year + "_it"
     insegnamenti_table = "insegnamenti_" + accademic_year + "_it"
     orari_table = "orari_" + accademic_year
     aule_table = "aule_" + accademic_year
 
-    if not check_table(corsi_table) or not check_table(insegnamenti_table) or not check_table(
-            orari_table) or not check_table(aule_table):
-        accademic_year = str(int(year) - 1)
+    while not (check_table(corsi_table) and check_table(insegnamenti_table) and check_table(
+            orari_table) and check_table(aule_table)):
+        accademic_year = str(int(accademic_year) - 1)
+        corsi_table = "corsi_" + accademic_year + "_it"
+        insegnamenti_table = "insegnamenti_" + accademic_year + "_it"
+        orari_table = "orari_" + accademic_year
+        aule_table = "aule_" + accademic_year
+
+        if accademic_year == stop_year:
+            if now > update_day:
+                accademic_year = year
+            else:
+                accademic_year = str(int(year) - 1)
+            break
+
+
 
     logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SET ACCADEMIC YEAR TO " + accademic_year)
-
-    print("SET ACCADEMIC YEAR TO " + accademic_year)
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SET ACCADEMIC YEAR TO " + accademic_year)
 
     get_all_courses()
 
