@@ -646,6 +646,23 @@ def on_chat_message(msg):
         bot.sendMessage(chat_id, output_string, reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
 
+def check_table(table):
+    url = "https://dati.unibo.it/api/action/datastore_search_sql?sql="
+
+    sql = "SELECT * FROM " + table + " limit 1"
+
+    json_response = requests.get(url + sql).text
+    ok = json.loads(json_response)["success"]
+
+    now = datetime.datetime.now()
+    if ok:
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### TABLE " + table + " PRESENT")
+        return True
+    else:
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### TABLE " + table + " NOT PRESENT")
+        return False
+
+
 def update():
     now = datetime.datetime.now()
     global accademic_year
@@ -654,11 +671,20 @@ def update():
     year = now.strftime("%Y")
     update_day = datetime.datetime.strptime(year + "-08-31T00:00:00", "%Y-%m-%dT%H:%M:%S")
 
-    # add check existance table
-
     if now > update_day:
         accademic_year = year
     else:
+        accademic_year = str(int(year) - 1)
+
+    # add check existance table
+
+    corsi_table = "corsi_" + accademic_year + "_it"
+    insegnamenti_table = "insegnamenti_" + accademic_year + "_it"
+    orari_table = "orari_" + accademic_year
+    aule_table = "aule_" + accademic_year
+
+    if not check_table(corsi_table) or not check_table(insegnamenti_table) or not check_table(
+            orari_table) or not check_table(aule_table):
         accademic_year = str(int(year) - 1)
 
     logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SET ACCADEMIC YEAR TO " + accademic_year)
