@@ -32,7 +32,6 @@ class Teaching:
         if self.docente_nome != "":
             result += " (" + self.docente_nome + ")"
         result += " [ " + self.componente_id + " ]"
-        result += "\n"
         return result
 
 
@@ -68,6 +67,9 @@ class Plan:
                 break
         if index < 0:
             self.teachings.append(teaching)
+            return True
+
+        return False
 
     def remove_teaching(self, teaching):
         index_to_remove = -1
@@ -77,6 +79,9 @@ class Plan:
                 index_to_remove = i
         if index_to_remove >= 0:
             del self.teachings[index_to_remove]
+            return True
+
+        return False
 
     def set_teachings(self, t):
         self.teachings = t

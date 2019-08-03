@@ -40,8 +40,7 @@ emo_no_less = u'\U0001F389'
 emo_url = u'\U0001F517'
 emo_confused = u'\U0001F615'
 emo_ay = u'\U00002712'
-emo_404 = u'\U00000034' + u'\U000020E3' + u'\U00000030' + u'\U000020E3' +   u'\U00000034' + u'\U000020E3'
-
+emo_404 = u'\U00000034' + u'\U000020E3' + u'\U00000030' + u'\U000020E3' + u'\U00000034' + u'\U000020E3'
 
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
@@ -406,7 +405,8 @@ def on_callback_query(msg):
 
             timetable = get_plan_timetable(day, plan)
 
-            output_string = emo_calendar + " " + day.strftime("%d/%m/%Y") + "\n\n"
+            output_string = emo_ay + " A.Y. " + accademic_year + "/" + str(int(accademic_year) + 1) + "\n"
+            output_string += emo_calendar + " " + day.strftime("%d/%m/%Y") + "\n\n"
             output_string += print_output_timetable(timetable)
 
             try:
@@ -421,7 +421,8 @@ def on_callback_query(msg):
             day = datetime.datetime.strptime(query_data, "%d/%m/%YT%H:%M:%S")
             timetable = get_plan_timetable(day, users_plans[chat_id])
 
-            output_string = emo_calendar + " " + day.strftime("%d/%m/%Y") + "\n\n"
+            output_string = emo_ay + " A.Y. " + accademic_year + "/" + str(int(accademic_year) + 1) + "\n"
+            output_string += emo_calendar + " " + day.strftime("%d/%m/%Y") + "\n\n"
             output_string += print_output_timetable(timetable)
             try:
                 bot.editMessageText(msg_edited, output_string, reply_markup=make_inline_timetable_keyboard(day))
@@ -470,7 +471,8 @@ def on_chat_message(msg):
             elif msg["text"] == ALL_COURSES:
                 users_mode[chat_id] = Mode.NORMAL
 
-                output_string = "Choose your area!"
+                output_string = emo_ay + " A.Y. " + accademic_year + "/" + str(int(accademic_year) + 1) + "\n"
+                output_string += "Choose your area!"
 
                 bot.sendMessage(chat_id, output_string, reply_markup=make_area_keyboard(users_mode[chat_id]))
 
@@ -495,7 +497,10 @@ def on_chat_message(msg):
                     bot.sendMessage(chat_id, output_string, reply_markup=make_inline_timetable_keyboard(now))
 
                 else:
-                    output_string = "Choose your action!"
+
+                    output_string = emo_ay + " A.Y. " + accademic_year + "/" + str(int(accademic_year) + 1) + "\n"
+
+                    output_string += "Choose your action!"
 
                     bot.sendMessage(chat_id, output_string,
                                     reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
@@ -543,17 +548,20 @@ def on_chat_message(msg):
             elif msg["text"] == BACK_TO_MAIN:
                 users_mode[chat_id] = Mode.NORMAL
 
-                output_string = "Choose your action!"
+                output_string = emo_ay + " A.Y. " + accademic_year + "/" + str(int(accademic_year) + 1) + "\n"
+                output_string += "Choose your action!"
 
                 bot.sendMessage(chat_id, output_string, reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
             elif msg["text"] == BACK_TO_AREAS:
 
-                output_string = "Choose your area!"
+                output_string = emo_ay + " A.Y. " + accademic_year + "/" + str(int(accademic_year) + 1) + "\n"
+                output_string += "Choose your area!"
 
                 bot.sendMessage(chat_id, output_string, reply_markup=make_area_keyboard(users_mode[chat_id]))
             elif msg["text"] in all_courses_group_by_area.keys():
 
-                output_string = "Choose your course!"
+                output_string = emo_ay + " A.Y. " + accademic_year + "/" + str(int(accademic_year) + 1) + "\n"
+                output_string += "Choose your course!"
 
                 bot.sendMessage(chat_id, output_string,
                                 reply_markup=make_courses_keyboard(msg["text"], users_mode[chat_id]))
@@ -571,7 +579,7 @@ def on_chat_message(msg):
                 output_string = ""
                 for s in string_list:
                     output_string += s
-                    i += 13
+                    i += 1
                     if i % 20 == 0:
                         bot.sendMessage(chat_id, output_string)
                         output_string = ""
@@ -587,9 +595,13 @@ def on_chat_message(msg):
 
                 if componente_id in all_teachings.keys():
                     teaching = all_teachings[componente_id]
-                    users_plans[chat_id].add_teaching(teaching)
+                    state = users_plans[chat_id].add_teaching(teaching)
                     store_user_plan(chat_id)
-                    output_string = "ADDED " + str(teaching)
+
+                    if state:
+                        output_string = "ADDED " + str(teaching)
+                    else:
+                        output_string = str(teaching) + " ALREADY IN YOUR STUDY PLAN"
                     bot.sendMessage(chat_id, output_string)
 
 
@@ -600,10 +612,14 @@ def on_chat_message(msg):
 
                 teaching = all_teachings[componente_id]
 
-                users_plans[chat_id].remove_teaching(teaching)
+                state = users_plans[chat_id].remove_teaching(teaching)
                 store_user_plan(chat_id)
 
-                output_string = "REMOVED " + str(teaching)
+                if state:
+                    output_string = "REMOVED " + str(teaching)
+                else:
+                    output_string = str(teaching) + " NOT IN YOUR STUDY PLAN"
+
                 bot.sendMessage(chat_id, output_string)
 
             elif msg["text"].startswith("/schedule_"):
@@ -698,7 +714,7 @@ def update():
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### RUNNING UPDATE")
 
     year = now.strftime("%Y")
-    update_day = datetime.datetime.strptime(year + "-08-01T00:00:00", "%Y-%m-%dT%H:%M:%S")
+    update_day = datetime.datetime.strptime(year + "-08-31T00:00:00", "%Y-%m-%dT%H:%M:%S")
 
     if now > update_day:
         accademic_year = year
@@ -725,7 +741,7 @@ def update():
 update()
 load_users_plans()
 schedule.every().day.at("04:00").do(update)
-#schedule.every().sunday.at("04:00").do(update)
+# schedule.every().sunday.at("04:00").do(update)
 MessageLoop(bot, {'chat': on_chat_message, 'callback_query': on_callback_query}).run_as_thread()
 
 print('Listening ...')
