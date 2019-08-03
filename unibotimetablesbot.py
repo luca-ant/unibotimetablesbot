@@ -53,7 +53,7 @@ BACK_TO_AREAS = emo_back + " " + "BACK TO AREAS"
 BACK_TO_MAIN = emo_back + " " + "BACK TO MAIN"
 
 donation_string = emo_money + " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
-help_string = "Use:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n" + MAKE_PLAN + " to build your study plan\n\nThen you can use:\n\n" + MY_PLAN + " to see your study plan\n\n" + MY_TIMETABLE + " to get your personal lesson's schedules\n\n" + DEL_PLAN + " to delete your plan" + "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail."
+help_string = "USE:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n" + MAKE_PLAN + " to build your study plan\n\nThen you can use:\n\n" + MY_PLAN + " to see your study plan\n\n" + MY_TIMETABLE + " to get your personal lesson's schedules\n\n" + DEL_PLAN + " to delete your plan" + "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail."
 
 current_dir = "./"
 # current_dir = "/bot/unibotimetablesbot/"
@@ -443,8 +443,8 @@ def on_chat_message(msg):
     try:
         content_type, chat_type, chat_id = telepot.glance(msg)
         now = datetime.datetime.now()
-        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### MESSAGGIO = " + str(msg))
-        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### MESSAGGIO = " + str(msg))
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### MESSAGE = " + str(msg))
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### MESSAGE = " + str(msg))
         if content_type == "text":
             if msg["text"] == '/start':
                 users_mode[chat_id] = Mode.NORMAL
