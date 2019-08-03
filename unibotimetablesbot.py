@@ -40,6 +40,7 @@ emo_no_less = u'\U0001F389'
 emo_url = u'\U0001F517'
 emo_confused = u'\U0001F615'
 emo_ay = u'\U0001F615'
+emo_bad = u'\U0001F615'
 
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
@@ -138,33 +139,35 @@ def get_plan_timetable(day, plan):
         else:
             sql_orari += " OR " + orari_table + ".componente_id=" + t.componente_id
     sql_orari += " )"
-    try:
-        json_orari = requests.get(url_o + sql_orari).text
+
+    json_orari = requests.get(url_o + sql_orari).text
+    ok = json.loads(json_orari)["success"]
+
+    if ok:
+
         orari = json.loads(json_orari)["result"]["records"]
-    except:
-        traceback.print_exc()
-        now = datetime.datetime.now()
-        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
+
+        for o in orari:
+            componente_id = o["componente_id"]
+
+            t = plan.find_teaching_by_componente_id(componente_id)
+            if t != None:
+                l = Lesson(t.corso_codice, t.materia_codice, t.materia_descrizione, t.docente_nome, t.componente_id,
+                           t.url,
+                           datetime.datetime.strptime(o["inizio"], "%Y-%m-%dT%H:%M:%S"),
+                           datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"))
+                for code in o["aula_codici"].split():
+                    json_aula = requests.get(url_a + code).text
+                    aula = json.loads(json_aula)["result"]["records"][0]
+                    a = Aula(aula["aula_codice"], aula["aula_nome"], aula["aula_indirizzo"], aula["aula_piano"],
+                             aula["lat"],
+                             aula["lot"])
+                    l.add_aula(a)
+                timetable.add_lesson(l)
+        timetable.lessons.sort(key=lambda x: x.inizio, reverse=False)
         return timetable
-
-    for o in orari:
-        componente_id = o["componente_id"]
-
-        t = plan.find_teaching_by_componente_id(componente_id)
-        if t != None:
-            l = Lesson(t.corso_codice, t.materia_codice, t.materia_descrizione, t.docente_nome, t.componente_id, t.url,
-                       datetime.datetime.strptime(o["inizio"], "%Y-%m-%dT%H:%M:%S"),
-                       datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"))
-            for code in o["aula_codici"].split():
-                json_aula = requests.get(url_a + code).text
-                aula = json.loads(json_aula)["result"]["records"][0]
-                a = Aula(aula["aula_codice"], aula["aula_nome"], aula["aula_indirizzo"], aula["aula_piano"],
-                         aula["lat"],
-                         aula["lot"])
-                l.add_aula(a)
-            timetable.add_lesson(l)
-    timetable.lessons.sort(key=lambda x: x.inizio, reverse=False)
-    return timetable
+    else:
+        return None
 
 
 def load_users_plans():
@@ -340,9 +343,15 @@ def make_teachings_keyboard(code, mode):
 
 
 def print_output_timetable(timetable):
-    output_string = str(timetable)
-    if output_string == "":
-        output_string = emo_no_less + " NO LESSONS FOR TODAY"
+    output_string = ""
+    if timetable != None:
+
+        output_string = str(timetable)
+        if output_string == "":
+            output_string = emo_no_less + " NO LESSONS FOR TODAY"
+    else:
+        output_string = emo_bad + " SCHEDULE DATA NOT FOUND!"
+
     return output_string
 
 
@@ -705,13 +714,11 @@ def update():
     orari_table = "orari_" + accademic_year
     aule_table = "aule_" + accademic_year
 
-    if not (check_table(corsi_table) and check_table(insegnamenti_table) and check_table(
-            orari_table) and check_table(aule_table)):
-        logging.info(
-            "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### TABLES ERROR")
-        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### TABLES ERROR")
+    if check_table(corsi_table) and check_table(insegnamenti_table):
+        get_all_courses()
 
-    get_all_courses()
+    check_table(orari_table)
+    check_table(aule_table)
 
 
 update()
