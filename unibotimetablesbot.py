@@ -453,7 +453,7 @@ def on_chat_message(msg):
                 writer_lock.acquire()
                 with open(users_file, "w") as f:
                     for u in users_mode.keys():
-                        f.writelines(str(u))
+                        f.writelines(str(u))+"\n"
                 writer_lock.release()
 
                 output_string = "Hi! Thanks to try this bot!\n" + help_string
