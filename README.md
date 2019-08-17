@@ -49,5 +49,9 @@ export BOT_TOKEN=YOUR_TOKEN_HERE
 python3.7 unibotimetablesbot.py
 ```
 
+## Credits
+* was developed by Luca Antognetti
+* Data provided by [UNIBO OpenData](https://dati.unibo.it/it/dataset)
+
 
 **An instance of bot it's now running!** You can find it on Telegram searching `@unibotimetablesbot`
