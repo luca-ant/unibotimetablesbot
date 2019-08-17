@@ -409,7 +409,7 @@ def on_callback_query(msg):
             try:
                 bot.editMessageText(msg_edited, output_string,
                                     reply_markup=make_inline_keyboard(chat_id, day, teaching.componente_id))
-                # bot.answerCallbackQuery(query_id, text="TRACKING STARTED!")
+                # bot.answerCallbackQuery(query_id, text="")
             except telepot.exception.TelegramError:
                 pass
 
@@ -423,7 +423,7 @@ def on_callback_query(msg):
             output_string += print_output_timetable(timetable)
             try:
                 bot.editMessageText(msg_edited, output_string, reply_markup=make_inline_timetable_keyboard(day))
-                # bot.answerCallbackQuery(query_id, text="TRACKING STARTED!")
+                # bot.answerCallbackQuery(query_id, text="")
             except telepot.exception.TelegramError:
                 pass
 
@@ -479,6 +479,10 @@ def on_chat_message(msg):
                 if chat_id in users_plans.keys():
 
                     now = datetime.datetime.now()
+
+                    ##### DEBUG #####
+                    #  now = datetime.datetime.strptime("29/05/2019", "%d/%m/%Y")
+                    #################
 
                     timetable = get_plan_timetable(now, users_plans[chat_id])
                     output_string = emo_ay + " A.Y. " + accademic_year + "/" + str(int(accademic_year) + 1) + "\n"
@@ -630,6 +634,10 @@ def on_chat_message(msg):
 
                     now = datetime.datetime.now()
 
+                    ##### DEBUG #####
+                    # now = datetime.datetime.strptime("29/05/2019", "%d/%m/%Y")
+                    #################
+
                     timetable = get_plan_timetable(now, plan)
 
                     output_string = emo_ay + " A.Y. " + accademic_year + "/" + str(int(accademic_year) + 1) + "\n"
@@ -705,6 +713,9 @@ def update():
     year = now.strftime("%Y")
     update_day = datetime.datetime.strptime(year + "-08-15T00:00:00", "%Y-%m-%dT%H:%M:%S")
 
+    ##### DEBUG #####
+    # update_day = datetime.datetime.strptime(year + "-08-30T00:00:00", "%Y-%m-%dT%H:%M:%S")
+    #################
     if now > update_day:
         accademic_year = year
     else:

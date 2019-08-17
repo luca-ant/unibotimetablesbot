@@ -67,6 +67,7 @@ class Plan:
                 break
         if index < 0:
             self.teachings.append(teaching)
+            self.teachings.sort(key=lambda x: x.materia_descrizione)
             return True
 
         return False
