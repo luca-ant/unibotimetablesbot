@@ -456,7 +456,7 @@ def on_chat_message(msg):
                         f.writelines(str(u))+"\n"
                 writer_lock.release()
 
-                output_string = "Hi! Thanks to try this bot!\n" + help_string
+                output_string = "Hi! Thanks for trying this bot!\n" + help_string
 
                 bot.sendMessage(chat_id, output_string, reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
