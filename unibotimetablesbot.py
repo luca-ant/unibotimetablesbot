@@ -343,7 +343,6 @@ def make_teachings_keyboard(code, mode):
 
 
 def print_output_timetable(timetable):
-    output_string = ""
     if timetable != None:
 
         output_string = str(timetable)
@@ -482,10 +481,6 @@ def on_chat_message(msg):
                 if chat_id in users_plans.keys():
 
                     now = datetime.datetime.now()
-
-                    ############################# DEBUG ########################################
-                    # now = datetime.datetime.strptime("2019-05-29T09:00:00", "%Y-%m-%dT%H:%M:%S")
-                    ############################################################################
 
                     timetable = get_plan_timetable(now, users_plans[chat_id])
                     output_string = emo_ay + " A.Y. " + accademic_year + "/" + str(int(accademic_year) + 1) + "\n"
@@ -637,10 +632,6 @@ def on_chat_message(msg):
 
                     now = datetime.datetime.now()
 
-                    ############################# DEBUG ########################################
-                    # now = datetime.datetime.strptime("2019-05-29T09:00:00", "%Y-%m-%dT%H:%M:%S")
-                    ############################################################################
-
                     timetable = get_plan_timetable(now, plan)
 
                     output_string = emo_ay + " A.Y. " + accademic_year + "/" + str(int(accademic_year) + 1) + "\n"
@@ -740,8 +731,7 @@ def update():
 
 update()
 load_users_plans()
-schedule.every().day.at("04:00").do(update)
-# schedule.every().sunday.at("04:00").do(update)
+schedule.every().sunday.at("04:00").do(update)
 MessageLoop(bot, {'chat': on_chat_message, 'callback_query': on_callback_query}).run_as_thread()
 
 print('Listening ...')
