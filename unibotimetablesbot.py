@@ -297,8 +297,6 @@ def print_teachings_message(chat_id, code):
             t_string += "\n\n"
             result.append(t_string)
 
-
-
     elif mode == Mode.MAKE_PLAN:
 
         for t in all_courses[code].teachings:
@@ -452,7 +450,7 @@ def on_chat_message(msg):
                 writer_lock.acquire()
                 with open(users_file, "w") as f:
                     for u in users_mode.keys():
-                        f.writelines(str(u)+"\n")
+                        f.writelines(str(u) + "\n")
                 writer_lock.release()
 
                 output_string = "Hi! Thanks for trying this bot!\n" + help_string
@@ -705,7 +703,7 @@ def update():
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### RUNNING UPDATE")
 
     year = now.strftime("%Y")
-    update_day = datetime.datetime.strptime(year + "-08-31T00:00:00", "%Y-%m-%dT%H:%M:%S")
+    update_day = datetime.datetime.strptime(year + "-08-15T00:00:00", "%Y-%m-%dT%H:%M:%S")
 
     if now > update_day:
         accademic_year = year
