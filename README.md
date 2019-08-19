@@ -50,7 +50,7 @@ python3.7 unibotimetablesbot.py
 ```
 
 ## Credits
-* was developed by Luca Antognetti
+* unibotimetablesbot was developed by Luca Antognetti
 * Data provided by [UNIBO OpenData](https://dati.unibo.it/it/dataset)
 
 
