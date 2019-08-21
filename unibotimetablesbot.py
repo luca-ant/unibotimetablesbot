@@ -354,9 +354,9 @@ def print_teachings_message(chat_id, corso_codice):
     elif mode == Mode.MAKE_PLAN:
 
         for t in all_courses[corso_codice].teachings:
-            t_string = t.materia_codice + " - " + t.materia_descrizione + ""
+            t_string = t.materia_codice + " - <b>" + t.materia_descrizione + "</b>"
             if t.docente_nome != "":
-                t_string += " (" + t.docente_nome + ")"
+                t_string += " (<i>" + t.docente_nome + "</i>)"
 
             t_string += " [ /add_" + t.componente_id + " ]"
             if t.url != "":
