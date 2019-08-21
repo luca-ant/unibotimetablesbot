@@ -54,15 +54,11 @@ BACK_TO_MAIN = emo_back + " " + "BACK TO MAIN"
 donation_string = emo_money + " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
 help_string = "USE:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n" + MAKE_PLAN + " to build your study plan\n\nThen you can use:\n\n" + MY_PLAN + " to see your study plan\n\n" + MY_TIMETABLE + " to get your personal lesson's schedules\n\n" + DEL_PLAN + " to delete your plan" + "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail."
 
-current_dir = "./"
 current_dir = os.getcwd() + "/"
-
-
-
 
 logging.basicConfig(filename=current_dir + "unibotimetablesbot.log", level=logging.INFO)
 
-logging.info("### DIR " + current_dir)
+logging.info("### WORK DIR " + current_dir)
 
 dir_plans_name = current_dir + 'plans/'
 users_file = current_dir + 'users'
