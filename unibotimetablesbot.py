@@ -610,6 +610,12 @@ def on_chat_message(msg):
 
             elif msg["text"] == BACK_TO_MAIN:
 
+                if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
+                    if os.path.isfile(dir_plans_name + str(chat_id)):
+                        users_mode[chat_id] = Mode.PLAN
+                    else:
+                        users_mode[chat_id] = Mode.NORMAL
+
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                     int(accademic_year) + 1) + "</code>\n"
                 output_string += "Choose your action!"
@@ -624,6 +630,7 @@ def on_chat_message(msg):
 
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                 reply_markup=make_area_keyboard(users_mode[chat_id]))
+                
             elif msg["text"] in all_courses_group_by_area.keys():
 
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
