@@ -16,7 +16,7 @@
         <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1081">
-              <caret line="632" column="16" selection-start-line="632" selection-start-column="16" selection-end-line="632" selection-end-column="16" />
+              <caret line="632" selection-start-line="632" selection-end-line="632" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -203,7 +203,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="-19" width="1920" height="1077" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.034300793" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -255,7 +254,7 @@
     <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1081">
-          <caret line="632" column="16" selection-start-line="632" selection-start-column="16" selection-end-line="632" selection-end-column="16" />
+          <caret line="632" selection-start-line="632" selection-end-line="632" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
