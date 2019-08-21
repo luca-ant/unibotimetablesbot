@@ -278,7 +278,7 @@ def make_main_keyboard(chat_id, mode):
 
     buttonLists[0].append(ALL_COURSES)
     buttonLists[1].append(MAKE_PLAN)
-    if users_mode[chat_id] == Mode.PLAN:
+    if mode != Mode.NORMAL:
         buttonLists[2].append(MY_TIMETABLE)
         buttonLists[3].append(MY_PLAN)
         buttonLists[4].append(DEL_PLAN)
