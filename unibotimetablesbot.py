@@ -323,7 +323,7 @@ def make_courses_keyboard(area, mode):
 def print_plan(chat_id, plan):
     result = emo_plan + " YOUR STUDY PLAN" + "\n\n"
     for t in plan.teachings:
-        result += t.materia_codice + " - <b>" + t.materia_descrizione +"</b>"
+        result += t.materia_codice + " - <b>" + t.materia_descrizione + "</b>"
         if t.docente_nome != "":
             result += " (<i>" + t.docente_nome + "</i>)"
         result += " [ /remove_" + t.componente_id + " ]"
@@ -592,8 +592,9 @@ def on_chat_message(msg):
             elif msg["text"] == MAKE_PLAN:
                 users_mode[chat_id] = Mode.MAKE_PLAN
 
-                plan = Plan()
-                store_user_plan(chat_id, plan)
+                if not os.path.isfile(dir_plans_name + str(chat_id)):
+                    plan = Plan()
+                    store_user_plan(chat_id, plan)
 
                 output_string = "Find your teachings and add them to your study plan. Send " + END_PLAN + " when you have finished!"
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
@@ -824,7 +825,6 @@ def update():
         for u in users_mode.keys():
             f.writelines(str(u) + "\n")
     writer_lock.release()
-
 
 
 if os.path.isfile(users_file):
