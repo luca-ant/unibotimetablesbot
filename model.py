@@ -28,9 +28,9 @@ class Teaching:
         self.materia_descrizione = materia_descrizione
 
     def __str__(self):
-        result = self.materia_codice + " - " + self.materia_descrizione
+        result = self.materia_codice + " - <b>" + self.materia_descrizione + "</b>"
         if self.docente_nome != "":
-            result += " (" + self.docente_nome + ")"
+            result += " (<i>" + self.docente_nome + "</i>)"
         result += " [ " + self.componente_id + " ]"
         return result
 
@@ -93,12 +93,18 @@ class Plan:
                 return t
         return None
 
+    def is_empty(self):
+        if len(self.teachings) == 0:
+            return True
+        else:
+            return False
+
     def __str__(self):
         result = emo_plan + " YOUR STUDY PLAN\n\n"
         for t in self.teachings:
-            result += t.materia_codice + " - " + t.materia_descrizione
+            result += t.materia_codice + " - " + t.materia_descrizione + ""
             if t.docente_nome != "":
-                result += " (" + t.docente_nome + ")"
+                result += " (<i>" + t.docente_nome + "</i>)"
             result += "\n\n"
 
         return result
@@ -136,9 +142,9 @@ class Timetable:
     def __str__(self):
         result = ""
         for l in self.lessons:
-            result += l.materia_codice + " - " + l.materia_descrizione
+            result += l.materia_codice + " - <b>" + l.materia_descrizione + "</b>"
             if l.docente_nome != "":
-                result += " (" + l.docente_nome + ") "
+                result += " (<i>" + l.docente_nome + "</i>)"
             result += "\n"
 
             result += emo_calendar + " " + l.inizio.strftime("%d/%m/%Y")
@@ -155,7 +161,7 @@ class Timetable:
                 result += a.aula_piano
                 result += "\n"
                 if a.lat != "" and a.lon != "":
-                    result += emo_gps + " " + a.lat + ", " + a.lon
+                    result += emo_gps + " <code>" + a.lat + ", " + a.lon + "</code>"
                     result += "\n"
             result += "\n"
 
@@ -165,3 +171,5 @@ class Timetable:
 class Mode(Enum):
     NORMAL = 1
     MAKE_PLAN = 2
+    DEL = 3
+    PLAN = 4

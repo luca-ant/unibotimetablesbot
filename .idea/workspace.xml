@@ -17,8 +17,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-7934">
-              <caret line="119" column="4" selection-start-line="119" selection-start-column="4" selection-end-line="119" selection-end-column="4" />
+            <state relative-caret-position="652">
+              <caret line="837" column="8" selection-start-line="837" selection-start-column="8" selection-end-line="837" selection-end-column="8" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -29,8 +29,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1115">
-              <caret line="134" lean-forward="true" selection-start-line="134" selection-end-line="134" />
+            <state relative-caret-position="980">
+              <caret line="99" column="24" selection-start-line="99" selection-start-column="24" selection-end-line="99" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -46,14 +46,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>all_courses_group_by_ambiti</find>
-      <find>BACK_TO_MAIN_MENU</find>
-      <find>emo</find>
-      <find>info</find>
-      <find>print_teac</find>
-      <find>print</find>
-      <find>added</find>
-      <find>print_te</find>
       <find>print_teachings_message</find>
       <find>get_plan_timetable</find>
       <find>Naviga</find>
@@ -61,12 +53,37 @@
       <find>logging</find>
       <find>print_pla</find>
       <find>emo_bad</find>
-      <find>store_user_plan</find>
       <find>users_plans</find>
+      <find>output_string = emo_ay + &quot; `A.Y. &quot; + accademic_year + &quot;/&quot; + str(int(accademic_year) + 1) + &quot;`\n&quot;</find>
+      <find>editMessa</find>
+      <find>MY_PLA</find>
+      <find>str(int(accademic_year)</find>
+      <find>[</find>
+      <find>remo</find>
+      <find>gps</find>
+      <find>store_user_plan</find>
+      <find>**</find>
+      <find>__</find>
+      <find>Markdown</find>
+      <find>sendMessa</find>
+      <find>traceback</find>
+      <find>/add</find>
+      <find>/remo</find>
+      <find>/url</find>
+      <find>/sche</find>
+      <find>emo_ay</find>
+      <find>NO LESSONS FOR TODAY</find>
+      <find>Mode</find>
+      <find>print_plan</find>
+      <find>Schedules da</find>
     </findStrings>
     <replaceStrings>
       <replace>all_courses_group_by_area</replace>
       <replace>BACK_TO_MAIN</replace>
+      <replace>output_string = emo_ay + &quot; A.Y. `&quot; + accademic_year + &quot;/&quot; + str(int(accademic_year) + 1) + &quot;`\n&quot;</replace>
+      <replace>HTML</replace>
+      <replace>emo_ay + &quot; A.Y. &lt;code&gt;&quot; + accademic_year + &quot;/&quot; + str(int(accademic_year) + 1) + &quot;&lt;/code&gt;\n&quot;</replace>
+      <replace>&lt;b&gt;NO LESSONS FOR TODAY &lt;/b&gt;</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -79,8 +96,8 @@
         <option value="$PROJECT_DIR$/course.py" />
         <option value="$PROJECT_DIR$/teaching.py" />
         <option value="$PROJECT_DIR$/plan.py" />
-        <option value="$PROJECT_DIR$/unibotimetablesbot.py" />
         <option value="$PROJECT_DIR$/model.py" />
+        <option value="$PROJECT_DIR$/unibotimetablesbot.py" />
       </list>
     </option>
   </component>
@@ -97,7 +114,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -109,6 +125,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -188,6 +205,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="-21" width="1920" height="1077" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.06965699" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -238,15 +256,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1115">
-          <caret line="134" lean-forward="true" selection-start-line="134" selection-end-line="134" />
+        <state relative-caret-position="980">
+          <caret line="99" column="24" selection-start-line="99" selection-start-column="24" selection-end-line="99" selection-end-column="24" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-7934">
-          <caret line="119" column="4" selection-start-line="119" selection-start-column="4" selection-end-line="119" selection-end-column="4" />
+        <state relative-caret-position="652">
+          <caret line="837" column="8" selection-start-line="837" selection-start-column="8" selection-end-line="837" selection-end-column="8" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
