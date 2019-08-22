@@ -674,10 +674,12 @@ def on_chat_message(msg):
                     store_user_plan(chat_id, plan)
 
                     if state:
-                        output_string = "ADDED " + str(teaching)
+                        output_string = "ADDED " + teaching.materia_descrizione
                     else:
-                        output_string = str(teaching) + " ALREADY IN YOUR STUDY PLAN"
-                    bot.sendMessage(chat_id, output_string, parse_mode='HTML')
+                        output_string =  teaching.materia_descrizione+ " ALREADY IN YOUR STUDY PLAN"
+
+
+                    #bot.sendMessage(chat_id, output_string, parse_mode='HTML', disable_notification=True)
 
 
             elif msg["text"].startswith("/remove_"):
@@ -693,11 +695,12 @@ def on_chat_message(msg):
                 store_user_plan(chat_id, plan)
 
                 if state:
-                    output_string = "REMOVED " + str(teaching)
+                    output_string = "REMOVED " +  teaching.materia_descrizione
                 else:
-                    output_string = str(teaching) + " NOT IN YOUR STUDY PLAN"
+                    output_string =  teaching.materia_descrizione + " NOT IN YOUR STUDY PLAN"
 
-                bot.sendMessage(chat_id, output_string, parse_mode='HTML')
+                #bot.sendMessage(chat_id, output_string, parse_mode='HTML', disable_notification=True)
+
 
             elif msg["text"].startswith("/schedule_"):
 
