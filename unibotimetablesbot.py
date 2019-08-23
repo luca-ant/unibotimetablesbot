@@ -496,6 +496,7 @@ def on_chat_message(msg):
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### MESSAGE = " + str(msg))
         print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### MESSAGE = " + str(msg))
         if content_type == "text":
+
             if msg["text"] == '/start':
                 users_mode[chat_id] = Mode.NORMAL
 
@@ -510,6 +511,19 @@ def on_chat_message(msg):
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                 reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
+            elif chat_id not in users_mode.keys():
+                if os.path.isfile(dir_plans_name + str(chat_id)):
+                    users_mode[chat_id] = Mode.PLAN
+                else:
+                    users_mode[chat_id] = Mode.NORMAL
+
+                output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
+                    int(accademic_year) + 1) + "</code>\n"
+                output_string += "Choose your action!"
+
+                bot.sendMessage(chat_id, output_string, parse_mode='HTML',
+                                reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+
 
             elif msg["text"] == '/help':
 
@@ -519,6 +533,11 @@ def on_chat_message(msg):
                                 reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
             elif msg["text"] == ALL_COURSES:
+
+                if os.path.isfile(dir_plans_name + str(chat_id)):
+                    users_mode[chat_id] = Mode.PLAN
+                else:
+                    users_mode[chat_id] = Mode.NORMAL
 
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                     int(accademic_year) + 1) + "</code>\n"
@@ -676,10 +695,9 @@ def on_chat_message(msg):
                     if state:
                         output_string = "ADDED " + teaching.materia_descrizione
                     else:
-                        output_string =  teaching.materia_descrizione+ " ALREADY IN YOUR STUDY PLAN"
+                        output_string = teaching.materia_descrizione + " ALREADY IN YOUR STUDY PLAN"
 
-
-                    #bot.sendMessage(chat_id, output_string, parse_mode='HTML', disable_notification=True)
+                    # bot.sendMessage(chat_id, output_string, parse_mode='HTML', disable_notification=True)
 
 
             elif msg["text"].startswith("/remove_"):
@@ -695,11 +713,11 @@ def on_chat_message(msg):
                 store_user_plan(chat_id, plan)
 
                 if state:
-                    output_string = "REMOVED " +  teaching.materia_descrizione
+                    output_string = "REMOVED " + teaching.materia_descrizione
                 else:
-                    output_string =  teaching.materia_descrizione + " NOT IN YOUR STUDY PLAN"
+                    output_string = teaching.materia_descrizione + " NOT IN YOUR STUDY PLAN"
 
-                #bot.sendMessage(chat_id, output_string, parse_mode='HTML', disable_notification=True)
+                # bot.sendMessage(chat_id, output_string, parse_mode='HTML', disable_notification=True)
 
 
             elif msg["text"].startswith("/schedule_"):
@@ -832,19 +850,32 @@ def update():
     check_table(orari_table)
 
     writer_lock.acquire()
+
+    chat_id_to_store = set()
+
+    if os.path.isfile(users_file):
+        with open(users_file) as f:
+            for line in f:
+                chat_id = int(line.replace("'", "").strip())
+                chat_id_to_store.add(chat_id)
+
+    for u in users_mode.keys():
+        chat_id_to_store.add(u)
+
     with open(users_file, "w") as f:
-        for u in users_mode.keys():
+        for u in chat_id_to_store:
             f.writelines(str(u) + "\n")
     writer_lock.release()
 
 
 if os.path.isfile(users_file):
     with open(users_file) as f:
-        chat_id = int(f.readline().replace("'", " ").strip())
-        if os.path.isfile(dir_plans_name + str(chat_id)):
-            users_mode[chat_id] = Mode.PLAN
-        else:
-            users_mode[chat_id] = Mode.NORMAL
+        for line in f:
+            chat_id = int(line.replace("'", "").strip())
+            if os.path.isfile(dir_plans_name + str(chat_id)):
+                users_mode[chat_id] = Mode.PLAN
+            else:
+                users_mode[chat_id] = Mode.NORMAL
 
 update()
 schedule.every().day.at("04:00").do(update)
