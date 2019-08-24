@@ -17,9 +17,9 @@ git clone git@github.com:luca-ant/unibotimetablesbot.git
 
 * Install dependencies
 ```
-sudo apt install python3.7-setuptools
-sudo apt install python3.7-pip
-sudo apt install python3.7-venv
+sudo apt install python3-setuptools
+sudo apt install python3-pip
+sudo apt install python3-venv
 ```
 or
 ```
@@ -31,10 +31,10 @@ sudo pacman -S python-virtualenv
 * Create a virtual environment and install requirements modules
 ```
 cd unibotimetablesbot
-python3.7 -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 
-python3.7 -m pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 ```
 
 
@@ -46,7 +46,7 @@ export BOT_TOKEN=YOUR_TOKEN_HERE
 * Run the python script as:
 
 ```
-python3.7 unibotimetablesbot.py
+python unibotimetablesbot.py
 ```
 
 ## Credits
