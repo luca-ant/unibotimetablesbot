@@ -41,18 +41,22 @@ emo_url = u'\U0001F517'
 emo_confused = u'\U0001F615'
 emo_ay = u'\U00002712'
 emo_404 = u'\U00000034' + u'\U000020E3' + u'\U00000030' + u'\U000020E3' + u'\U00000034' + u'\U000020E3'
+emo_not_on = u'\U0001F514'
+emo_not_off = u'\U0001F515'
 
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
 MY_PLAN = emo_plan + " " + "MY STUDY PLAN"
 MAKE_PLAN = emo_make + " " + "UPDATE MY STUDY PLAN"
+NOTIFY_ON = emo_not_on + " " + "ENABLE NOTIFICATIONS"
+NOTIFY_OFF = emo_not_off + " " + "DISABLE NOTIFICATIONS"
 DEL_PLAN = emo_del + " " + "DELETE STUDY PLAN"
 END_PLAN = emo_end_plan + " " + "DONE!"
 BACK_TO_AREAS = emo_back + " " + "BACK TO AREAS"
 BACK_TO_MAIN = emo_back + " " + "BACK TO MAIN"
 
 donation_string = emo_money + " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
-help_string = "USE:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n" + MAKE_PLAN + " to build your study plan\n\nThen you can use:\n\n" + MY_PLAN + " to see your study plan\n\n" + MY_TIMETABLE + " to get your personal lesson's schedules\n\n" + DEL_PLAN + " to delete your plan" + "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail."
+help_string = "USE:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n" + MAKE_PLAN + " to build your study plan\n\nThen you can use:\n\n" + MY_PLAN + " to see your study plan\n\n" + MY_TIMETABLE + " to get your personal lesson's schedules\n\n" + NOTIFY_ON + " to receive a notification every morning\n\n" + DEL_PLAN + " to delete your plan" + "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail."
 
 current_dir = os.getcwd() + "/"
 
@@ -70,6 +74,7 @@ all_aule = dict()
 all_teachings = dict()
 all_courses_group_by_area = collections.defaultdict(list)
 users_mode = collections.defaultdict(Mode)
+notified_users = set()
 
 accademic_year = ""
 
@@ -275,13 +280,18 @@ def make_main_keyboard(chat_id, mode):
     buttonLists.append(list())
     buttonLists.append(list())
     buttonLists.append(list())
+    buttonLists.append(list())
 
     buttonLists[0].append(ALL_COURSES)
     buttonLists[1].append(MAKE_PLAN)
     if mode != Mode.NORMAL:
-        buttonLists[2].append(MY_TIMETABLE)
-        buttonLists[3].append(MY_PLAN)
-        buttonLists[4].append(DEL_PLAN)
+        if chat_id in notified_users:
+            buttonLists[2].append(NOTIFY_OFF)
+        else:
+            buttonLists[2].append(NOTIFY_ON)
+        buttonLists[3].append(MY_TIMETABLE)
+        buttonLists[4].append(MY_PLAN)
+        buttonLists[5].append(DEL_PLAN)
     keyboard = ReplyKeyboardMarkup(keyboard=buttonLists, resize_keyboard=True)
     return keyboard
 
@@ -563,7 +573,7 @@ def on_chat_message(msg):
 
                 output_string += print_output_timetable(timetable)
 
-                bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
+                # bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                 reply_markup=make_inline_timetable_keyboard(now))
 
@@ -649,6 +659,42 @@ def on_chat_message(msg):
 
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                 reply_markup=make_area_keyboard(users_mode[chat_id]))
+
+
+            elif msg["text"] == NOTIFY_ON:
+
+                if os.path.isfile(dir_plans_name + str(chat_id)):
+                    notified_users.add(chat_id)
+
+                    output_string = "Notifications enabled!"
+
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML',
+                                    reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                else:
+
+                    output_string = "Create a study plan before!"
+
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML',
+                                    reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+
+
+            elif msg["text"] == NOTIFY_OFF:
+
+                if chat_id in notified_users:
+                    notified_users.remove(chat_id)
+
+                    output_string = "Notifications disabled!"
+
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML',
+                                    reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                else:
+                    output_string = "Notifications already disabled!"
+
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML',
+                                    reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+
+
+
 
             elif msg["text"] in all_courses_group_by_area.keys():
 
@@ -745,7 +791,7 @@ def on_chat_message(msg):
 
                     output_string += print_output_timetable(timetable)
 
-                    bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
+                    # bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                     reply_markup=make_inline_keyboard(chat_id, now, teaching.componente_id))
 
@@ -868,6 +914,36 @@ def update():
     writer_lock.release()
 
 
+def send_good_morning():
+    for chat_id in notified_users:
+        try:
+            now = datetime.datetime.now()
+
+            plan = load_user_plan(chat_id)
+
+            timetable = get_plan_timetable(now, plan)
+            output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
+                int(accademic_year) + 1) + "</code>\n"
+            output_string += emo_calendar + " " + now.strftime("%A %B %d, %Y") + "\n\n"
+
+            output_string += print_output_timetable(timetable)
+            if "NO LESSONS FOR TODAY" not in output_string:
+                logging.info(
+                    "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SENDING GOOD MORNING TO " + str(chat_id))
+                print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + "  ### SENDING GOOD MORNING TO " + str(
+                    chat_id))
+
+                # bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
+                bot.sendMessage(chat_id, output_string, parse_mode='HTML',
+                                reply_markup=make_inline_timetable_keyboard(now))
+
+        except:
+            traceback.print_exc()
+            now = datetime.datetime.now()
+            logging.info(
+                "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
+
+
 if os.path.isfile(users_file):
     with open(users_file) as f:
         for line in f:
@@ -879,10 +955,15 @@ if os.path.isfile(users_file):
 
 update()
 schedule.every().day.at("04:00").do(update)
+schedule.every().monday.at("08:45").do(send_good_morning)
+schedule.every().thursday.at("08:45").do(send_good_morning)
+schedule.every().wednesday.at("08:45").do(send_good_morning)
+schedule.every().thursday.at("08:45").do(send_good_morning)
+schedule.every().friday.at("08:45").do(send_good_morning)
 MessageLoop(bot, {'chat': on_chat_message, 'callback_query': on_callback_query}).run_as_thread()
 
 print('Listening ...')
 # Keep the program running.
 while 1:
     schedule.run_pending()
-    time.sleep(10)
+    time.sleep(1)

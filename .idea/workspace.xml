@@ -15,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="201">
-              <caret line="499" column="12" selection-start-line="499" selection-start-column="12" selection-end-line="499" selection-end-column="12" />
+            <state relative-caret-position="621">
+              <caret line="957" selection-start-line="957" selection-end-line="957" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -44,8 +44,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>get_plan_timetable</find>
-      <find>Naviga</find>
       <find>Sorry</find>
       <find>logging</find>
       <find>print_pla</find>
@@ -74,6 +72,8 @@
       <find>print_plan</find>
       <find>Schedules da</find>
       <find>ADDED</find>
+      <find>users_notified</find>
+      <find>donation_string</find>
     </findStrings>
     <replaceStrings>
       <replace>all_courses_group_by_area</replace>
@@ -82,6 +82,7 @@
       <replace>HTML</replace>
       <replace>emo_ay + &quot; A.Y. &lt;code&gt;&quot; + accademic_year + &quot;/&quot; + str(int(accademic_year) + 1) + &quot;&lt;/code&gt;\n&quot;</replace>
       <replace>&lt;b&gt;NO LESSONS FOR TODAY &lt;/b&gt;</replace>
+      <replace>notified_users</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -254,8 +255,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="201">
-          <caret line="499" column="12" selection-start-line="499" selection-start-column="12" selection-end-line="499" selection-end-column="12" />
+        <state relative-caret-position="621">
+          <caret line="957" selection-start-line="957" selection-end-line="957" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
