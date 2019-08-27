@@ -743,7 +743,7 @@ def on_chat_message(msg):
                     else:
                         output_string = teaching.materia_descrizione + " ALREADY IN YOUR STUDY PLAN"
 
-                    # bot.sendMessage(chat_id, output_string, parse_mode='HTML', disable_notification=True)
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML', disable_notification=True)
 
 
             elif msg["text"].startswith("/remove_"):
@@ -763,7 +763,7 @@ def on_chat_message(msg):
                 else:
                     output_string = teaching.materia_descrizione + " NOT IN YOUR STUDY PLAN"
 
-                # bot.sendMessage(chat_id, output_string, parse_mode='HTML', disable_notification=True)
+                bot.sendMessage(chat_id, output_string, parse_mode='HTML', disable_notification=True)
 
 
             elif msg["text"].startswith("/schedule_"):

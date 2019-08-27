@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e17713db-7e88-4611-93d8-6d9c8db7cdc0" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/unibotimetablesbot.py" beforeDir="false" afterPath="$PROJECT_DIR$/unibotimetablesbot.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -15,8 +16,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="201">
-              <caret line="929" lean-forward="true" selection-start-line="929" selection-end-line="929" />
+            <state relative-caret-position="458">
+              <caret line="745" column="20" selection-start-line="745" selection-start-column="20" selection-end-line="745" selection-end-column="20" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -254,8 +255,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="201">
-          <caret line="929" lean-forward="true" selection-start-line="929" selection-end-line="929" />
+        <state relative-caret-position="458">
+          <caret line="745" column="20" selection-start-line="745" selection-start-column="20" selection-end-line="745" selection-end-column="20" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
