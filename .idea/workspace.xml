@@ -16,8 +16,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="458">
-              <caret line="745" column="20" selection-start-line="745" selection-start-column="20" selection-end-line="745" selection-end-column="20" />
+            <state relative-caret-position="390">
+              <caret line="59" column="575" selection-start-line="59" selection-start-column="575" selection-end-line="59" selection-end-column="575" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -45,7 +45,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Sorry</find>
       <find>logging</find>
       <find>print_pla</find>
       <find>emo_bad</find>
@@ -75,6 +74,7 @@
       <find>ADDED</find>
       <find>users_notified</find>
       <find>donation_string</find>
+      <find>traceback.format_exc()</find>
     </findStrings>
     <replaceStrings>
       <replace>all_courses_group_by_area</replace>
@@ -114,6 +114,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -125,7 +126,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -205,6 +205,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="-19" width="1920" height="1077" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.015831135" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -255,8 +256,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/unibotimetablesbot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="458">
-          <caret line="745" column="20" selection-start-line="745" selection-start-column="20" selection-end-line="745" selection-end-column="20" />
+        <state relative-caret-position="390">
+          <caret line="59" column="575" selection-start-line="59" selection-start-column="575" selection-end-line="59" selection-end-column="575" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>

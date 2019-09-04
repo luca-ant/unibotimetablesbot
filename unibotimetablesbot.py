@@ -43,6 +43,7 @@ emo_ay = u'\U00002712'
 emo_404 = u'\U00000034' + u'\U000020E3' + u'\U00000030' + u'\U000020E3' + u'\U00000034' + u'\U000020E3'
 emo_not_on = u'\U0001F514'
 emo_not_off = u'\U0001F515'
+emo_wrong = u'\U0001F914'
 
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
@@ -56,7 +57,7 @@ BACK_TO_AREAS = emo_back + " " + "BACK TO AREAS"
 BACK_TO_MAIN = emo_back + " " + "BACK TO MAIN"
 
 donation_string = emo_money + " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
-help_string = "USE:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n" + MAKE_PLAN + " to build your study plan\n\nThen you can use:\n\n" + MY_PLAN + " to see your study plan\n\n" + MY_TIMETABLE + " to get your personal lesson's schedules\n\n" + NOTIFY_ON + " to receive a notification every morning\n\n" + DEL_PLAN + " to delete your plan" + "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail."
+help_string = "USE:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n" + MAKE_PLAN + " to build your study plan\n\nThen you can use:\n\n" + MY_PLAN + " to see your study plan\n\n" + MY_TIMETABLE + " to get your personal lesson's schedules\n\n" + NOTIFY_ON + " to receive a notification every morning\n\n" + DEL_PLAN + " to delete your plan" + "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail.\n\n<b>REMIND! All data are updated once a day. For last update please check on official Unibo site! (Especially for the first weeks)</b>"
 
 current_dir = os.getcwd() + "/"
 
@@ -469,6 +470,7 @@ def on_callback_query(msg):
                                     reply_markup=make_inline_keyboard(chat_id, day, teaching.componente_id))
                 # bot.answerCallbackQuery(query_id, text="")
             except telepot.exception.TelegramError:
+                bot.answerCallbackQuery(query_id, text="SLOW DOWN!!")
                 pass
 
 
@@ -494,13 +496,16 @@ def on_callback_query(msg):
         now = datetime.datetime.now()
         logging.info("TIMESTAMP = " + now.strftime(
             "%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
-        output_string = traceback.format_exc()
+
+        output_string = emo_wrong + " Oh no! Something bad happend.."
+
         bot.sendMessage(chat_id, output_string,
                         reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
 
 def on_chat_message(msg):
     try:
+
         content_type, chat_type, chat_id = telepot.glance(msg)
         now = datetime.datetime.now()
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### MESSAGE = " + str(msg))
@@ -836,7 +841,7 @@ def on_chat_message(msg):
         traceback.print_exc()
         now = datetime.datetime.now()
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
-        output_string = traceback.format_exc()
+        output_string = emo_wrong + " Oh no! Something bad happend.."
         bot.sendMessage(chat_id, output_string,
                         reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
