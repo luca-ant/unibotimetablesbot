@@ -55,6 +55,8 @@ DEL_PLAN = emo_del + " " + "DELETE STUDY PLAN"
 END_PLAN = emo_end_plan + " " + "DONE!"
 BACK_TO_AREAS = emo_back + " " + "BACK TO AREAS"
 BACK_TO_MAIN = emo_back + " " + "BACK TO MAIN"
+DONATION = emo_money + " " + "DONATION"
+HELP = emo_help + " " + "HELP"
 
 donation_string = emo_money + " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
 help_string = "USE:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n" + MAKE_PLAN + " to build your study plan\n\nThen you can use:\n\n" + MY_PLAN + " to see your study plan\n\n" + MY_TIMETABLE + " to get your personal lesson's schedules\n\n" + NOTIFY_ON + " to receive a notification every morning\n\n" + DEL_PLAN + " to delete your plan" + "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail.\n\n<b>REMIND! All data are updated once a day. For last update please check on official Unibo site! (Especially for the first weeks)</b>"
@@ -281,6 +283,7 @@ def make_main_keyboard(chat_id, mode):
     buttonLists.append(list())
     buttonLists.append(list())
     buttonLists.append(list())
+    buttonLists.append(list())    
     buttonLists.append(list())
 
     buttonLists[0].append(ALL_COURSES)
@@ -293,6 +296,10 @@ def make_main_keyboard(chat_id, mode):
         buttonLists[3].append(MY_TIMETABLE)
         buttonLists[4].append(MY_PLAN)
         buttonLists[5].append(DEL_PLAN)
+
+    buttonLists[6].append(HELP)
+    buttonLists[6].append(DONATION)
+
     keyboard = ReplyKeyboardMarkup(keyboard=buttonLists, resize_keyboard=True)
     return keyboard
 
@@ -698,8 +705,23 @@ def on_chat_message(msg):
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                     reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
+            elif msg["text"] == DONATION:
+                if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
+                    if os.path.isfile(dir_plans_name + str(chat_id)):
+                        users_mode[chat_id] = Mode.PLAN
+                    else:
+                        users_mode[chat_id] = Mode.NORMAL
 
+                bot.sendMessage(chat_id, donation_string, parse_mode='HTML', reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+    
+            elif msg["text"] == HELP:
+                if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
+                    if os.path.isfile(dir_plans_name + str(chat_id)):
+                        users_mode[chat_id] = Mode.PLAN
+                    else:
+                        users_mode[chat_id] = Mode.NORMAL
 
+                bot.sendMessage(chat_id, help_string, parse_mode='HTML', reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
             elif msg["text"] in all_courses_group_by_area.keys():
 
