@@ -40,7 +40,8 @@ emo_no_less = u'\U0001F389'
 emo_url = u'\U0001F517'
 emo_confused = u'\U0001F615'
 emo_ay = u'\U00002712'
-emo_404 = u'\U00000034' + u'\U000020E3' + u'\U00000030' + u'\U000020E3' + u'\U00000034' + u'\U000020E3'
+emo_404 = u'\U00000034' + u'\U000020E3' + u'\U00000030' + \
+    u'\U000020E3' + u'\U00000034' + u'\U000020E3'
 emo_not_on = u'\U0001F514'
 emo_not_off = u'\U0001F515'
 emo_wrong = u'\U0001F914'
@@ -58,17 +59,21 @@ BACK_TO_MAIN = emo_back + " " + "BACK TO MAIN"
 DONATION = emo_money + " " + "DONATION"
 HELP = emo_help + " " + "HELP"
 
-donation_string = emo_money + " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
-help_string = "USE:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n" + MAKE_PLAN + " to build your study plan\n\nThen you can use:\n\n" + MY_PLAN + " to see your study plan\n\n" + MY_TIMETABLE + " to get your personal lesson's schedules\n\n" + NOTIFY_ON + " to receive a notification every morning\n\n" + DEL_PLAN + " to delete your plan" + "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail.\n\n<b>REMIND! All data are updated once a day. For last update please check on official Unibo site! (Especially for the first weeks)</b>"
+donation_string = emo_money + \
+    " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
+help_string = "USE:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n" + MAKE_PLAN + " to build your study plan\n\nThen you can use:\n\n" + MY_PLAN + " to see your study plan\n\n" + MY_TIMETABLE + " to get your personal lesson's schedules\n\n" + NOTIFY_ON + \
+    " to receive a notification every morning\n\n" + DEL_PLAN + " to delete your plan" + \
+    "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail.\n\n<b>REMIND! All data are updated once a day. For last update please check on official Unibo site! (Especially for the first weeks)</b>"
 
 current_dir = os.getcwd() + "/"
 
-logging.basicConfig(filename=current_dir + "unibotimetablesbot.log", level=logging.INFO)
+logging.basicConfig(filename=current_dir +
+                    "unibotimetablesbot.log", level=logging.INFO)
 
 logging.info("### WORK DIR " + current_dir)
 
 dir_plans_name = current_dir + 'plans/'
-users_file = current_dir + 'users'
+dir_users_name = current_dir + 'users/'
 
 writer_lock = Lock()
 
@@ -84,8 +89,10 @@ accademic_year = ""
 
 def get_all_aule():
     now = datetime.datetime.now()
-    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### GETTING ALL AULE")
-    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### GETTING ALL AULE")
+    logging.info("TIMESTAMP = " +
+                 now.strftime("%b %d %Y %H:%M:%S") + " ### GETTING ALL AULE")
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+          " ### GETTING ALL AULE")
 
     aule_table = "aule_" + accademic_year
 
@@ -102,7 +109,8 @@ def get_all_aule():
     except:
         traceback.print_exc()
         now = datetime.datetime.now()
-        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                     " ### EXCEPTION = " + traceback.format_exc())
         return
 
     for aula in aule:
@@ -114,8 +122,10 @@ def get_all_aule():
 
 def get_all_courses():
     now = datetime.datetime.now()
-    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### GETTING ALL COURSES")
-    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### GETTING ALL COURSES")
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                 " ### GETTING ALL COURSES")
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+          " ### GETTING ALL COURSES")
     url = "https://dati.unibo.it/api/action/datastore_search_sql?sql="
     corsi_table = "corsi_" + accademic_year + "_it"
     insegnamenti_table = "insegnamenti_" + accademic_year + "_it"
@@ -136,7 +146,8 @@ def get_all_courses():
     except:
         traceback.print_exc()
         now = datetime.datetime.now()
-        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                     " ### EXCEPTION = " + traceback.format_exc())
         return
 
     for c in corsi:
@@ -165,7 +176,8 @@ def get_plan_timetable(day, plan):
     orari_table = "orari_" + accademic_year
     aule_table = "aule_" + accademic_year
     url_o = "https://dati.unibo.it/api/action/datastore_search_sql?sql="
-    url_a = "https://dati.unibo.it/api/action/datastore_search?resource_id=" + aule_table + "&q="
+    url_a = "https://dati.unibo.it/api/action/datastore_search?resource_id=" + \
+        aule_table + "&q="
 
     sql_orari = "SELECT " + orari_table + ".inizio, " \
                 + orari_table + ".fine, " \
@@ -173,7 +185,7 @@ def get_plan_timetable(day, plan):
                 + orari_table + ".componente_id " \
                 + " FROM " + orari_table \
                 + " WHERE " + orari_table + ".inizio between \'" + day.strftime(
-        "%Y/%m/%d") + " 00:00:00\' and " + "\'" + day.strftime("%Y/%m/%d") + " 23:59:59\' AND ("
+                    "%Y/%m/%d") + " 00:00:00\' and " + "\'" + day.strftime("%Y/%m/%d") + " 23:59:59\' AND ("
 
     for i in range(0, len(plan.teachings), 1):
         t = plan.teachings[i]
@@ -197,7 +209,8 @@ def get_plan_timetable(day, plan):
             if t != None:
                 l = Lesson(t.corso_codice, t.materia_codice, t.materia_descrizione, t.docente_nome, t.componente_id,
                            t.url,
-                           datetime.datetime.strptime(o["inizio"], "%Y-%m-%dT%H:%M:%S"),
+                           datetime.datetime.strptime(
+                               o["inizio"], "%Y-%m-%dT%H:%M:%S"),
                            datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"))
                 for code in o["aula_codici"].split():
                     a = all_aule[code]
@@ -232,42 +245,31 @@ def load_user_plan(chat_id):
         return None
 
 
-# NOT USED
-def load_users_plans():
-    users_plans = collections.defaultdict(Plan)  # RAM mode
+def store_user(chat_id):
+    if not os.path.isdir(dir_users_name):
+        os.makedirs(dir_users_name)
+    with open(dir_users_name + str(chat_id), 'w') as outfile:
+        user_dict = {}
+        user_dict["chat_id"] = chat_id
+        user_dict["mode"] = users_mode[chat_id].name
+        user_dict["notification"] = chat_id in notified_users
+        outfile.write(json.dumps(user_dict))
 
-    now = datetime.datetime.now()
-    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### LOADING USERS PLANS")
-    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### LOADING USERS PLANS")
-    if os.path.isfile(users_file):
-        with open(users_file) as f:
-            chat_id = int(f.readline().replace("'", " ").strip())
-            users_mode[chat_id] = Mode.NORMAL
 
-    if os.path.isdir(dir_plans_name):
-        for filename in os.listdir(dir_plans_name):
-            with open(dir_plans_name + filename) as f:
-                plan_dict = json.load(f)
-                plan = Plan()
-                for t in plan_dict["teachings"]:
-                    try:
-                        teaching = Teaching(t["corso_codice"], t["materia_codice"], t["materia_descrizione"],
-                                            t["docente_nome"], t["componente_id"], t["url"])
-                        plan.add_teaching(teaching)
+def load_user(chat_id):
+    if os.path.isfile(dir_users_name+str(chat_id)):
+        with open(dir_users_name + str(chat_id), 'r') as f:
+            user_dict = json.load(f)
 
-                    except:
-                        traceback.print_exc()
-                        now = datetime.datetime.now()
-                        logging.info("TIMESTAMP = " + now.strftime(
-                            "%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
-                users_plans[int(filename)] = plan
-    return users_plans
+    return user_dict["chat_id"], Mode[user_dict["mode"]], user_dict["notification"]
 
 
 def store_user_plan(chat_id, plan):
     now = datetime.datetime.now()
-    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### STORE PLAN OF USER " + str(chat_id))
-    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### STORE PLAN OF USER " + str(chat_id))
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                 " ### STORE PLAN OF USER " + str(chat_id))
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+          " ### STORE PLAN OF USER " + str(chat_id))
     if not os.path.isdir(dir_plans_name):
         os.mkdir(dir_plans_name)
 
@@ -283,7 +285,7 @@ def make_main_keyboard(chat_id, mode):
     buttonLists.append(list())
     buttonLists.append(list())
     buttonLists.append(list())
-    buttonLists.append(list())    
+    buttonLists.append(list())
     buttonLists.append(list())
 
     buttonLists[0].append(ALL_COURSES)
@@ -384,7 +386,6 @@ def print_teachings_message(chat_id, corso_codice):
             t_string += "\n\n"
             result.append(t_string)
 
-
     else:
         result.clear()
 
@@ -449,7 +450,8 @@ def make_inline_keyboard(chat_id, day, componente_id):
 
 
 def on_callback_query(msg):
-    query_id, chat_id, query_data = telepot.glance(msg, flavor='callback_query')
+    query_id, chat_id, query_data = telepot.glance(
+        msg, flavor='callback_query')
     try:
         msg_edited = (chat_id, msg['message']['message_id'])
 
@@ -468,8 +470,10 @@ def on_callback_query(msg):
 
             timetable = get_plan_timetable(day, plan)
 
-            output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(int(accademic_year) + 1) + "</code>\n"
-            output_string += emo_calendar + " " + day.strftime("%A %B %d, %Y") + "\n\n"
+            output_string = emo_ay + " A.Y. <code>" + accademic_year + \
+                "/" + str(int(accademic_year) + 1) + "</code>\n"
+            output_string += emo_calendar + " " + \
+                day.strftime("%A %B %d, %Y") + "\n\n"
             output_string += print_output_timetable(timetable)
 
             try:
@@ -480,14 +484,15 @@ def on_callback_query(msg):
                 bot.answerCallbackQuery(query_id, text="SLOW DOWN!!")
                 pass
 
-
         else:
             day = datetime.datetime.strptime(query_data, "%d/%m/%YT%H:%M:%S")
             plan = load_user_plan(chat_id)
             timetable = get_plan_timetable(day, plan)
 
-            output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(int(accademic_year) + 1) + "</code>\n"
-            output_string += emo_calendar + " " + day.strftime("%A %B %d, %Y") + "\n\n"
+            output_string = emo_ay + " A.Y. <code>" + accademic_year + \
+                "/" + str(int(accademic_year) + 1) + "</code>\n"
+            output_string += emo_calendar + " " + \
+                day.strftime("%A %B %d, %Y") + "\n\n"
             output_string += print_output_timetable(timetable)
             try:
                 bot.editMessageText(msg_edited, output_string, parse_mode='HTML',
@@ -496,7 +501,6 @@ def on_callback_query(msg):
                 bot.answerCallbackQuery(query_id, text="SLOW DOWN!!")
 
                 pass
-
 
     except:
         traceback.print_exc()
@@ -515,18 +519,16 @@ def on_chat_message(msg):
 
         content_type, chat_type, chat_id = telepot.glance(msg)
         now = datetime.datetime.now()
-        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### MESSAGE = " + str(msg))
-        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### MESSAGE = " + str(msg))
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                     " ### MESSAGE = " + str(msg))
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+              " ### MESSAGE = " + str(msg))
         if content_type == "text":
 
             if msg["text"] == '/start':
                 users_mode[chat_id] = Mode.NORMAL
 
-                writer_lock.acquire()
-                with open(users_file, "w") as f:
-                    for u in users_mode.keys():
-                        f.writelines(str(u) + "\n")
-                writer_lock.release()
+                store_user(chat_id)
 
                 output_string = "Hi! Thanks for trying this bot!\n" + help_string
 
@@ -538,6 +540,7 @@ def on_chat_message(msg):
                     users_mode[chat_id] = Mode.PLAN
                 else:
                     users_mode[chat_id] = Mode.NORMAL
+                store_user(chat_id)
 
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                     int(accademic_year) + 1) + "</code>\n"
@@ -545,7 +548,6 @@ def on_chat_message(msg):
 
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                 reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
-
 
             elif msg["text"] == '/help':
 
@@ -560,6 +562,7 @@ def on_chat_message(msg):
                     users_mode[chat_id] = Mode.PLAN
                 else:
                     users_mode[chat_id] = Mode.NORMAL
+                store_user(chat_id)
 
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                     int(accademic_year) + 1) + "</code>\n"
@@ -570,6 +573,7 @@ def on_chat_message(msg):
 
             elif msg["text"] == MY_TIMETABLE:
                 users_mode[chat_id] = Mode.PLAN
+                store_user(chat_id)
 
                 now = datetime.datetime.now()
 
@@ -581,7 +585,8 @@ def on_chat_message(msg):
                 timetable = get_plan_timetable(now, plan)
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                     int(accademic_year) + 1) + "</code>\n"
-                output_string += emo_calendar + " " + now.strftime("%A %B %d, %Y") + "\n\n"
+                output_string += emo_calendar + " " + \
+                    now.strftime("%A %B %d, %Y") + "\n\n"
 
                 output_string += print_output_timetable(timetable)
 
@@ -589,10 +594,9 @@ def on_chat_message(msg):
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                 reply_markup=make_inline_timetable_keyboard(now))
 
-
-
             elif msg["text"] == MY_PLAN:
                 users_mode[chat_id] = Mode.PLAN
+                store_user(chat_id)
 
                 plan = load_user_plan(chat_id)
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
@@ -602,7 +606,6 @@ def on_chat_message(msg):
                 bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                 reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
-
 
             elif msg["text"] == DEL_PLAN:
 
@@ -614,6 +617,7 @@ def on_chat_message(msg):
             elif msg["text"] == "YES" and users_mode[chat_id] == Mode.DEL:
 
                 users_mode[chat_id] = Mode.NORMAL
+                store_user(chat_id)
 
                 if os.path.isfile(dir_plans_name + str(chat_id)):
                     os.remove(dir_plans_name + str(chat_id))
@@ -630,22 +634,25 @@ def on_chat_message(msg):
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                 reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
-
             elif msg["text"] == MAKE_PLAN:
                 users_mode[chat_id] = Mode.MAKE_PLAN
+                store_user(chat_id)
 
                 if not os.path.isfile(dir_plans_name + str(chat_id)):
                     plan = Plan()
                     store_user_plan(chat_id, plan)
 
-                output_string = "Find your teachings and add them to your study plan. Send " + END_PLAN + " when you have finished!"
+                output_string = "Find your teachings and add them to your study plan. Send " + \
+                    END_PLAN + " when you have finished!"
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                 reply_markup=make_area_keyboard(users_mode[chat_id]))
 
             elif msg["text"] == END_PLAN:
                 users_mode[chat_id] = Mode.PLAN
+                store_user(chat_id)
 
-                output_string = "Well done! Now you can use " + MY_PLAN + " to see your study plan and " + MY_TIMETABLE + " to get your lessons shedules!"
+                output_string = "Well done! Now you can use " + MY_PLAN + \
+                    " to see your study plan and " + MY_TIMETABLE + " to get your lessons shedules!"
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                 reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
@@ -656,6 +663,7 @@ def on_chat_message(msg):
                         users_mode[chat_id] = Mode.PLAN
                     else:
                         users_mode[chat_id] = Mode.NORMAL
+                store_user(chat_id)
 
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                     int(accademic_year) + 1) + "</code>\n"
@@ -672,11 +680,11 @@ def on_chat_message(msg):
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                 reply_markup=make_area_keyboard(users_mode[chat_id]))
 
-
             elif msg["text"] == NOTIFY_ON:
 
                 if os.path.isfile(dir_plans_name + str(chat_id)):
                     notified_users.add(chat_id)
+                    store_user(chat_id)
 
                     output_string = "Notifications enabled!"
 
@@ -689,11 +697,11 @@ def on_chat_message(msg):
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                     reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
-
             elif msg["text"] == NOTIFY_OFF:
 
                 if chat_id in notified_users:
                     notified_users.remove(chat_id)
+                    store_user(chat_id)
 
                     output_string = "Notifications disabled!"
 
@@ -711,17 +719,21 @@ def on_chat_message(msg):
                         users_mode[chat_id] = Mode.PLAN
                     else:
                         users_mode[chat_id] = Mode.NORMAL
+                    store_user(chat_id)
 
-                bot.sendMessage(chat_id, donation_string, parse_mode='HTML', reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
-    
+                bot.sendMessage(chat_id, donation_string, parse_mode='HTML',
+                                reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+
             elif msg["text"] == HELP:
                 if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
                     if os.path.isfile(dir_plans_name + str(chat_id)):
                         users_mode[chat_id] = Mode.PLAN
                     else:
                         users_mode[chat_id] = Mode.NORMAL
+                    store_user(chat_id)
 
-                bot.sendMessage(chat_id, help_string, parse_mode='HTML', reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                bot.sendMessage(chat_id, help_string, parse_mode='HTML',
+                                reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
 
             elif msg["text"] in all_courses_group_by_area.keys():
 
@@ -739,7 +751,8 @@ def on_chat_message(msg):
                     output_string = emo_url + " " + course.url
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML')
 
-                string_list = print_teachings_message(chat_id, course.corso_codice)
+                string_list = print_teachings_message(
+                    chat_id, course.corso_codice)
 
                 i = 0
                 output_string = ""
@@ -747,12 +760,11 @@ def on_chat_message(msg):
                     output_string += s
                     i += 1
                     if i % 20 == 0:
-                        bot.sendMessage(chat_id, output_string, parse_mode='HTML')
+                        bot.sendMessage(chat_id, output_string,
+                                        parse_mode='HTML')
                         output_string = ""
                 if output_string != "":
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML')
-
-
 
             elif msg["text"].startswith("/add_") and users_mode[chat_id] == Mode.MAKE_PLAN:
 
@@ -770,8 +782,8 @@ def on_chat_message(msg):
                     else:
                         output_string = teaching.materia_descrizione + " ALREADY IN YOUR STUDY PLAN"
 
-                    bot.sendMessage(chat_id, output_string, parse_mode='HTML', disable_notification=True)
-
+                    bot.sendMessage(chat_id, output_string,
+                                    parse_mode='HTML', disable_notification=True)
 
             elif msg["text"].startswith("/remove_"):
 
@@ -790,8 +802,8 @@ def on_chat_message(msg):
                 else:
                     output_string = teaching.materia_descrizione + " NOT IN YOUR STUDY PLAN"
 
-                bot.sendMessage(chat_id, output_string, parse_mode='HTML', disable_notification=True)
-
+                bot.sendMessage(chat_id, output_string,
+                                parse_mode='HTML', disable_notification=True)
 
             elif msg["text"].startswith("/schedule_"):
 
@@ -814,7 +826,8 @@ def on_chat_message(msg):
 
                     output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                         int(accademic_year) + 1) + "</code>\n"
-                    output_string += emo_calendar + " " + now.strftime("%A %B %d, %Y") + "\n\n"
+                    output_string += emo_calendar + " " + \
+                        now.strftime("%A %B %d, %Y") + "\n\n"
 
                     output_string += print_output_timetable(timetable)
 
@@ -822,17 +835,16 @@ def on_chat_message(msg):
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                     reply_markup=make_inline_keyboard(chat_id, now, teaching.componente_id))
 
-
             elif msg["text"].startswith("/url_"):
 
                 array = msg["text"].split("_")
                 componente_id = array[1]
 
                 if componente_id in all_teachings.keys():
-                    output_string = emo_url + " " + all_teachings[componente_id].url
+                    output_string = emo_url + " " + \
+                        all_teachings[componente_id].url
 
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML')
-
 
             else:
 
@@ -841,6 +853,7 @@ def on_chat_message(msg):
                         users_mode[chat_id] = Mode.PLAN
                     else:
                         users_mode[chat_id] = Mode.NORMAL
+                    store_user(chat_id)
 
                 output_string = emo_confused + " Sorry.. I don't understand.."
                 output_string += "\n\n" + help_string
@@ -854,6 +867,7 @@ def on_chat_message(msg):
                     users_mode[chat_id] = Mode.PLAN
                 else:
                     users_mode[chat_id] = Mode.NORMAL
+                store_user(chat_id)
 
             output_string = emo_confused + " Sorry.. I don't understand.."
             output_string += "\n\n" + help_string
@@ -862,7 +876,8 @@ def on_chat_message(msg):
     except:
         traceback.print_exc()
         now = datetime.datetime.now()
-        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                     " ### EXCEPTION = " + traceback.format_exc())
         output_string = emo_wrong + " Oh no! Something bad happend.."
         bot.sendMessage(chat_id, output_string,
                         reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
@@ -878,23 +893,29 @@ def check_table(table):
 
     now = datetime.datetime.now()
     if ok:
-        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### TABLE " + table + " PRESENT")
-        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### TABLE " + table + " PRESENT")
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                     " ### TABLE " + table + " PRESENT")
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+              " ### TABLE " + table + " PRESENT")
         return True
     else:
-        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### TABLE " + table + " NOT PRESENT")
-        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### TABLE " + table + " NOT PRESENT")
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                     " ### TABLE " + table + " NOT PRESENT")
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+              " ### TABLE " + table + " NOT PRESENT")
         return False
 
 
 def update():
     now = datetime.datetime.now()
     global accademic_year
-    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### RUNNING UPDATE")
+    logging.info("TIMESTAMP = " +
+                 now.strftime("%b %d %Y %H:%M:%S") + " ### RUNNING UPDATE")
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### RUNNING UPDATE")
 
     year = now.strftime("%Y")
-    update_day = datetime.datetime.strptime(year + "-08-15T00:00:00", "%Y-%m-%dT%H:%M:%S")
+    update_day = datetime.datetime.strptime(
+        year + "-08-15T00:00:00", "%Y-%m-%dT%H:%M:%S")
 
     ##### DEBUG #####
     # update_day = datetime.datetime.strptime(year + "-08-30T00:00:00", "%Y-%m-%dT%H:%M:%S")
@@ -904,8 +925,10 @@ def update():
     else:
         accademic_year = str(int(year) - 1)
 
-    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SET ACCADEMIC YEAR TO " + accademic_year)
-    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SET ACCADEMIC YEAR TO " + accademic_year)
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                 " ### SET ACCADEMIC YEAR TO " + accademic_year)
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+          " ### SET ACCADEMIC YEAR TO " + accademic_year)
 
     # check existence table
 
@@ -922,24 +945,6 @@ def update():
 
     check_table(orari_table)
 
-    writer_lock.acquire()
-
-    chat_id_to_store = set()
-
-    if os.path.isfile(users_file):
-        with open(users_file) as f:
-            for line in f:
-                chat_id = int(line.replace("'", "").strip())
-                chat_id_to_store.add(chat_id)
-
-    for u in users_mode.keys():
-        chat_id_to_store.add(u)
-
-    with open(users_file, "w") as f:
-        for u in chat_id_to_store:
-            f.writelines(str(u) + "\n")
-    writer_lock.release()
-
 
 def send_good_morning():
     for chat_id in notified_users:
@@ -951,7 +956,8 @@ def send_good_morning():
             timetable = get_plan_timetable(now, plan)
             output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                 int(accademic_year) + 1) + "</code>\n"
-            output_string += emo_calendar + " " + now.strftime("%A %B %d, %Y") + "\n\n"
+            output_string += emo_calendar + " " + \
+                now.strftime("%A %B %d, %Y") + "\n\n"
 
             output_string += print_output_timetable(timetable)
             if "NO LESSONS FOR TODAY" not in output_string:
@@ -971,14 +977,14 @@ def send_good_morning():
                 "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
 
 
-if os.path.isfile(users_file):
-    with open(users_file) as f:
-        for line in f:
-            chat_id = int(line.replace("'", "").strip())
-            if os.path.isfile(dir_plans_name + str(chat_id)):
-                users_mode[chat_id] = Mode.PLAN
-            else:
-                users_mode[chat_id] = Mode.NORMAL
+if os.path.isdir(dir_users_name):
+    for f in os.listdir(dir_users_name):
+        filename = os.fsdecode(f)
+        chat_id, mode, notification = load_user(filename)
+        users_mode[chat_id] = mode
+        if notification:
+            notified_users.add(chat_id)
+
 
 update()
 schedule.every().day.at("04:00").do(update)
@@ -987,7 +993,8 @@ schedule.every().thursday.at("08:45").do(send_good_morning)
 schedule.every().wednesday.at("08:45").do(send_good_morning)
 schedule.every().thursday.at("08:45").do(send_good_morning)
 schedule.every().friday.at("08:45").do(send_good_morning)
-MessageLoop(bot, {'chat': on_chat_message, 'callback_query': on_callback_query}).run_as_thread()
+MessageLoop(bot, {'chat': on_chat_message,
+                  'callback_query': on_callback_query}).run_as_thread()
 
 print('Listening ...')
 # Keep the program running.
