@@ -987,7 +987,7 @@ if os.path.isdir(dir_users_name):
 
 
 update()
-schedule.every().day.at("04:00").do(update)
+schedule.every().day.at("07:00").do(update)
 schedule.every().monday.at("08:45").do(send_good_morning)
 schedule.every().thursday.at("08:45").do(send_good_morning)
 schedule.every().wednesday.at("08:45").do(send_good_morning)
