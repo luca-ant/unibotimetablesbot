@@ -378,7 +378,8 @@ def make_courses_keyboard(area, mode):
         buttonLists.append(list())
 
     for i in range(0, len(all_courses_group_by_area[area]), 1):
-        buttonLists[i + 1].append(str(all_courses_group_by_area[area][i]))
+        c=all_courses_group_by_area[area][i]
+        buttonLists[i + 1].append(c.corso_codice +" - " + c.corso_descrizione[:50]  +" (" + c.sededidattica + ") - " + c.tipologia) 
 
     buttonLists[len(all_courses_group_by_area[area]) + 1].append(BACK_TO_AREAS)
     buttonLists[len(all_courses_group_by_area[area]) + 1].append(BACK_TO_MAIN)
@@ -397,7 +398,7 @@ def make_year_keyboard(corso_codice, mode):
         buttonLists.append(list())
 
     for i in range(0, c.durata, 1):
-        buttonLists[i + 1].append(str(c) + " YEAR " + str(i+1))
+        buttonLists[i + 1].append(c.corso_codice +" - " + c.corso_descrizione[:50]  +" (" + c.sededidattica + ")" + " - YEAR " + str(i+1))
 
     buttonLists[c.durata + 1].append(BACK_TO_AREAS)
     buttonLists[c.durata + 1].append(BACK_TO_MAIN)
@@ -852,6 +853,7 @@ def on_chat_message(msg):
 
                     output_string = emo_ay + " A.Y. <code>" + accademic_year + \
                         "/" + str(int(accademic_year) + 1) + "</code>\n"
+                    output_string += "<b>SELECTED COURSE:\n"+str(course)+"</b>\n\n"
                     output_string += "Choose your year!"
 
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML',  reply_markup=make_year_keyboard(
