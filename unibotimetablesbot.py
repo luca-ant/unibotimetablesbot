@@ -633,10 +633,6 @@ def on_chat_message(msg):
             elif msg["text"] == ALL_COURSES:
                 u = get_user(chat_id)
 
-                # if os.path.isfile(dir_plans_name + str(chat_id)):
-                #     users_mode[chat_id] = Mode.PLAN
-                # else:
-                #     users_mode[chat_id] = Mode.NORMAL
                 store_user(chat_id)
 
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
@@ -727,6 +723,8 @@ def on_chat_message(msg):
                 u = get_user(chat_id)
                 u.mode = Mode.PLAN
                 store_user(chat_id)
+                plan = load_user_plan(chat_id)
+                store_user_plan(chat_id, plan)
 
                 output_string = "Well done! Now you can use " + MY_PLAN + \
                     " to see your study plan and " + MY_TIMETABLE + " to get your lessons shedules!"
@@ -735,11 +733,6 @@ def on_chat_message(msg):
 
             elif msg["text"] == BACK_TO_MAIN:
                 check_user(chat_id)
-                # if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
-                #     if os.path.isfile(dir_plans_name + str(chat_id)):
-                #         users_mode[chat_id] = Mode.PLAN
-                #     else:
-                #         users_mode[chat_id] = Mode.NORMAL
                 store_user(chat_id)
 
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
@@ -795,22 +788,13 @@ def on_chat_message(msg):
 
             elif msg["text"] == DONATION:
                 check_user(chat_id)
-                # if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
-                #     if os.path.isfile(dir_plans_name + str(chat_id)):
-                #         users_mode[chat_id] = Mode.PLAN
-                #     else:
-                #         users_mode[chat_id] = Mode.NORMAL
                 store_user(chat_id)
 
                 bot.sendMessage(chat_id, donation_string, parse_mode='HTML',
                                 reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == HELP:
-                # if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
-                #     if os.path.isfile(dir_plans_name + str(chat_id)):
-                #         users_mode[chat_id] = Mode.PLAN
-                #     else:
-                #         users_mode[chat_id] = Mode.NORMAL
+
                 check_user(chat_id)
                 store_user(chat_id)
 
@@ -818,11 +802,6 @@ def on_chat_message(msg):
                                 reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == PRIVACY:
-                # if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
-                #     if os.path.isfile(dir_plans_name + str(chat_id)):
-                #         users_mode[chat_id] = Mode.PLAN
-                #     else:
-                #         users_mode[chat_id] = Mode.NORMAL
                 check_user(chat_id)
                 store_user(chat_id)
 
@@ -959,11 +938,6 @@ def on_chat_message(msg):
 
             else:
                 check_user(chat_id)
-                # if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
-                #     if os.path.isfile(dir_plans_name + str(chat_id)):
-                #         users_mode[chat_id] = Mode.PLAN
-                #     else:
-                #         users_mode[chat_id] = Mode.NORMAL
                 store_user(chat_id)
 
                 output_string = emo_confused + " Sorry.. I don't understand.."
@@ -973,11 +947,6 @@ def on_chat_message(msg):
                                 reply_markup=make_main_keyboard(chat_id))
         else:
 
-            # if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
-            #     if os.path.isfile(dir_plans_name + str(chat_id)):
-            #         users_mode[chat_id] = Mode.PLAN
-            #     else:
-            #         users_mode[chat_id] = Mode.NORMAL
             check_user(chat_id)
             store_user(chat_id)
 
