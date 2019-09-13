@@ -18,14 +18,30 @@ emo_gps = u'\U0001F4CD'
 emo_help = u'\U00002139'
 
 
+class Mode(Enum):
+    NORMAL = 1
+    MAKE_PLAN = 2
+    DEL = 3
+    PLAN = 4
+
+
+class User:
+    def __init__(self, chat_id, mode=Mode.NORMAL, notificated=False):
+        self.chat_id = chat_id
+        self.mode = mode
+        self.notificated = notificated
+
+
 class Teaching:
-    def __init__(self, corso_codice, materia_codice, materia_descrizione, docente_nome, componente_id, url):
+    def __init__(self, corso_codice, materia_codice, materia_descrizione, docente_nome, componente_id, url, anno, crediti):
         self.componente_id = componente_id
         self.corso_codice = corso_codice
         self.materia_codice = materia_codice
         self.docente_nome = docente_nome
         self.url = url
         self.materia_descrizione = materia_descrizione
+        self.anno = int(anno)
+        self.crediti = crediti
 
     def __str__(self):
         result = self.materia_codice + " - <b>" + self.materia_descrizione + "</b>"
@@ -37,7 +53,7 @@ class Teaching:
 
 class Course:
 
-    def __init__(self, corso_codice, corso_descrizione, tipologia, sededidattica, ambiti, url):
+    def __init__(self, corso_codice, corso_descrizione, tipologia, sededidattica, ambiti, url, durata):
         self.url = url
         self.ambiti = ambiti
         self.tipologia = tipologia
@@ -45,6 +61,7 @@ class Course:
         self.sededidattica = sededidattica
         self.corso_codice = corso_codice
         self.teachings = list()
+        self.durata = int(durata)
 
     def add_teaching(self, t):
         self.teachings.append(t)
@@ -122,11 +139,14 @@ class Aula:
 
 class Lesson(Teaching):
     def __init__(self, corso_codice, materia_codice, materia_descrizione, docente_nome, componente_id, url, inizio,
-                 fine):
-        Teaching.__init__(self, corso_codice, materia_codice, materia_descrizione, docente_nome, componente_id, url)
+                 fine, anno, crediti):
+        Teaching.__init__(self, corso_codice, materia_codice,
+                          materia_descrizione, docente_nome, componente_id, url, anno, crediti)
         self.inizio = inizio
         self.fine = fine
         self.lista_aule = list()
+        self.anno = anno
+        self.crediti = crediti
 
     def add_aula(self, a):
         self.lista_aule.append(a)
@@ -145,6 +165,9 @@ class Timetable:
             result += l.materia_codice + " - <b>" + l.materia_descrizione + "</b>"
             if l.docente_nome != "":
                 result += " (<i>" + l.docente_nome + "</i>)"
+            if l.crediti != None and l.crediti != "":
+                result += " - " + l.crediti + " CFU"
+
             result += "\n"
 
             result += emo_calendar + " " + l.inizio.strftime("%d/%m/%Y")
@@ -166,10 +189,3 @@ class Timetable:
             result += "\n"
 
         return result
-
-
-class Mode(Enum):
-    NORMAL = 1
-    MAKE_PLAN = 2
-    DEL = 3
-    PLAN = 4

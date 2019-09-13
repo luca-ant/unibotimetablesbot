@@ -14,7 +14,7 @@ from telepot.loop import MessageLoop
 from telepot.namedtuple import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardMarkup, \
     InlineKeyboardButton
 from threading import Lock
-from model import Course, Teaching, Mode, Plan, Lesson, Aula, Timetable
+from model import Course, Teaching, Mode, Plan, Lesson, Aula, Timetable, User
 
 token = os.environ['BOT_TOKEN']
 
@@ -45,6 +45,7 @@ emo_404 = u'\U00000034' + u'\U000020E3' + u'\U00000030' + \
 emo_not_on = u'\U0001F514'
 emo_not_off = u'\U0001F515'
 emo_wrong = u'\U0001F914'
+emo_privacy = u'\U0001F50F'
 
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
@@ -58,6 +59,7 @@ BACK_TO_AREAS = emo_back + " " + "BACK TO AREAS"
 BACK_TO_MAIN = emo_back + " " + "BACK TO MAIN"
 DONATION = emo_money + " " + "DONATION"
 HELP = emo_help + " " + "HELP"
+PRIVACY = emo_privacy + " " + "PRIVACY POLICY"
 
 donation_string = emo_money + \
     " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
@@ -65,6 +67,7 @@ help_string = "USE:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n"
     " to receive a notification every morning\n\n" + DEL_PLAN + " to delete your plan" + \
     "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail.\n\n<b>REMIND! All data are updated once a day. For last update please check on official Unibo site! (Especially for the first weeks)</b>"
 
+privacy_string = "<b>In order to provide you the service, this bot collects user data like your study plan and your preferences (ON/OFF notification...). \nUsing this bot you allow your data to be saved.</b>"
 current_dir = os.getcwd() + "/"
 
 logging.basicConfig(filename=current_dir +
@@ -75,14 +78,15 @@ logging.info("### WORK DIR " + current_dir)
 dir_plans_name = current_dir + 'plans/'
 dir_users_name = current_dir + 'users/'
 
-writer_lock = Lock()
+# writer_lock = Lock()
 
 all_courses = dict()
 all_aule = dict()
 all_teachings = dict()
 all_courses_group_by_area = collections.defaultdict(list)
-users_mode = collections.defaultdict(Mode)
-notified_users = set()
+
+users = dict()
+
 
 accademic_year = ""
 
@@ -129,8 +133,13 @@ def get_all_courses():
     url = "https://dati.unibo.it/api/action/datastore_search_sql?sql="
     corsi_table = "corsi_" + accademic_year + "_it"
     insegnamenti_table = "insegnamenti_" + accademic_year + "_it"
-    #    sql_string = "SELECT "+ insegnamenti_table + ".docente_nome, "+ insegnamenti_table + ".materia_codice, "+ insegnamenti_table + ".materia_descrizione, " + corsi_table + ".corso_codice, "+ insegnamenti_table + ".url, "+ corsi_table + ".tipologia, "  + corsi_table+ ".corso_descrizione, "+ corsi_table+ ".sededidattica"+" FROM " + corsi_table + ", " + insegnamenti_table + " WHERE " + corsi_table + ".corso_codice=" + insegnamenti_table + ".corso_codice"
-    sql_insegnamenti = "SELECT * FROM " + insegnamenti_table
+    curricula_table = "curriculadettagli_"+accademic_year+"_it"
+
+    sql_insegnamenti = "SELECT " + insegnamenti_table + ".*, " + curricula_table + ".anno," + curricula_table+".insegnamento_crediti" + " FROM " + curricula_table + \
+        ", " + insegnamenti_table + " WHERE " + curricula_table + \
+        ".componente_id=" + insegnamenti_table + ".componente_id"
+
+    # sql_insegnamenti = "SELECT * FROM " + insegnamenti_table
     sql_corsi = "SELECT * FROM " + corsi_table
 
     json_corsi = requests.get(url + sql_corsi).text
@@ -152,14 +161,14 @@ def get_all_courses():
 
     for c in corsi:
         course = Course(c["corso_codice"], c["corso_descrizione"], c["tipologia"], c["sededidattica"], c["ambiti"],
-                        c["url"])
+                        c["url"], c["durata"])
         all_courses[course.corso_codice] = course
         all_courses_group_by_area[course.ambiti].append(course)
 
     for i in insegnamenti:
         teaching = Teaching(i["corso_codice"], i["materia_codice"], i["materia_descrizione"], i["docente_nome"],
                             i["componente_id"],
-                            i["url"])
+                            i["url"], i["anno"], i["insegnamento_crediti"])
         all_teachings[i["componente_id"]] = teaching
         try:
             all_courses[teaching.corso_codice].add_teaching(teaching)
@@ -211,7 +220,7 @@ def get_plan_timetable(day, plan):
                            t.url,
                            datetime.datetime.strptime(
                                o["inizio"], "%Y-%m-%dT%H:%M:%S"),
-                           datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"))
+                           datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti)
                 for code in o["aula_codici"].split():
                     a = all_aule[code]
                     l.add_aula(a)
@@ -231,8 +240,16 @@ def load_user_plan(chat_id):
             for t in plan_dict["teachings"]:
                 try:
                     teaching = Teaching(t["corso_codice"], t["materia_codice"], t["materia_descrizione"],
-                                        t["docente_nome"], t["componente_id"], t["url"])
+                                        t["docente_nome"], t["componente_id"], t["url"], t["anno"], t["crediti"])
                     plan.add_teaching(teaching)
+
+                # to recover plans from componente_id
+                except KeyError:
+
+                    teaching = all_teachings[t["componente_id"]]
+                    plan.add_teaching(teaching)
+
+                #####
 
                 except:
                     traceback.print_exc()
@@ -245,15 +262,35 @@ def load_user_plan(chat_id):
         return None
 
 
+def get_user(chat_id):
+    if chat_id in users.keys():
+        return users[chat_id]
+    else:
+        u = User(chat_id)
+        users[chat_id] = u
+        return u
+
+
 def store_user(chat_id):
     if not os.path.isdir(dir_users_name):
         os.makedirs(dir_users_name)
+
+    u = get_user(chat_id)
+
     with open(dir_users_name + str(chat_id), 'w') as outfile:
         user_dict = {}
-        user_dict["chat_id"] = chat_id
-        user_dict["mode"] = users_mode[chat_id].name
-        user_dict["notification"] = chat_id in notified_users
+        user_dict["chat_id"] = u.chat_id
+        user_dict["mode"] = u.mode.name
+        user_dict["notification"] = u.notificated
         outfile.write(json.dumps(user_dict))
+
+
+def check_user(chat_id):
+    u = get_user(chat_id)
+    if os.path.isfile(dir_plans_name + str(chat_id)):
+        u.mode = Mode.PLAN
+    else:
+        u.mode = Mode.NORMAL
 
 
 def load_user(chat_id):
@@ -261,7 +298,17 @@ def load_user(chat_id):
         with open(dir_users_name + str(chat_id), 'r') as f:
             user_dict = json.load(f)
 
-    return user_dict["chat_id"], Mode[user_dict["mode"]], user_dict["notification"]
+    u = User(chat_id)
+    for key in user_dict.keys():
+        if key == 'chat_id':
+            pass
+        elif key == 'mode':
+            u.mode = Mode[user_dict["mode"]]
+
+        elif key == 'notification':
+            u.notificated = user_dict["notification"]
+
+    return u
 
 
 def store_user_plan(chat_id, plan):
@@ -277,21 +324,18 @@ def store_user_plan(chat_id, plan):
         outfile.write(json.dumps(plan, default=lambda x: x.__dict__))
 
 
-def make_main_keyboard(chat_id, mode):
-    buttonLists = list()
+def make_main_keyboard(chat_id):
 
-    buttonLists.append(list())
-    buttonLists.append(list())
-    buttonLists.append(list())
-    buttonLists.append(list())
-    buttonLists.append(list())
-    buttonLists.append(list())
-    buttonLists.append(list())
+    u = get_user(chat_id)
+
+    buttonLists = list()
+    for i in range(8):
+        buttonLists.append(list())
 
     buttonLists[0].append(ALL_COURSES)
     buttonLists[1].append(MAKE_PLAN)
-    if mode != Mode.NORMAL:
-        if chat_id in notified_users:
+    if u.mode != Mode.NORMAL:
+        if u.notificated:
             buttonLists[2].append(NOTIFY_OFF)
         else:
             buttonLists[2].append(NOTIFY_ON)
@@ -301,6 +345,7 @@ def make_main_keyboard(chat_id, mode):
 
     buttonLists[6].append(HELP)
     buttonLists[6].append(DONATION)
+    buttonLists[7].append(PRIVACY)
 
     keyboard = ReplyKeyboardMarkup(keyboard=buttonLists, resize_keyboard=True)
     return keyboard
@@ -341,12 +386,34 @@ def make_courses_keyboard(area, mode):
     return keyboard
 
 
+def make_year_keyboard(corso_codice, mode):
+    buttonLists = list()
+    c = all_courses[corso_codice]
+
+    for i in range(0, c.durata + 2, 1):
+        buttonLists.append(list())
+
+    for i in range(0, c.durata, 1):
+        buttonLists[i + 1].append(str(c) + " YEAR " + str(i+1))
+
+    buttonLists[c.durata + 1].append(BACK_TO_AREAS)
+    buttonLists[c.durata + 1].append(BACK_TO_MAIN)
+    if mode == Mode.MAKE_PLAN:
+        buttonLists[0].append(END_PLAN)
+
+    keyboard = ReplyKeyboardMarkup(keyboard=buttonLists, resize_keyboard=True)
+    return keyboard
+
+
 def print_plan(chat_id, plan):
     result = emo_plan + " YOUR STUDY PLAN" + "\n\n"
     for t in plan.teachings:
         result += t.materia_codice + " - <b>" + t.materia_descrizione + "</b>"
         if t.docente_nome != "":
             result += " (<i>" + t.docente_nome + "</i>)"
+        if t.crediti != None and t.crediti != "":
+            result += " - "+t.crediti + " CFU "
+
         result += " [ /remove_" + t.componente_id + " ]"
         if t.url != "":
             result += " [ /url_" + t.componente_id + " ]"
@@ -356,35 +423,43 @@ def print_plan(chat_id, plan):
     return result
 
 
-def print_teachings_message(chat_id, corso_codice):
+def print_teachings_message(chat_id, corso_codice, year):
     result = list()
-    mode = users_mode[chat_id]
+    mode = get_user(chat_id).mode
     if mode == Mode.NORMAL or mode == Mode.PLAN:
 
         for t in all_courses[corso_codice].teachings:
-            t_string = t.materia_codice + " - <b>" + t.materia_descrizione + "</b>"
-            if t.docente_nome != "":
-                t_string += " (<i>" + t.docente_nome + "</i>)"
-            t_string += " [ /schedule_" + t.componente_id + " ]"
-            if t.url != "":
-                t_string += " [ /url_" + t.componente_id + " ]"
+            if t.anno == year:
+                t_string = t.materia_codice + " - <b>" + t.materia_descrizione + "</b>"
+                if t.docente_nome != "":
+                    t_string += " (<i>" + t.docente_nome + "</i>)"
+                if t.crediti != None and t.crediti != "":
+                    t_string += " - " + t.crediti + " CFU "
 
-            t_string += "\n\n"
-            result.append(t_string)
+                t_string += " [ /schedule_" + t.componente_id + " ]"
+                if t.url != "":
+                    t_string += " [ /url_" + t.componente_id + " ]"
+
+                t_string += "\n\n"
+                result.append(t_string)
 
     elif mode == Mode.MAKE_PLAN:
 
         for t in all_courses[corso_codice].teachings:
-            t_string = t.materia_codice + " - <b>" + t.materia_descrizione + "</b>"
-            if t.docente_nome != "":
-                t_string += " (<i>" + t.docente_nome + "</i>)"
+            if t.anno == year:
 
-            t_string += " [ /add_" + t.componente_id + " ]"
-            if t.url != "":
-                t_string += " [ /url_" + t.componente_id + " ]"
+                t_string = t.materia_codice + " - <b>" + t.materia_descrizione + "</b>"
+                if t.docente_nome != "":
+                    t_string += " (<i>" + t.docente_nome + "</i>)"
+                if t.crediti != None and t.crediti != "":
+                    t_string += " - "+t.crediti + " CFU "
 
-            t_string += "\n\n"
-            result.append(t_string)
+                t_string += " [ /add_" + t.componente_id + " ]"
+                if t.url != "":
+                    t_string += " [ /url_" + t.componente_id + " ]"
+
+                t_string += "\n\n"
+                result.append(t_string)
 
     else:
         result.clear()
@@ -511,7 +586,7 @@ def on_callback_query(msg):
         output_string = emo_wrong + " Oh no! Something bad happend.."
 
         bot.sendMessage(chat_id, output_string,
-                        reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                        reply_markup=make_main_keyboard(chat_id))
 
 
 def on_chat_message(msg):
@@ -526,20 +601,17 @@ def on_chat_message(msg):
         if content_type == "text":
 
             if msg["text"] == '/start':
-                users_mode[chat_id] = Mode.NORMAL
+                get_user(chat_id).mode = Mode.NORMAL
 
                 store_user(chat_id)
 
                 output_string = "Hi! Thanks for trying this bot!\n" + help_string
 
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                                reply_markup=make_main_keyboard(chat_id))
 
-            elif chat_id not in users_mode.keys():
-                if os.path.isfile(dir_plans_name + str(chat_id)):
-                    users_mode[chat_id] = Mode.PLAN
-                else:
-                    users_mode[chat_id] = Mode.NORMAL
+            elif chat_id not in users.keys():
+                check_user(chat_id)
                 store_user(chat_id)
 
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
@@ -547,21 +619,22 @@ def on_chat_message(msg):
                 output_string += "Choose your action!"
 
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                                reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == '/help':
 
                 output_string = help_string
 
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                                reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == ALL_COURSES:
+                u = get_user(chat_id)
 
-                if os.path.isfile(dir_plans_name + str(chat_id)):
-                    users_mode[chat_id] = Mode.PLAN
-                else:
-                    users_mode[chat_id] = Mode.NORMAL
+                # if os.path.isfile(dir_plans_name + str(chat_id)):
+                #     users_mode[chat_id] = Mode.PLAN
+                # else:
+                #     users_mode[chat_id] = Mode.NORMAL
                 store_user(chat_id)
 
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
@@ -569,10 +642,10 @@ def on_chat_message(msg):
                 output_string += "Choose your area!"
 
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_area_keyboard(users_mode[chat_id]))
+                                reply_markup=make_area_keyboard(u.mode))
 
             elif msg["text"] == MY_TIMETABLE:
-                users_mode[chat_id] = Mode.PLAN
+                get_user(chat_id).mode = Mode.PLAN
                 store_user(chat_id)
 
                 now = datetime.datetime.now()
@@ -595,7 +668,7 @@ def on_chat_message(msg):
                                 reply_markup=make_inline_timetable_keyboard(now))
 
             elif msg["text"] == MY_PLAN:
-                users_mode[chat_id] = Mode.PLAN
+                get_user(chat_id).mode = Mode.PLAN
                 store_user(chat_id)
 
                 plan = load_user_plan(chat_id)
@@ -605,18 +678,18 @@ def on_chat_message(msg):
                 output_string += print_plan(chat_id, plan)
                 bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                                reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == DEL_PLAN:
 
-                users_mode[chat_id] = Mode.DEL
+                get_user(chat_id).mode = Mode.DEL
 
                 output_string = "Are you sure? Send \"<b>YES</b>\" to confirm or \"<b>NO</b>\" to cancel (without quotes)"
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML')
 
-            elif msg["text"] == "YES" and users_mode[chat_id] == Mode.DEL:
+            elif msg["text"] == "YES" and get_user(chat_id).mode == Mode.DEL:
 
-                users_mode[chat_id] = Mode.NORMAL
+                get_user(chat_id).mode = Mode.NORMAL
                 store_user(chat_id)
 
                 if os.path.isfile(dir_plans_name + str(chat_id)):
@@ -624,18 +697,19 @@ def on_chat_message(msg):
 
                 output_string = "Your study plan was deleted!"
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                                reply_markup=make_main_keyboard(chat_id))
 
-            elif msg["text"] == "NO" and users_mode[chat_id] == Mode.DEL:
-                users_mode[chat_id] = Mode.PLAN
+            elif msg["text"] == "NO" and get_user(chat_id).mode == Mode.DEL:
+                get_user(chat_id).mode = Mode.PLAN
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                     int(accademic_year) + 1) + "</code>\n"
                 output_string += "Choose your action!"
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                                reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == MAKE_PLAN:
-                users_mode[chat_id] = Mode.MAKE_PLAN
+                u = get_user(chat_id)
+                u.mode = Mode.MAKE_PLAN
                 store_user(chat_id)
 
                 if not os.path.isfile(dir_plans_name + str(chat_id)):
@@ -645,24 +719,25 @@ def on_chat_message(msg):
                 output_string = "Find your teachings and add them to your study plan. Send " + \
                     END_PLAN + " when you have finished!"
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_area_keyboard(users_mode[chat_id]))
+                                reply_markup=make_area_keyboard(u.mode))
 
             elif msg["text"] == END_PLAN:
-                users_mode[chat_id] = Mode.PLAN
+                u = get_user(chat_id)
+                u.mode = Mode.PLAN
                 store_user(chat_id)
 
                 output_string = "Well done! Now you can use " + MY_PLAN + \
                     " to see your study plan and " + MY_TIMETABLE + " to get your lessons shedules!"
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                                reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == BACK_TO_MAIN:
-
-                if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
-                    if os.path.isfile(dir_plans_name + str(chat_id)):
-                        users_mode[chat_id] = Mode.PLAN
-                    else:
-                        users_mode[chat_id] = Mode.NORMAL
+                check_user(chat_id)
+                # if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
+                #     if os.path.isfile(dir_plans_name + str(chat_id)):
+                #         users_mode[chat_id] = Mode.PLAN
+                #     else:
+                #         users_mode[chat_id] = Mode.NORMAL
                 store_user(chat_id)
 
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
@@ -670,103 +745,137 @@ def on_chat_message(msg):
                 output_string += "Choose your action!"
 
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
-            elif msg["text"] == BACK_TO_AREAS:
+                                reply_markup=make_main_keyboard(chat_id))
 
+            elif msg["text"] == BACK_TO_AREAS:
+                u = get_user(chat_id)
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                     int(accademic_year) + 1) + "</code>\n"
                 output_string += "Choose your area!"
 
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_area_keyboard(users_mode[chat_id]))
+                                reply_markup=make_area_keyboard(u.mode))
 
             elif msg["text"] == NOTIFY_ON:
+                u = get_user(chat_id)
 
                 if os.path.isfile(dir_plans_name + str(chat_id)):
-                    notified_users.add(chat_id)
+                    u.notificated = True
                     store_user(chat_id)
 
                     output_string = "Notifications enabled!"
 
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                    reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                                    reply_markup=make_main_keyboard(chat_id))
                 else:
 
                     output_string = "Create a study plan before!"
 
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                    reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                                    reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == NOTIFY_OFF:
+                u = get_user(chat_id)
 
-                if chat_id in notified_users:
-                    notified_users.remove(chat_id)
+                if u.notificated:
+                    u.notificated = False
                     store_user(chat_id)
 
                     output_string = "Notifications disabled!"
 
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                    reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                                    reply_markup=make_main_keyboard(chat_id))
                 else:
                     output_string = "Notifications already disabled!"
 
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                    reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                                    reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == DONATION:
-                if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
-                    if os.path.isfile(dir_plans_name + str(chat_id)):
-                        users_mode[chat_id] = Mode.PLAN
-                    else:
-                        users_mode[chat_id] = Mode.NORMAL
-                    store_user(chat_id)
+                check_user(chat_id)
+                # if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
+                #     if os.path.isfile(dir_plans_name + str(chat_id)):
+                #         users_mode[chat_id] = Mode.PLAN
+                #     else:
+                #         users_mode[chat_id] = Mode.NORMAL
+                store_user(chat_id)
 
                 bot.sendMessage(chat_id, donation_string, parse_mode='HTML',
-                                reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                                reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == HELP:
-                if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
-                    if os.path.isfile(dir_plans_name + str(chat_id)):
-                        users_mode[chat_id] = Mode.PLAN
-                    else:
-                        users_mode[chat_id] = Mode.NORMAL
-                    store_user(chat_id)
+                # if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
+                #     if os.path.isfile(dir_plans_name + str(chat_id)):
+                #         users_mode[chat_id] = Mode.PLAN
+                #     else:
+                #         users_mode[chat_id] = Mode.NORMAL
+                check_user(chat_id)
+                store_user(chat_id)
 
                 bot.sendMessage(chat_id, help_string, parse_mode='HTML',
-                                reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                                reply_markup=make_main_keyboard(chat_id))
+
+            elif msg["text"] == PRIVACY:
+                # if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
+                #     if os.path.isfile(dir_plans_name + str(chat_id)):
+                #         users_mode[chat_id] = Mode.PLAN
+                #     else:
+                #         users_mode[chat_id] = Mode.NORMAL
+                check_user(chat_id)
+                store_user(chat_id)
+
+                bot.sendMessage(chat_id, privacy_string, parse_mode='HTML',
+                                reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] in all_courses_group_by_area.keys():
+                u = get_user(chat_id)
 
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                     int(accademic_year) + 1) + "</code>\n"
                 output_string += "Choose your course!"
 
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_courses_keyboard(msg["text"], users_mode[chat_id]))
+                                reply_markup=make_courses_keyboard(msg["text"], u.mode))
 
             elif msg["text"].split()[0] in all_courses.keys():
-
                 course = all_courses[msg["text"].split()[0]]
-                if course.url != "":
-                    output_string = emo_url + " " + course.url
-                    bot.sendMessage(chat_id, output_string, parse_mode='HTML')
 
-                string_list = print_teachings_message(
-                    chat_id, course.corso_codice)
+                try:
 
-                i = 0
-                output_string = ""
-                for s in string_list:
-                    output_string += s
-                    i += 1
-                    if i % 20 == 0:
+                    year = int(msg["text"].split()[-1])
+
+                    if course.url != "":
+                        output_string = emo_url + " " + course.url
                         bot.sendMessage(chat_id, output_string,
                                         parse_mode='HTML')
-                        output_string = ""
-                if output_string != "":
-                    bot.sendMessage(chat_id, output_string, parse_mode='HTML')
 
-            elif msg["text"].startswith("/add_") and users_mode[chat_id] == Mode.MAKE_PLAN:
+                    string_list = print_teachings_message(
+                        chat_id, course.corso_codice, year)
+
+                    i = 0
+                    output_string = "<b>TEACHINGS " + \
+                        str(year) + " YEAR</b>\n\n"
+                    for s in string_list:
+                        output_string += s
+                        i += 1
+                        if i % 20 == 0:
+                            bot.sendMessage(chat_id, output_string,
+                                            parse_mode='HTML')
+                            output_string = ""
+                    if output_string != "":
+                        bot.sendMessage(chat_id, output_string,
+                                        parse_mode='HTML')
+
+                except ValueError:
+
+                    output_string = emo_ay + " A.Y. <code>" + accademic_year + \
+                        "/" + str(int(accademic_year) + 1) + "</code>\n"
+                    output_string += "Choose your year!"
+
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML',  reply_markup=make_year_keyboard(
+                        course.corso_codice, get_user(chat_id).mode))
+
+            elif msg["text"].startswith("/add_") and get_user(chat_id).mode == Mode.MAKE_PLAN:
 
                 array = msg["text"].split("_")
                 componente_id = array[1]
@@ -847,32 +956,33 @@ def on_chat_message(msg):
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML')
 
             else:
-
-                if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
-                    if os.path.isfile(dir_plans_name + str(chat_id)):
-                        users_mode[chat_id] = Mode.PLAN
-                    else:
-                        users_mode[chat_id] = Mode.NORMAL
-                    store_user(chat_id)
+                check_user(chat_id)
+                # if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
+                #     if os.path.isfile(dir_plans_name + str(chat_id)):
+                #         users_mode[chat_id] = Mode.PLAN
+                #     else:
+                #         users_mode[chat_id] = Mode.NORMAL
+                store_user(chat_id)
 
                 output_string = emo_confused + " Sorry.. I don't understand.."
                 output_string += "\n\n" + help_string
 
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                                reply_markup=make_main_keyboard(chat_id))
         else:
 
-            if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
-                if os.path.isfile(dir_plans_name + str(chat_id)):
-                    users_mode[chat_id] = Mode.PLAN
-                else:
-                    users_mode[chat_id] = Mode.NORMAL
-                store_user(chat_id)
+            # if users_mode[chat_id] != Mode.PLAN and users_mode[chat_id] != Mode.NORMAL:
+            #     if os.path.isfile(dir_plans_name + str(chat_id)):
+            #         users_mode[chat_id] = Mode.PLAN
+            #     else:
+            #         users_mode[chat_id] = Mode.NORMAL
+            check_user(chat_id)
+            store_user(chat_id)
 
             output_string = emo_confused + " Sorry.. I don't understand.."
             output_string += "\n\n" + help_string
             bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                            reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                            reply_markup=make_main_keyboard(chat_id))
     except:
         traceback.print_exc()
         now = datetime.datetime.now()
@@ -880,7 +990,7 @@ def on_chat_message(msg):
                      " ### EXCEPTION = " + traceback.format_exc())
         output_string = emo_wrong + " Oh no! Something bad happend.."
         bot.sendMessage(chat_id, output_string,
-                        reply_markup=make_main_keyboard(chat_id, users_mode[chat_id]))
+                        reply_markup=make_main_keyboard(chat_id))
 
 
 def check_table(table):
@@ -947,28 +1057,31 @@ def update():
 
 
 def send_good_morning():
-    for chat_id in notified_users:
+    for chat_id in users.keys():
         try:
-            now = datetime.datetime.now()
+            u = get_user(chat_id)
 
-            plan = load_user_plan(chat_id)
+            if u.notificated:
+                now = datetime.datetime.now()
 
-            timetable = get_plan_timetable(now, plan)
-            output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
-                int(accademic_year) + 1) + "</code>\n"
-            output_string += emo_calendar + " " + \
-                now.strftime("%A %B %d, %Y") + "\n\n"
+                plan = load_user_plan(chat_id)
 
-            output_string += print_output_timetable(timetable)
-            if "NO LESSONS FOR TODAY" not in output_string:
-                logging.info(
-                    "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SENDING GOOD MORNING TO " + str(chat_id))
-                print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + "  ### SENDING GOOD MORNING TO " + str(
-                    chat_id))
+                timetable = get_plan_timetable(now, plan)
+                output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
+                    int(accademic_year) + 1) + "</code>\n"
+                output_string += emo_calendar + " " + \
+                    now.strftime("%A %B %d, %Y") + "\n\n"
 
-                # bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
-                bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_inline_timetable_keyboard(now))
+                output_string += print_output_timetable(timetable)
+                if "NO LESSONS FOR TODAY" not in output_string:
+                    logging.info(
+                        "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SENDING GOOD MORNING TO " + str(chat_id))
+                    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + "  ### SENDING GOOD MORNING TO " + str(
+                        chat_id))
+
+                    # bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML',
+                                    reply_markup=make_inline_timetable_keyboard(now))
 
         except:
             traceback.print_exc()
@@ -980,10 +1093,8 @@ def send_good_morning():
 if os.path.isdir(dir_users_name):
     for f in os.listdir(dir_users_name):
         filename = os.fsdecode(f)
-        chat_id, mode, notification = load_user(filename)
-        users_mode[chat_id] = mode
-        if notification:
-            notified_users.add(chat_id)
+        u = load_user(int(filename))
+        users[u.chat_id] = u
 
 
 update()
