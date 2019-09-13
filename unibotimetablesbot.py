@@ -166,14 +166,15 @@ def get_all_courses():
         all_courses_group_by_area[course.ambiti].append(course)
 
     for i in insegnamenti:
-        teaching = Teaching(i["corso_codice"], i["materia_codice"], i["materia_descrizione"], i["docente_nome"],
-                            i["componente_id"],
-                            i["url"], i["anno"], i["insegnamento_crediti"])
-        all_teachings[i["componente_id"]] = teaching
-        try:
-            all_courses[teaching.corso_codice].add_teaching(teaching)
-        except KeyError:
-            pass
+        if "TIROCINIO" not in i['materia_descrizione'].upper():
+            teaching = Teaching(i["corso_codice"], i["materia_codice"], i["materia_descrizione"], i["docente_nome"],
+                                i["componente_id"],
+                                i["url"], i["anno"], i["insegnamento_crediti"])
+            all_teachings[i["componente_id"]] = teaching
+            try:
+                all_courses[teaching.corso_codice].add_teaching(teaching)
+            except KeyError:
+                pass
 
 
 def get_plan_timetable(day, plan):
