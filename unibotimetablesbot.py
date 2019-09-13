@@ -245,9 +245,11 @@ def load_user_plan(chat_id):
 
                 # to recover plans from componente_id
                 except KeyError:
-
-                    teaching = all_teachings[t["componente_id"]]
-                    plan.add_teaching(teaching)
+                    try:
+                        teaching = all_teachings[t["componente_id"]]
+                        plan.add_teaching(teaching)
+                    except:
+                        pass
 
                 #####
 
