@@ -63,13 +63,15 @@ PRIVACY = emo_privacy + " " + "PRIVACY POLICY"
 
 donation_string = emo_money + \
     " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
-help_string = "USE:\n\n" + ALL_COURSES + " to see all teachings' timetables\n\n" + MAKE_PLAN + " to build your study plan\n\nThen you can use:\n\n" + MY_PLAN + " to see your study plan\n\n" + MY_TIMETABLE + " to get your personal lesson's schedules\n\n" + NOTIFY_ON + \
+
+help_string = "This bot helps you to get your personal timetable of Unibo lessons. First of all <b>you need to make your study plan</b> by pressing " + MAKE_PLAN+" and then you have to add your teachings. After that by simply pressing " + MY_TIMETABLE+" you get your personal  timetable for today!\n\n<b>USE:</b>\n\n" + ALL_COURSES + " to see today's schedule\n\n" + MAKE_PLAN + " to make your study plan\n\n" + MY_PLAN + " to see your study plan and remove teachings\n\n" + MY_TIMETABLE + " to get your personal lesson's schedule\n\n" + NOTIFY_ON + \
     " to receive a notification every morning\n\n" + DEL_PLAN + " to delete your plan" + \
-    "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail.\n\n<b>REMIND! All data are updated once a day. For last update please check on official Unibo site! (Especially for the first weeks)</b>"
+    "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail.\n\n<b>REMIND! All data (provided by https://dati.unibo.it) are updated once a day. For last update please check on official Unibo site! (Especially for the first weeks)</b>"
 
 privacy_string = "<b>In order to provide you the service, this bot collects user data like your study plan and your preferences (ON/OFF notification...). \nUsing this bot you allow your data to be saved.</b>"
-current_dir = os.getcwd() + "/"
 
+
+current_dir = os.getcwd() + "/"
 logging.basicConfig(filename=current_dir +
                     "unibotimetablesbot.log", level=logging.INFO)
 
@@ -84,10 +86,7 @@ all_courses = dict()
 all_aule = dict()
 all_teachings = dict()
 all_courses_group_by_area = collections.defaultdict(list)
-
 users = dict()
-
-
 accademic_year = ""
 
 
@@ -170,11 +169,18 @@ def get_all_courses():
             teaching = Teaching(i["corso_codice"], i["materia_codice"], i["materia_descrizione"], i["docente_nome"],
                                 i["componente_id"],
                                 i["url"], i["anno"], i["insegnamento_crediti"])
-            all_teachings[i["componente_id"]] = teaching
-            try:
-                all_courses[teaching.corso_codice].add_teaching(teaching)
-            except KeyError:
-                pass
+
+            if teaching.componente_id not in all_teachings.keys():
+                all_teachings[i["componente_id"]] = teaching
+
+                try:
+                    all_courses[teaching.corso_codice].add_teaching(teaching)
+                except KeyError:
+                    pass
+
+    for key in all_courses.keys():
+        all_courses[key].teachings.sort(
+            key=lambda x: x.materia_descrizione, reverse=False)
 
 
 def get_plan_timetable(day, plan):
@@ -223,8 +229,12 @@ def get_plan_timetable(day, plan):
                                o["inizio"], "%Y-%m-%dT%H:%M:%S"),
                            datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti)
                 for code in o["aula_codici"].split():
-                    a = all_aule[code]
-                    l.add_aula(a)
+                    try:
+                        a = all_aule[code]
+                        l.add_aula(a)
+                    except:
+                        l.add_aula(Aula("-", "UNKNOWN AULA",
+                                        "UNKNOWN ADDRESS", "", "NO LAT", "NO LON"))
 
                 timetable.add_lesson(l)
         timetable.lessons.sort(key=lambda x: x.inizio, reverse=False)
@@ -378,8 +388,9 @@ def make_courses_keyboard(area, mode):
         buttonLists.append(list())
 
     for i in range(0, len(all_courses_group_by_area[area]), 1):
-        c=all_courses_group_by_area[area][i]
-        buttonLists[i + 1].append(c.corso_codice +" - " + c.corso_descrizione[:50]  +" (" + c.sededidattica + ") - " + c.tipologia) 
+        c = all_courses_group_by_area[area][i]
+        buttonLists[i + 1].append(c.corso_codice + " - " + c.corso_descrizione[:50] +
+                                  " (" + c.sededidattica + ") - " + c.tipologia)
 
     buttonLists[len(all_courses_group_by_area[area]) + 1].append(BACK_TO_AREAS)
     buttonLists[len(all_courses_group_by_area[area]) + 1].append(BACK_TO_MAIN)
@@ -398,7 +409,8 @@ def make_year_keyboard(corso_codice, mode):
         buttonLists.append(list())
 
     for i in range(0, c.durata, 1):
-        buttonLists[i + 1].append(c.corso_codice +" - " + c.corso_descrizione[:50]  +" (" + c.sededidattica + ")" + " - YEAR " + str(i+1))
+        buttonLists[i + 1].append(c.corso_codice + " - " + c.corso_descrizione[:50] +
+                                  " (" + c.sededidattica + ")" + " - YEAR " + str(i+1))
 
     buttonLists[c.durata + 1].append(BACK_TO_AREAS)
     buttonLists[c.durata + 1].append(BACK_TO_MAIN)
@@ -430,24 +442,24 @@ def print_plan(chat_id, plan):
 def print_teachings_message(chat_id, corso_codice, year):
     result = list()
     mode = get_user(chat_id).mode
-    if mode == Mode.NORMAL or mode == Mode.PLAN:
+    # if mode == Mode.NORMAL or mode == Mode.PLAN:
 
-        for t in all_courses[corso_codice].teachings:
-            if t.anno == year:
-                t_string = t.materia_codice + " - <b>" + t.materia_descrizione + "</b>"
-                if t.docente_nome != "":
-                    t_string += " (<i>" + t.docente_nome + "</i>)"
-                if t.crediti != None and t.crediti != "":
-                    t_string += " - " + t.crediti + " CFU "
+    #     for t in all_courses[corso_codice].teachings:
+    #         if t.anno == year:
+    #             t_string = t.materia_codice + " - <b>" + t.materia_descrizione + "</b>"
+    #             if t.docente_nome != "":
+    #                 t_string += " (<i>" + t.docente_nome + "</i>)"
+    #             if t.crediti != None and t.crediti != "":
+    #                 t_string += " - " + t.crediti + " CFU "
 
-                t_string += " [ /schedule_" + t.componente_id + " ]"
-                if t.url != "":
-                    t_string += " [ /url_" + t.componente_id + " ]"
+    #             t_string += " [ /schedule_" + t.componente_id + " ]"
+    #             if t.url != "":
+    #                 t_string += " [ /url_" + t.componente_id + " ]"
 
-                t_string += "\n\n"
-                result.append(t_string)
+    #             t_string += "\n\n"
+    #             result.append(t_string)
 
-    elif mode == Mode.MAKE_PLAN:
+    if mode == Mode.MAKE_PLAN:
 
         for t in all_courses[corso_codice].teachings:
             if t.anno == year:
@@ -513,7 +525,22 @@ def make_inline_timetable_keyboard(day):
     return keyboard
 
 
-def make_inline_keyboard(chat_id, day, componente_id):
+def make_inline_today_schedule_keyboard(chat_id, day, corso_codice, year):
+    next_day = day + datetime.timedelta(days=1)
+    prec_day = day - datetime.timedelta(days=1)
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=emo_arrow_back + " " + 'Back',
+                              callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + prec_day.strftime(
+                                  "%d/%m/%YT%H:%M:%S")),
+         InlineKeyboardButton(text='Next ' + emo_arrow_forward,
+                              callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + next_day.strftime(
+                                  "%d/%m/%YT%H:%M:%S"))]
+    ])
+
+    return keyboard
+
+
+def make_inline_teaching_schedule_keyboard(chat_id, day, componente_id):
     next_day = day + datetime.timedelta(days=1)
     prec_day = day - datetime.timedelta(days=1)
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -557,7 +584,38 @@ def on_callback_query(msg):
 
             try:
                 bot.editMessageText(msg_edited, output_string, parse_mode='HTML',
-                                    reply_markup=make_inline_keyboard(chat_id, day, teaching.componente_id))
+                                    reply_markup=make_inline_teaching_schedule_keyboard(chat_id, day, teaching.componente_id))
+                # bot.answerCallbackQuery(query_id, text="")
+            except telepot.exception.TelegramError:
+                bot.answerCallbackQuery(query_id, text="SLOW DOWN!!")
+                pass
+
+        elif (query_data.startswith("course")):
+
+            array = query_data.split("_")
+            corso_codice = array[1]
+            year = int(array[3])
+            day_string = array[len(array) - 1]
+
+            day = datetime.datetime.strptime(day_string, "%d/%m/%YT%H:%M:%S")
+
+            course = all_courses[corso_codice]
+            plan = Plan()
+            for t in course.teachings:
+                if t.anno == year:
+                    plan.add_teaching(t)
+
+            timetable = get_plan_timetable(day, plan)
+
+            output_string = emo_ay + " A.Y. <code>" + accademic_year + \
+                "/" + str(int(accademic_year) + 1) + "</code>\n"
+            output_string += emo_calendar + " " + \
+                day.strftime("%A %B %d, %Y") + "\n\n"
+            output_string += print_output_timetable(timetable)
+
+            try:
+                bot.editMessageText(msg_edited, output_string, parse_mode='HTML',
+                                    reply_markup=make_inline_today_schedule_keyboard(chat_id, day, course.corso_codice, year))
                 # bot.answerCallbackQuery(query_id, text="")
             except telepot.exception.TelegramError:
                 bot.answerCallbackQuery(query_id, text="SLOW DOWN!!")
@@ -609,7 +667,7 @@ def on_chat_message(msg):
 
                 store_user(chat_id)
 
-                output_string = "Hi! Thanks for trying this bot!\n" + help_string
+                output_string = "Hi! Thanks for trying this bot!\n\n" + help_string
 
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                 reply_markup=make_main_keyboard(chat_id))
@@ -822,41 +880,68 @@ def on_chat_message(msg):
 
             elif msg["text"].split()[0] in all_courses.keys():
                 course = all_courses[msg["text"].split()[0]]
-
+                u = get_user(chat_id)
                 try:
 
                     year = int(msg["text"].split()[-1])
+                    if u.mode == Mode.MAKE_PLAN:
 
-                    if course.url != "":
-                        output_string = emo_url + " " + course.url
-                        bot.sendMessage(chat_id, output_string,
-                                        parse_mode='HTML')
+                        string_list = print_teachings_message(
+                            chat_id, course.corso_codice, year)
 
-                    string_list = print_teachings_message(
-                        chat_id, course.corso_codice, year)
-
-                    i = 0
-                    output_string = "<b>TEACHINGS " + \
-                        str(year) + " YEAR</b>\n\n"
-                    for s in string_list:
-                        output_string += s
-                        i += 1
-                        if i % 20 == 0:
+                        i = 0
+                        output_string = "<b>TEACHINGS " + \
+                            str(year) + " YEAR</b> (sorted by name)\n\n"
+                        for s in string_list:
+                            output_string += s
+                            i += 1
+                            if i % 20 == 0:
+                                bot.sendMessage(chat_id, output_string,
+                                                parse_mode='HTML')
+                                output_string = ""
+                        if output_string != "":
                             bot.sendMessage(chat_id, output_string,
                                             parse_mode='HTML')
-                            output_string = ""
-                    if output_string != "":
-                        bot.sendMessage(chat_id, output_string,
-                                        parse_mode='HTML')
+
+                    elif u.mode == Mode.NORMAL or u.mode == Mode.PLAN:
+
+                        plan = Plan()
+                        for t in course.teachings:
+                            if t.anno == year:
+                                plan.add_teaching(t)
+
+                        now = datetime.datetime.now()
+
+                        timetable = get_plan_timetable(now, plan)
+
+                        output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
+                            int(accademic_year) + 1) + "</code>\n"
+                        output_string += emo_calendar + " " + \
+                            now.strftime("%A %B %d, %Y") + "\n\n"
+
+                        output_string += print_output_timetable(timetable)
+
+                        # bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
+                        bot.sendMessage(chat_id, output_string, parse_mode='HTML',
+                                        reply_markup=make_inline_today_schedule_keyboard(chat_id, now, course.corso_codice, year))
+
+                    else:
+                        check_user(chat_id)
+                        store_user(chat_id)
 
                 except ValueError:
 
                     output_string = emo_ay + " A.Y. <code>" + accademic_year + \
                         "/" + str(int(accademic_year) + 1) + "</code>\n"
-                    output_string += "<b>SELECTED COURSE:\n"+str(course)+"</b>\n\n"
+                    output_string += "<b>SELECTED COURSE:\n" + \
+                        str(course)+"</b>\n\n"
+
+                    if course.url != "":
+                        output_string += "WEB SITE -> " + emo_url + " " + course.url+"\n\n"
+
                     output_string += "Choose your year!"
 
-                    bot.sendMessage(chat_id, output_string, parse_mode='HTML',  reply_markup=make_year_keyboard(
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML', disable_web_page_preview=True, reply_markup=make_year_keyboard(
                         course.corso_codice, get_user(chat_id).mode))
 
             elif msg["text"].startswith("/add_") and get_user(chat_id).mode == Mode.MAKE_PLAN:
@@ -898,35 +983,35 @@ def on_chat_message(msg):
                 bot.sendMessage(chat_id, output_string,
                                 parse_mode='HTML', disable_notification=True)
 
-            elif msg["text"].startswith("/schedule_"):
+            # elif msg["text"].startswith("/schedule_"):
 
-                array = msg["text"].split("_")
-                componente_id = array[1]
+            #     array = msg["text"].split("_")
+            #     componente_id = array[1]
 
-                if componente_id in all_teachings.keys():
-                    plan = Plan()
-                    teaching = all_teachings[componente_id]
+            #     if componente_id in all_teachings.keys():
+            #         plan = Plan()
+            #         teaching = all_teachings[componente_id]
 
-                    plan.add_teaching(teaching)
+            #         plan.add_teaching(teaching)
 
-                    now = datetime.datetime.now()
+            #         now = datetime.datetime.now()
 
-                    ##### DEBUG #####
-                    # now = datetime.datetime.strptime("29/05/2019", "%d/%m/%Y")
-                    #################
+            #         ##### DEBUG #####
+            #         # now = datetime.datetime.strptime("29/05/2019", "%d/%m/%Y")
+            #         #################
 
-                    timetable = get_plan_timetable(now, plan)
+            #         timetable = get_plan_timetable(now, plan)
 
-                    output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
-                        int(accademic_year) + 1) + "</code>\n"
-                    output_string += emo_calendar + " " + \
-                        now.strftime("%A %B %d, %Y") + "\n\n"
+            #         output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
+            #             int(accademic_year) + 1) + "</code>\n"
+            #         output_string += emo_calendar + " " + \
+            #             now.strftime("%A %B %d, %Y") + "\n\n"
 
-                    output_string += print_output_timetable(timetable)
+            #         output_string += print_output_timetable(timetable)
 
-                    # bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
-                    bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                    reply_markup=make_inline_keyboard(chat_id, now, teaching.componente_id))
+            #         # bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
+            #         bot.sendMessage(chat_id, output_string, parse_mode='HTML',
+            #                         reply_markup=make_inline_teaching_schedule_keyboard(chat_id, now, teaching.componente_id))
 
             elif msg["text"].startswith("/url_"):
 
