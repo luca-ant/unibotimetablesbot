@@ -134,8 +134,12 @@ def get_all_courses():
     insegnamenti_table = "insegnamenti_" + accademic_year + "_it"
     curricula_table = "curriculadettagli_"+accademic_year+"_it"
 
+    # sql_insegnamenti = "SELECT " + insegnamenti_table + ".*, " + curricula_table + ".anno," + curricula_table+".insegnamento_crediti" + " FROM " + curricula_table + \
+    #     ", " + insegnamenti_table + " WHERE " + curricula_table + \
+    #     ".componente_id=" + insegnamenti_table + ".componente_id"
+
     sql_insegnamenti = "SELECT " + insegnamenti_table + ".*, " + curricula_table + ".anno," + curricula_table+".insegnamento_crediti" + " FROM " + curricula_table + \
-        ", " + insegnamenti_table + " WHERE " + curricula_table + \
+        " RIGHT JOIN " + insegnamenti_table + " ON " + curricula_table + \
         ".componente_id=" + insegnamenti_table + ".componente_id"
 
     # sql_insegnamenti = "SELECT * FROM " + insegnamenti_table
@@ -168,7 +172,7 @@ def get_all_courses():
         if "TIROCINIO" not in i['materia_descrizione'].upper():
             teaching = Teaching(i["corso_codice"], i["materia_codice"], i["materia_descrizione"], i["docente_nome"],
                                 i["componente_id"],
-                                i["url"], i["anno"], i["insegnamento_crediti"])
+                                i["url"], i["anno"], i["insegnamento_crediti"], i["componente_padre"])
 
             if teaching.componente_id not in all_teachings.keys():
                 all_teachings[i["componente_id"]] = teaching
@@ -177,6 +181,13 @@ def get_all_courses():
                     all_courses[teaching.corso_codice].add_teaching(teaching)
                 except KeyError:
                     pass
+
+    for key in all_teachings.keys():
+        t = all_teachings[key]
+        if t.anno == None and t.componente_padre!=None:
+            t.anno = all_teachings[t.componente_padre].anno
+        if t.crediti == None and t.componente_padre!=None:
+            t.crediti = all_teachings[t.componente_padre].crediti
 
     for key in all_courses.keys():
         all_courses[key].teachings.sort(
@@ -191,7 +202,7 @@ def get_plan_timetable(day, plan):
 
     orari_table = "orari_" + accademic_year
     aule_table = "aule_" + accademic_year
-    url_o = "https://dati.unibo.it/api/action/datastore_search_sql?sql="
+    url_o = "https://dati.unibo.it/api/action/datastore_search_sql"
     url_a = "https://dati.unibo.it/api/action/datastore_search?resource_id=" + \
         aule_table + "&q="
 
@@ -211,9 +222,14 @@ def get_plan_timetable(day, plan):
             sql_orari += " OR " + orari_table + ".componente_id=" + t.componente_id
     sql_orari += " )"
 
-    json_orari = requests.get(url_o + sql_orari).text
-    ok = json.loads(json_orari)["success"]
-
+    headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+    json_orari = requests.post(url_o, headers=headers, data='{"sql":'+'"'+sql_orari+'"}').text
+    
+    try:
+        ok = json.loads(json_orari)["success"]
+    except:
+        pass
+    
     if ok:
 
         orari = json.loads(json_orari)["result"]["records"]
@@ -227,7 +243,7 @@ def get_plan_timetable(day, plan):
                            t.url,
                            datetime.datetime.strptime(
                                o["inizio"], "%Y-%m-%dT%H:%M:%S"),
-                           datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti)
+                           datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre)
                 for code in o["aula_codici"].split():
                     try:
                         a = all_aule[code]
@@ -251,7 +267,7 @@ def load_user_plan(chat_id):
             for t in plan_dict["teachings"]:
                 try:
                     teaching = Teaching(t["corso_codice"], t["materia_codice"], t["materia_descrizione"],
-                                        t["docente_nome"], t["componente_id"], t["url"], t["anno"], t["crediti"])
+                                        t["docente_nome"], t["componente_id"], t["url"], t["anno"], t["crediti"], t["componente_padre"])
                     plan.add_teaching(teaching)
 
                 # to recover plans from componente_id
@@ -462,7 +478,7 @@ def print_teachings_message(chat_id, corso_codice, year):
     if mode == Mode.MAKE_PLAN:
 
         for t in all_courses[corso_codice].teachings:
-            if t.anno == year:
+            if t.anno == None or int(t.anno) == year:
 
                 t_string = t.materia_codice + " - <b>" + t.materia_descrizione + "</b>"
                 if t.docente_nome != "":
@@ -602,7 +618,7 @@ def on_callback_query(msg):
             course = all_courses[corso_codice]
             plan = Plan()
             for t in course.teachings:
-                if t.anno == year:
+                if t.anno == None or int(t.anno) == year:
                     plan.add_teaching(t)
 
             timetable = get_plan_timetable(day, plan)
@@ -907,7 +923,7 @@ def on_chat_message(msg):
 
                         plan = Plan()
                         for t in course.teachings:
-                            if t.anno == year:
+                            if t.anno == None or int(t.anno) == year:
                                 plan.add_teaching(t)
 
                         now = datetime.datetime.now()

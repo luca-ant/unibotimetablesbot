@@ -33,15 +33,16 @@ class User:
 
 
 class Teaching:
-    def __init__(self, corso_codice, materia_codice, materia_descrizione, docente_nome, componente_id, url, anno, crediti):
+    def __init__(self, corso_codice, materia_codice, materia_descrizione, docente_nome, componente_id, url, anno, crediti, componente_padre):
         self.componente_id = componente_id
         self.corso_codice = corso_codice
         self.materia_codice = materia_codice
         self.docente_nome = docente_nome
         self.url = url
         self.materia_descrizione = materia_descrizione
-        self.anno = int(anno)
+        self.anno = anno
         self.crediti = crediti
+        self.componente_padre = componente_padre
 
     def __str__(self):
         result = self.materia_codice + " - <b>" + self.materia_descrizione + "</b>"
@@ -139,14 +140,15 @@ class Aula:
 
 class Lesson(Teaching):
     def __init__(self, corso_codice, materia_codice, materia_descrizione, docente_nome, componente_id, url, inizio,
-                 fine, anno, crediti):
+                 fine, anno, crediti, componente_padre):
         Teaching.__init__(self, corso_codice, materia_codice,
-                          materia_descrizione, docente_nome, componente_id, url, anno, crediti)
+                          materia_descrizione, docente_nome, componente_id, url, anno, crediti, componente_padre)
         self.inizio = inizio
         self.fine = fine
         self.lista_aule = list()
         self.anno = anno
         self.crediti = crediti
+        self.componente_padre = componente_padre
 
     def add_aula(self, a):
         self.lista_aule.append(a)
@@ -183,7 +185,7 @@ class Timetable:
                 result += " - "
                 result += a.aula_piano
                 result += "\n"
-                if a.lat != "" and a.lon != "":
+                if a.lat != None and a.lon != None and a.lat != "" and a.lon != "":
                     result += emo_gps + " <code>" + a.lat + ", " + a.lon + "</code>"
                     result += "\n"
             result += "\n"
