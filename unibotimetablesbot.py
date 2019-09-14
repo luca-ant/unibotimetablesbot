@@ -99,11 +99,12 @@ def get_all_aule():
 
     aule_table = "aule_" + accademic_year
 
-    url = "https://dati.unibo.it/api/action/datastore_search_sql?sql="
+    url = "https://dati.unibo.it/api/action/datastore_search_sql"
 
     sql_aule = "SELECT * FROM " + aule_table
 
-    json_aule = requests.get(url + sql_aule).text
+    headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+    json_aule = requests.post(url,headers=headers, data='{"sql":'+'"'+sql_aule+'"}').text
 
     all_aule.clear()
 
@@ -129,7 +130,7 @@ def get_all_courses():
                  " ### GETTING ALL COURSES")
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
           " ### GETTING ALL COURSES")
-    url = "https://dati.unibo.it/api/action/datastore_search_sql?sql="
+    url = "https://dati.unibo.it/api/action/datastore_search_sql"
     corsi_table = "corsi_" + accademic_year + "_it"
     insegnamenti_table = "insegnamenti_" + accademic_year + "_it"
     curricula_table = "curriculadettagli_"+accademic_year+"_it"
@@ -145,8 +146,10 @@ def get_all_courses():
     # sql_insegnamenti = "SELECT * FROM " + insegnamenti_table
     sql_corsi = "SELECT * FROM " + corsi_table
 
-    json_corsi = requests.get(url + sql_corsi).text
-    json_insegnamenti = requests.get(url + sql_insegnamenti).text
+    headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+
+    json_corsi = requests.post(url, headers=headers, data='{"sql":'+'"'+sql_corsi+'"}').text
+    json_insegnamenti = requests.post(url, headers=headers, data='{"sql":'+'"'+sql_insegnamenti+'"}').text
 
     all_courses.clear()
     all_teachings.clear()
