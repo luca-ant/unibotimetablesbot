@@ -467,6 +467,25 @@ def print_plan(chat_id, plan):
     return result
 
 
+def print_plan_message(chat_id, plan):
+    result = list()
+    for t in plan.teachings:
+        t_string = t.materia_codice + " - <b>" + t.materia_descrizione + "</b>"
+        if t.docente_nome != "":
+            t_string += " (<i>" + t.docente_nome + "</i>)"
+        if t.crediti != None and t.crediti != "":
+            t_string += " - "+t.crediti + " CFU "
+
+        t_string += " [ /remove_" + t.componente_id + " ]"
+        if t.url != "":
+            t_string += " [ /url_" + t.componente_id + " ]"
+        t_string += "\n\n"
+
+        result.append(t_string)
+
+    return result
+
+
 def print_teachings_message(chat_id, corso_codice, year):
     result = list()
     mode = get_user(chat_id).mode
@@ -795,13 +814,24 @@ def on_chat_message(msg):
                 store_user(chat_id)
 
                 plan = load_user_plan(chat_id)
+
+                string_list = print_plan_message(chat_id, plan)
+
+                i = 0
                 output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                     int(accademic_year) + 1) + "</code>\n"
+                output_string += emo_plan + " YOUR STUDY PLAN" + "\n\n"
 
-                output_string += print_plan(chat_id, plan)
-                bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
-                bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_main_keyboard(chat_id))
+                for s in string_list:
+                    output_string += s
+                    i += 1
+                    if i % 20 == 0:
+                        bot.sendMessage(chat_id, output_string,
+                                        parse_mode='HTML', reply_markup=make_main_keyboard(chat_id))
+                        output_string = ""
+                if output_string != "":
+                    bot.sendMessage(chat_id, output_string,
+                                    parse_mode='HTML', reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == DEL_PLAN:
 
