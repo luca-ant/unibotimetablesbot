@@ -840,7 +840,7 @@ def on_chat_message(msg):
                 output_string = "Are you sure? Send \"<b>YES</b>\" to confirm or \"<b>NO</b>\" to cancel (without quotes)"
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML')
 
-            elif msg["text"] == "YES" and get_user(chat_id).mode == Mode.DEL:
+            elif msg["text"].upper() == "YES" and get_user(chat_id).mode == Mode.DEL:
 
                 get_user(chat_id).mode = Mode.NORMAL
                 store_user(chat_id)
