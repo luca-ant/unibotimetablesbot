@@ -23,7 +23,9 @@ bot = telepot.Bot(token)
 emo_money = u'\U0001F4B5'
 emo_clock = u'\U0001F552'
 emo_arrow_back = u'\U00002B05'
+emo_double_arrow_back = u'\U000023EA'
 emo_arrow_forward = u'\U000027A1'
+emo_double_arrow_forward = u'\U000023E9'
 emo_courses = u'\U0001F4CE'
 emo_plan = u'\U0001F4D8'
 emo_end_plan = u'\U00002705'
@@ -103,8 +105,10 @@ def get_all_aule():
 
     sql_aule = "SELECT * FROM " + aule_table
 
-    headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-    json_aule = requests.post(url,headers=headers, data='{"sql":'+'"'+sql_aule+'"}').text
+    headers = {'Content-type': 'application/json',
+               'Accept': 'application/json'}
+    json_aule = requests.post(url, headers=headers,
+                              data='{"sql":'+'"'+sql_aule+'"}').text
 
     all_aule.clear()
 
@@ -146,10 +150,13 @@ def get_all_courses():
     # sql_insegnamenti = "SELECT * FROM " + insegnamenti_table
     sql_corsi = "SELECT * FROM " + corsi_table
 
-    headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+    headers = {'Content-type': 'application/json',
+               'Accept': 'application/json'}
 
-    json_corsi = requests.post(url, headers=headers, data='{"sql":'+'"'+sql_corsi+'"}').text
-    json_insegnamenti = requests.post(url, headers=headers, data='{"sql":'+'"'+sql_insegnamenti+'"}').text
+    json_corsi = requests.post(
+        url, headers=headers, data='{"sql":'+'"'+sql_corsi+'"}').text
+    json_insegnamenti = requests.post(
+        url, headers=headers, data='{"sql":'+'"'+sql_insegnamenti+'"}').text
 
     all_courses.clear()
     all_teachings.clear()
@@ -187,9 +194,9 @@ def get_all_courses():
 
     for key in all_teachings.keys():
         t = all_teachings[key]
-        if t.anno == None and t.componente_padre!=None:
+        if t.anno == None and t.componente_padre != None:
             t.anno = all_teachings[t.componente_padre].anno
-        if t.crediti == None and t.componente_padre!=None:
+        if t.crediti == None and t.componente_padre != None:
             t.crediti = all_teachings[t.componente_padre].crediti
 
     for key in all_courses.keys():
@@ -225,14 +232,16 @@ def get_plan_timetable(day, plan):
             sql_orari += " OR " + orari_table + ".componente_id=" + t.componente_id
     sql_orari += " )"
 
-    headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-    json_orari = requests.post(url_o, headers=headers, data='{"sql":'+'"'+sql_orari+'"}').text
-    
+    headers = {'Content-type': 'application/json',
+               'Accept': 'application/json'}
+    json_orari = requests.post(
+        url_o, headers=headers, data='{"sql":'+'"'+sql_orari+'"}').text
+
     try:
         ok = json.loads(json_orari)["success"]
     except:
         pass
-    
+
     if ok:
 
         orari = json.loads(json_orari)["result"]["records"]
@@ -536,24 +545,61 @@ def print_output_timetable(timetable):
 def make_inline_timetable_keyboard(day):
     next_day = day + datetime.timedelta(days=1)
     prec_day = day - datetime.timedelta(days=1)
+    next_week = day + datetime.timedelta(days=7)
+    prec_week = day - datetime.timedelta(days=7)
+    # keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    #     [InlineKeyboardButton(text=emo_arrow_back + " " + 'Back', callback_data=prec_day.strftime("%d/%m/%YT%H:%M:%S")),
+    #      InlineKeyboardButton(text='Next ' + emo_arrow_forward,
+    #                           callback_data=next_day.strftime("%d/%m/%YT%H:%M:%S"))],
+    #     [InlineKeyboardButton(text=emo_double_arrow_back + " " + 'Previous week',
+    #                           callback_data=prec_week.strftime(
+    #                               "%d/%m/%YT%H:%M:%S")),
+    #      InlineKeyboardButton(text='Next week ' + emo_double_arrow_forward,
+    #                           callback_data=next_week.strftime(
+    #                               "%d/%m/%YT%H:%M:%S"))]
+    # ])
+
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=emo_arrow_back + " " + 'Back', callback_data=prec_day.strftime("%d/%m/%YT%H:%M:%S")),
-         InlineKeyboardButton(text='Next ' + emo_arrow_forward,
-                              callback_data=next_day.strftime("%d/%m/%YT%H:%M:%S"))]
+        [InlineKeyboardButton(text=emo_double_arrow_back,
+                              callback_data=prec_week.strftime("%d/%m/%YT%H:%M:%S")),
+         InlineKeyboardButton(
+             text=emo_arrow_back, callback_data=prec_day.strftime("%d/%m/%YT%H:%M:%S")),
+         InlineKeyboardButton(
+             text=emo_arrow_forward, callback_data=next_day.strftime("%d/%m/%YT%H:%M:%S")),
+         InlineKeyboardButton(text=emo_double_arrow_forward, callback_data=next_week.strftime("%d/%m/%YT%H:%M:%S"))]
     ])
+
     return keyboard
 
 
 def make_inline_today_schedule_keyboard(chat_id, day, corso_codice, year):
     next_day = day + datetime.timedelta(days=1)
     prec_day = day - datetime.timedelta(days=1)
+    next_week = day + datetime.timedelta(days=7)
+    prec_week = day - datetime.timedelta(days=7)
+    # keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    #     [InlineKeyboardButton(text=emo_arrow_back + " " + 'Previous day',
+    #                           callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + prec_day.strftime(
+    #                               "%d/%m/%YT%H:%M:%S")),
+    #      InlineKeyboardButton(text='Next day ' + emo_arrow_forward,
+    #                           callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + next_day.strftime(
+    #                               "%d/%m/%YT%H:%M:%S"))],
+    #     [InlineKeyboardButton(text=emo_double_arrow_back + " " + 'Previous week',
+    #                           callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + prec_week.strftime(
+    #                               "%d/%m/%YT%H:%M:%S")),
+    #         InlineKeyboardButton(text='Next week ' + emo_double_arrow_forward,
+    #                              callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + next_week.strftime(
+    #                                  "%d/%m/%YT%H:%M:%S"))]
+    # ])
+
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=emo_arrow_back + " " + 'Back',
-                              callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + prec_day.strftime(
-                                  "%d/%m/%YT%H:%M:%S")),
-         InlineKeyboardButton(text='Next ' + emo_arrow_forward,
-                              callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + next_day.strftime(
-                                  "%d/%m/%YT%H:%M:%S"))]
+        [InlineKeyboardButton(text=emo_double_arrow_back,
+                              callback_data=prec_week.strftime("%d/%m/%YT%H:%M:%S")),
+         InlineKeyboardButton(
+             text=emo_arrow_back, callback_data=prec_day.strftime("%d/%m/%YT%H:%M:%S")),
+         InlineKeyboardButton(
+             text=emo_arrow_forward, callback_data=next_day.strftime("%d/%m/%YT%H:%M:%S")),
+         InlineKeyboardButton(text=emo_double_arrow_forward, callback_data=next_week.strftime("%d/%m/%YT%H:%M:%S"))]
     ])
 
     return keyboard
@@ -580,36 +626,36 @@ def on_callback_query(msg):
     try:
         msg_edited = (chat_id, msg['message']['message_id'])
 
-        if (query_data.startswith("schedule")):
+        # if (query_data.startswith("schedule")):
 
-            array = query_data.split("_")
-            componente_id = array[1]
-            day_string = array[len(array) - 1]
+        #     array = query_data.split("_")
+        #     componente_id = array[1]
+        #     day_string = array[len(array) - 1]
 
-            day = datetime.datetime.strptime(day_string, "%d/%m/%YT%H:%M:%S")
+        #     day = datetime.datetime.strptime(day_string, "%d/%m/%YT%H:%M:%S")
 
-            plan = Plan()
-            teaching = all_teachings[componente_id]
+        #     plan = Plan()
+        #     teaching = all_teachings[componente_id]
 
-            plan.add_teaching(teaching)
+        #     plan.add_teaching(teaching)
 
-            timetable = get_plan_timetable(day, plan)
+        #     timetable = get_plan_timetable(day, plan)
 
-            output_string = emo_ay + " A.Y. <code>" + accademic_year + \
-                "/" + str(int(accademic_year) + 1) + "</code>\n"
-            output_string += emo_calendar + " " + \
-                day.strftime("%A %B %d, %Y") + "\n\n"
-            output_string += print_output_timetable(timetable)
+        #     output_string = emo_ay + " A.Y. <code>" + accademic_year + \
+        #         "/" + str(int(accademic_year) + 1) + "</code>\n"
+        #     output_string += emo_calendar + " " + \
+        #         day.strftime("%A %B %d, %Y") + "\n\n"
+        #     output_string += print_output_timetable(timetable)
 
-            try:
-                bot.editMessageText(msg_edited, output_string, parse_mode='HTML',
-                                    reply_markup=make_inline_teaching_schedule_keyboard(chat_id, day, teaching.componente_id))
-                # bot.answerCallbackQuery(query_id, text="")
-            except telepot.exception.TelegramError:
-                bot.answerCallbackQuery(query_id, text="SLOW DOWN!!")
-                pass
+        #     try:
+        #         bot.editMessageText(msg_edited, output_string, parse_mode='HTML',
+        #                             reply_markup=make_inline_teaching_schedule_keyboard(chat_id, day, teaching.componente_id))
+        #         # bot.answerCallbackQuery(query_id, text="")
+        #     except telepot.exception.TelegramError:
+        #         bot.answerCallbackQuery(query_id, text="SLOW DOWN!!")
+        #         pass
 
-        elif (query_data.startswith("course")):
+        if (query_data.startswith("course")):
 
             array = query_data.split("_")
             corso_codice = array[1]
