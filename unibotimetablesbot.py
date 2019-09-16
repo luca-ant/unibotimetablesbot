@@ -935,11 +935,11 @@ def on_chat_message(msg):
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                     reply_markup=make_main_keyboard(chat_id))
                 else:
+                    output_string = "You haven't a study plan yet! Use "+ MAKE_PLAN + " to make it"
+                    get_user(chat_id).mode = Mode.NORMAL
+                    store_user(chat_id)
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML', reply_markup=make_main_keyboard(chat_id))
 
-                    output_string = "Create a study plan before!"
-
-                    bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                    reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == NOTIFY_OFF:
                 u = get_user(chat_id)
