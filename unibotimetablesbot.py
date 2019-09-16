@@ -797,41 +797,55 @@ def on_chat_message(msg):
                 #################
                 plan = load_user_plan(chat_id)
 
-                timetable = get_plan_timetable(now, plan)
-                output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
-                    int(accademic_year) + 1) + "</code>\n"
-                output_string += emo_calendar + " " + \
-                    now.strftime("%A %B %d, %Y") + "\n\n"
+                if plan != None:
 
-                output_string += print_output_timetable(timetable)
+                    timetable = get_plan_timetable(now, plan)
+                    output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
+                        int(accademic_year) + 1) + "</code>\n"
+                    output_string += emo_calendar + " " + \
+                        now.strftime("%A %B %d, %Y") + "\n\n"
 
-                # bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
-                bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                reply_markup=make_inline_timetable_keyboard(now))
+                    output_string += print_output_timetable(timetable)
+
+                    # bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML',
+                                    reply_markup=make_inline_timetable_keyboard(now))
+
+                else:
+                    output_string = "You haven't a study plan yet! Use "+ MAKE_PLAN + " to make it"
+                    get_user(chat_id).mode = Mode.NORMAL
+                    store_user(chat_id)
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML', reply_markup=make_main_keyboard(chat_id))
+
 
             elif msg["text"] == MY_PLAN:
                 get_user(chat_id).mode = Mode.PLAN
                 store_user(chat_id)
 
                 plan = load_user_plan(chat_id)
+                if plan != None:
+                    string_list = print_plan_message(chat_id, plan)
 
-                string_list = print_plan_message(chat_id, plan)
+                    i = 0
+                    output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
+                        int(accademic_year) + 1) + "</code>\n"
+                    output_string += emo_plan + " YOUR STUDY PLAN" + "\n\n"
 
-                i = 0
-                output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
-                    int(accademic_year) + 1) + "</code>\n"
-                output_string += emo_plan + " YOUR STUDY PLAN" + "\n\n"
-
-                for s in string_list:
-                    output_string += s
-                    i += 1
-                    if i % 20 == 0:
+                    for s in string_list:
+                        output_string += s
+                        i += 1
+                        if i % 20 == 0:
+                            bot.sendMessage(chat_id, output_string,
+                                            parse_mode='HTML', reply_markup=make_main_keyboard(chat_id))
+                            output_string = ""
+                    if output_string != "":
                         bot.sendMessage(chat_id, output_string,
                                         parse_mode='HTML', reply_markup=make_main_keyboard(chat_id))
-                        output_string = ""
-                if output_string != "":
-                    bot.sendMessage(chat_id, output_string,
-                                    parse_mode='HTML', reply_markup=make_main_keyboard(chat_id))
+                else:
+                    output_string = "You haven't a study plan yet! Use "+ MAKE_PLAN + " to make it"
+                    get_user(chat_id).mode = Mode.NORMAL
+                    store_user(chat_id)
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML', reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == DEL_PLAN:
 
