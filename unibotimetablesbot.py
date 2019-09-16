@@ -1117,7 +1117,7 @@ def on_chat_message(msg):
                     output_string = emo_url + " " + \
                         all_teachings[componente_id].url
 
-                    bot.sendMessage(chat_id, output_string, parse_mode='HTML')
+                    bot.sendMessage(chat_id, output_string,disable_web_page_preview=True, parse_mode='HTML')
 
             else:
                 check_user(chat_id)
