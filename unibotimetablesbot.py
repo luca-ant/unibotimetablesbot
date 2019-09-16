@@ -708,20 +708,23 @@ def on_callback_query(msg):
         else:
             day = datetime.datetime.strptime(query_data, "%d/%m/%YT%H:%M:%S")
             plan = load_user_plan(chat_id)
-            timetable = get_plan_timetable(day, plan)
 
-            output_string = emo_ay + " A.Y. <code>" + accademic_year + \
-                "/" + str(int(accademic_year) + 1) + "</code>\n"
-            output_string += emo_calendar + " " + \
-                day.strftime("%A %B %d, %Y") + "\n\n"
-            output_string += print_output_timetable(timetable)
-            try:
-                bot.editMessageText(msg_edited, output_string, parse_mode='HTML',
-                                    reply_markup=make_inline_timetable_keyboard(day))
-            except telepot.exception.TelegramError:
-                bot.answerCallbackQuery(query_id, text="SLOW DOWN!!")
+            if plan != None:
 
-                pass
+                timetable = get_plan_timetable(day, plan)
+
+                output_string = emo_ay + " A.Y. <code>" + accademic_year + \
+                    "/" + str(int(accademic_year) + 1) + "</code>\n"
+                output_string += emo_calendar + " " + \
+                    day.strftime("%A %B %d, %Y") + "\n\n"
+                output_string += print_output_timetable(timetable)
+                try:
+                    bot.editMessageText(msg_edited, output_string, parse_mode='HTML',
+                                        reply_markup=make_inline_timetable_keyboard(day))
+                except telepot.exception.TelegramError:
+                    bot.answerCallbackQuery(query_id, text="SLOW DOWN!!")
+
+                    pass
 
     except:
         traceback.print_exc()
