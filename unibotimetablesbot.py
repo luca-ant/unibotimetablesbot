@@ -66,9 +66,10 @@ PRIVACY = emo_privacy + " " + "PRIVACY POLICY"
 donation_string = emo_money + \
     " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
 
+important_string = "<b>IMPORTANT! All data (provided by https://dati.unibo.it) are updated once a day. For suddend changes or extra lessons please check on official Unibo site! (Especially for the first weeks)</b>"
 help_string = "This bot helps you to get your personal timetable of Unibo lessons. First of all <b>you need to make your study plan</b> by pressing " + MAKE_PLAN+" and then you have to add your teachings. After that by simply pressing " + MY_TIMETABLE+" you get your personal  timetable for today!\n\n<b>USE:</b>\n\n" + ALL_COURSES + " to see today's schedule\n\n" + MAKE_PLAN + " to make your study plan\n\n" + MY_PLAN + " to see your study plan and remove teachings\n\n" + MY_TIMETABLE + " to get your personal lesson's schedule\n\n" + NOTIFY_ON + \
     " to receive a notification every morning\n\n" + DEL_PLAN + " to delete your plan" + \
-    "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail.\n\n<b>REMIND! All data (provided by https://dati.unibo.it) are updated once a day. For last update please check on official Unibo site! (Especially for the first weeks)</b>"
+    "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail.\n\n" + important_string
 
 privacy_string = "<b>In order to provide you the service, this bot collects user data like your study plan and your preferences (ON/OFF notification...). \nUsing this bot you allow your data to be saved.</b>"
 
@@ -827,7 +828,8 @@ def on_chat_message(msg):
 
                     output_string += print_output_timetable(timetable)
 
-                    # bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
+                    bot.sendMessage(chat_id, important_string,
+                                    parse_mode='HTML')
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                     reply_markup=make_inline_timetable_keyboard(now))
 
@@ -1051,7 +1053,8 @@ def on_chat_message(msg):
 
                         output_string += print_output_timetable(timetable)
 
-                        # bot.sendMessage(chat_id, donation_string, parse_mode='HTML')
+                        bot.sendMessage(chat_id, important_string,
+                                        parse_mode='HTML')
                         bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                         reply_markup=make_inline_today_schedule_keyboard(chat_id, now, course.corso_codice, year))
 
