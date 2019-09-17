@@ -184,6 +184,11 @@ def get_all_courses():
                                 i["componente_id"],
                                 i["url"], i["anno"], i["insegnamento_crediti"], i["componente_padre"])
 
+            ##### DEBUG #####
+            # if teaching.componente_id == '448379':
+            #     print(teaching)
+            #################
+
             if teaching.componente_id not in all_teachings.keys():
                 all_teachings[i["componente_id"]] = teaching
 
@@ -194,9 +199,9 @@ def get_all_courses():
 
     for key in all_teachings.keys():
         t = all_teachings[key]
-        if t.anno == None and t.componente_padre != None:
+        if (t.anno == None or t.anno == "") and t.componente_padre != None and t.componente_padre != "":
             t.anno = all_teachings[t.componente_padre].anno
-        if t.crediti == None and t.componente_padre != None:
+        if (t.crediti == None or t.crediti == "") and t.componente_padre != None and t.componente_padre != "":
             t.crediti = all_teachings[t.componente_padre].crediti
 
     for key in all_courses.keys():
@@ -251,6 +256,10 @@ def get_plan_timetable(day, plan):
 
             t = plan.find_teaching_by_componente_id(componente_id)
             if t != None:
+                ##### DEBUG #####
+                # if t.componente_id == '448380':
+                #     print(t)
+                #################
                 l = Lesson(t.corso_codice, t.materia_codice, t.materia_descrizione, t.docente_nome, t.componente_id,
                            t.url,
                            datetime.datetime.strptime(
@@ -613,12 +622,16 @@ def make_inline_today_schedule_keyboard(chat_id, day, corso_codice, year):
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=emo_double_arrow_back,
-                              callback_data=prec_week.strftime("%d/%m/%YT%H:%M:%S")),
+                              callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + prec_week.strftime(
+                                  "%d/%m/%YT%H:%M:%S")),
          InlineKeyboardButton(
-             text=emo_arrow_back, callback_data=prec_day.strftime("%d/%m/%YT%H:%M:%S")),
+             text=emo_arrow_back,  callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + prec_day.strftime(
+                 "%d/%m/%YT%H:%M:%S")),
          InlineKeyboardButton(
-             text=emo_arrow_forward, callback_data=next_day.strftime("%d/%m/%YT%H:%M:%S")),
-         InlineKeyboardButton(text=emo_double_arrow_forward, callback_data=next_week.strftime("%d/%m/%YT%H:%M:%S"))]
+             text=emo_arrow_forward, callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + next_day.strftime(
+                 "%d/%m/%YT%H:%M:%S")),
+         InlineKeyboardButton(text=emo_double_arrow_forward, callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + next_week.strftime(
+             "%d/%m/%YT%H:%M:%S"))]
     ])
 
     return keyboard
@@ -1024,7 +1037,7 @@ def on_chat_message(msg):
 
                         plan = Plan()
                         for t in course.teachings:
-                            if t.anno == None or int(t.anno) == year:
+                            if t.anno == None or t.anno == "" or int(t.anno) == year:
                                 plan.add_teaching(t)
 
                         now = datetime.datetime.now()
