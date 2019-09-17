@@ -638,19 +638,19 @@ def make_inline_today_schedule_keyboard(chat_id, day, corso_codice, year):
     return keyboard
 
 
-def make_inline_teaching_schedule_keyboard(chat_id, day, componente_id):
-    next_day = day + datetime.timedelta(days=1)
-    prec_day = day - datetime.timedelta(days=1)
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=emo_arrow_back + " " + 'Back',
-                              callback_data="schedule_" + componente_id + "_" + prec_day.strftime(
-                                  "%d/%m/%YT%H:%M:%S")),
-         InlineKeyboardButton(text='Next ' + emo_arrow_forward,
-                              callback_data="schedule_" + componente_id + "_" + next_day.strftime(
-                                  "%d/%m/%YT%H:%M:%S"))]
-    ])
+# def make_inline_teaching_schedule_keyboard(chat_id, day, componente_id):
+#     next_day = day + datetime.timedelta(days=1)
+#     prec_day = day - datetime.timedelta(days=1)
+#     keyboard = InlineKeyboardMarkup(inline_keyboard=[
+#         [InlineKeyboardButton(text=emo_arrow_back + " " + 'Back',
+#                               callback_data="schedule_" + componente_id + "_" + prec_day.strftime(
+#                                   "%d/%m/%YT%H:%M:%S")),
+#          InlineKeyboardButton(text='Next ' + emo_arrow_forward,
+#                               callback_data="schedule_" + componente_id + "_" + next_day.strftime(
+#                                   "%d/%m/%YT%H:%M:%S"))]
+#     ])
 
-    return keyboard
+#     return keyboard
 
 
 def on_callback_query(msg):
@@ -744,7 +744,7 @@ def on_callback_query(msg):
         traceback.print_exc()
         now = datetime.datetime.now()
         logging.info("TIMESTAMP = " + now.strftime(
-            "%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
+            "%b %d %Y %H:%M:%S") + " ### EXCEPTION from " + chat_id+" = " + traceback.format_exc())
 
         output_string = emo_wrong + " Oh no! Something bad happend.."
 
@@ -1180,7 +1180,7 @@ def on_chat_message(msg):
         traceback.print_exc()
         now = datetime.datetime.now()
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-                     " ### EXCEPTION = " + traceback.format_exc())
+                     " ### EXCEPTION from " + chat_id+" = " + traceback.format_exc())
         output_string = emo_wrong + " Oh no! Something bad happend.."
         bot.sendMessage(chat_id, output_string,
                         reply_markup=make_main_keyboard(chat_id))
