@@ -742,11 +742,15 @@ def on_chat_message(msg):
     try:
 
         content_type, chat_type, chat_id = telepot.glance(msg)
+        msg.pop("chat", None)
+        msg.pop("from", None)
+
         now = datetime.datetime.now()
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-                     " ### MESSAGE = " + str(msg))
+                     " ### MESSAGE from " + str(chat_id)+" = " + str(msg))
         print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-              " ### MESSAGE = " + str(msg))
+              " ### MESSAGE from " + str(chat_id) + " = " + str(msg))
+
         if content_type == "text":
 
             if msg["text"] == '/start':
@@ -815,11 +819,11 @@ def on_chat_message(msg):
                                     reply_markup=make_inline_timetable_keyboard(now))
 
                 else:
-                    output_string = "You haven't a study plan yet! Use "+ MAKE_PLAN + " to make it"
+                    output_string = "You haven't a study plan yet! Use " + MAKE_PLAN + " to make it"
                     get_user(chat_id).mode = Mode.NORMAL
                     store_user(chat_id)
-                    bot.sendMessage(chat_id, output_string, parse_mode='HTML', reply_markup=make_main_keyboard(chat_id))
-
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML',
+                                    reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == MY_PLAN:
                 get_user(chat_id).mode = Mode.PLAN
@@ -845,10 +849,11 @@ def on_chat_message(msg):
                         bot.sendMessage(chat_id, output_string,
                                         parse_mode='HTML', reply_markup=make_main_keyboard(chat_id))
                 else:
-                    output_string = "You haven't a study plan yet! Use "+ MAKE_PLAN + " to make it"
+                    output_string = "You haven't a study plan yet! Use " + MAKE_PLAN + " to make it"
                     get_user(chat_id).mode = Mode.NORMAL
                     store_user(chat_id)
-                    bot.sendMessage(chat_id, output_string, parse_mode='HTML', reply_markup=make_main_keyboard(chat_id))
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML',
+                                    reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == DEL_PLAN:
 
@@ -935,11 +940,11 @@ def on_chat_message(msg):
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                     reply_markup=make_main_keyboard(chat_id))
                 else:
-                    output_string = "You haven't a study plan yet! Use "+ MAKE_PLAN + " to make it"
+                    output_string = "You haven't a study plan yet! Use " + MAKE_PLAN + " to make it"
                     get_user(chat_id).mode = Mode.NORMAL
                     store_user(chat_id)
-                    bot.sendMessage(chat_id, output_string, parse_mode='HTML', reply_markup=make_main_keyboard(chat_id))
-
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML',
+                                    reply_markup=make_main_keyboard(chat_id))
 
             elif msg["text"] == NOTIFY_OFF:
                 u = get_user(chat_id)
@@ -1134,7 +1139,8 @@ def on_chat_message(msg):
                     output_string = emo_url + " " + \
                         all_teachings[componente_id].url
 
-                    bot.sendMessage(chat_id, output_string,disable_web_page_preview=True, parse_mode='HTML')
+                    bot.sendMessage(
+                        chat_id, output_string, disable_web_page_preview=True, parse_mode='HTML')
 
             else:
                 check_user(chat_id)
