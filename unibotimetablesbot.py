@@ -95,7 +95,7 @@ all_courses_group_by_area = collections.defaultdict(list)
 users = dict()
 accademic_year = ""
 
-orari = []  # list of dict
+orari = collections.defaultdict(list)
 
 
 def get_all_aule():
@@ -220,26 +220,28 @@ def get_plan_timetable(day, plan):
 
     if plan.is_empty():
         return timetable
-    start = datetime.datetime.strptime(day.strftime("%Y-%m-%d") + "T00:00:00", "%Y-%m-%dT%H:%M:%S")
-    stop = datetime.datetime.strptime(day.strftime("%Y-%m-%d") + "T23:59:59", "%Y-%m-%dT%H:%M:%S")
-  
-    for o in orari:
-        try:
-            componente_id = o["componente_id"]
 
-            t = plan.find_teaching_by_componente_id(componente_id)
-            if t != None:
+    start = datetime.datetime.strptime(day.strftime(
+        "%Y-%m-%d") + "T00:00:00", "%Y-%m-%dT%H:%M:%S")
+    stop = datetime.datetime.strptime(day.strftime(
+        "%Y-%m-%d") + "T23:59:59", "%Y-%m-%dT%H:%M:%S")
+
+    for t in plan.teachings:
+        for o in orari[t.componente_id]:
+            try:
                 ##### DEBUG #####
                 # if t.componente_id == '448380':
                 #     print(t)
                 #################
-                inizio= datetime.datetime.strptime(o["inizio"], "%Y-%m-%dT%H:%M:%S")
+                inizio = datetime.datetime.strptime(
+                    o["inizio"], "%Y-%m-%dT%H:%M:%S")
+
                 if inizio > start and inizio < stop:
                     l = Lesson(t.corso_codice, t.materia_codice, t.materia_descrizione, t.docente_nome, t.componente_id,
-                                t.url,
-                                datetime.datetime.strptime(
-                                    o["inizio"], "%Y-%m-%dT%H:%M:%S"),
-                                datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre)
+                               t.url,
+                               datetime.datetime.strptime(
+                                   o["inizio"], "%Y-%m-%dT%H:%M:%S"),
+                               datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre)
                     for code in o["aula_codici"].split():
                         try:
                             a = all_aule[code]
@@ -249,12 +251,12 @@ def get_plan_timetable(day, plan):
                                             "UNKNOWN ADDRESS", "", "NO LAT", "NO LON"))
 
                     timetable.add_lesson(l)
-        except:
-            traceback.print_exc()
-            now = datetime.datetime.now()
-            logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-                        " ### EXCEPTION = " + traceback.format_exc())
-    
+            except:
+                traceback.print_exc()
+                now = datetime.datetime.now()
+                logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                             " ### EXCEPTION = " + traceback.format_exc())
+
     timetable.lessons.sort(key=lambda x: x.inizio, reverse=False)
     return timetable
 
@@ -299,8 +301,8 @@ def get_plan_timetable_web_api(day, plan):
 
     if ok:
 
-        orari = json.loads(json_orari)["result"]["records"]
-        for o in orari:
+        orari_dict = json.loads(json_orari)["result"]["records"]
+        for o in orari_dict:
             try:
                 componente_id = o["componente_id"]
 
@@ -311,10 +313,10 @@ def get_plan_timetable_web_api(day, plan):
                     #     print(t)
                     #################
                     l = Lesson(t.corso_codice, t.materia_codice, t.materia_descrizione, t.docente_nome, t.componente_id,
-                            t.url,
-                            datetime.datetime.strptime(
-                                o["inizio"], "%Y-%m-%dT%H:%M:%S"),
-                            datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre)
+                               t.url,
+                               datetime.datetime.strptime(
+                                   o["inizio"], "%Y-%m-%dT%H:%M:%S"),
+                               datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre)
                     for code in o["aula_codici"].split():
                         try:
                             a = all_aule[code]
@@ -328,7 +330,7 @@ def get_plan_timetable_web_api(day, plan):
                 traceback.print_exc()
                 now = datetime.datetime.now()
                 logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-                            " ### EXCEPTION = " + traceback.format_exc())
+                             " ### EXCEPTION = " + traceback.format_exc())
         timetable.lessons.sort(key=lambda x: x.inizio, reverse=False)
         return timetable
     else:
@@ -1241,9 +1243,11 @@ def on_chat_message(msg):
 
 
 def download_csv_orari():
-    now=datetime.datetime.now()
-    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### DOWNLOADING CSV ORARI") 
-    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + "  ### DOWNLOADING CSV ORARI")
+    now = datetime.datetime.now()
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                 " ### DOWNLOADING CSV ORARI")
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+          "  ### DOWNLOADING CSV ORARI")
 
     if os.path.isfile(current_dir+"orari_"+accademic_year+".csv"):
         os.remove(current_dir+"orari_"+accademic_year+".csv")
@@ -1253,18 +1257,18 @@ def download_csv_orari():
 
     csv_orari_filename = wget.download(
         url_orari_csv, current_dir+"orari_"+accademic_year+".csv")
-        
+
     orari.clear()
 
     with open(csv_orari_filename) as f:
         csv_reader = csv.reader(f, delimiter=',')
         for row in csv_reader:
             o = {}
-            o["componente_id"]=row[0]
-            o["inizio"]=''.join(row[1].split("+")[0])
-            o["fine"]=''.join(row[2].split("+")[0])
-            o["aula_codici"]=row[3]
-            orari.append(o)
+            o["componente_id"] = row[0]
+            o["inizio"] = ''.join(row[1].split("+")[0])
+            o["fine"] = ''.join(row[2].split("+")[0])
+            o["aula_codici"] = row[3]
+            orari[o["componente_id"]].append(o)
 
 
 def check_table(table):
