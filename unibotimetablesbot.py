@@ -6,10 +6,12 @@ import sys
 import traceback
 import datetime
 import logging
+import wget
 import json
 import requests
 import time
 import telepot
+import csv
 from telepot.loop import MessageLoop
 from telepot.namedtuple import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardMarkup, \
     InlineKeyboardButton
@@ -83,6 +85,7 @@ logging.info("### WORK DIR " + current_dir)
 dir_plans_name = current_dir + 'plans/'
 dir_users_name = current_dir + 'users/'
 
+
 # writer_lock = Lock()
 
 all_courses = dict()
@@ -91,6 +94,8 @@ all_teachings = dict()
 all_courses_group_by_area = collections.defaultdict(list)
 users = dict()
 accademic_year = ""
+
+orari = []  # list of dict
 
 
 def get_all_aule():
@@ -215,6 +220,50 @@ def get_plan_timetable(day, plan):
 
     if plan.is_empty():
         return timetable
+    start = datetime.datetime.strptime(day.strftime("%Y-%m-%d") + "T00:00:00", "%Y-%m-%dT%H:%M:%S")
+    stop = datetime.datetime.strptime(day.strftime("%Y-%m-%d") + "T23:59:59", "%Y-%m-%dT%H:%M:%S")
+  
+    for o in orari:
+        try:
+            componente_id = o["componente_id"]
+
+            t = plan.find_teaching_by_componente_id(componente_id)
+            if t != None:
+                ##### DEBUG #####
+                # if t.componente_id == '448380':
+                #     print(t)
+                #################
+                inizio= datetime.datetime.strptime(o["inizio"], "%Y-%m-%dT%H:%M:%S")
+                if inizio > start and inizio < stop:
+                    l = Lesson(t.corso_codice, t.materia_codice, t.materia_descrizione, t.docente_nome, t.componente_id,
+                                t.url,
+                                datetime.datetime.strptime(
+                                    o["inizio"], "%Y-%m-%dT%H:%M:%S"),
+                                datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre)
+                    for code in o["aula_codici"].split():
+                        try:
+                            a = all_aule[code]
+                            l.add_aula(a)
+                        except:
+                            l.add_aula(Aula("-", "UNKNOWN AULA",
+                                            "UNKNOWN ADDRESS", "", "NO LAT", "NO LON"))
+
+                    timetable.add_lesson(l)
+        except:
+            traceback.print_exc()
+            now = datetime.datetime.now()
+            logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                        " ### EXCEPTION = " + traceback.format_exc())
+    
+    timetable.lessons.sort(key=lambda x: x.inizio, reverse=False)
+    return timetable
+
+
+def get_plan_timetable_web_api(day, plan):
+    timetable = Timetable()
+
+    if plan.is_empty():
+        return timetable
 
     orari_table = "orari_" + accademic_year
     aule_table = "aule_" + accademic_year
@@ -251,30 +300,35 @@ def get_plan_timetable(day, plan):
     if ok:
 
         orari = json.loads(json_orari)["result"]["records"]
-
         for o in orari:
-            componente_id = o["componente_id"]
+            try:
+                componente_id = o["componente_id"]
 
-            t = plan.find_teaching_by_componente_id(componente_id)
-            if t != None:
-                ##### DEBUG #####
-                # if t.componente_id == '448380':
-                #     print(t)
-                #################
-                l = Lesson(t.corso_codice, t.materia_codice, t.materia_descrizione, t.docente_nome, t.componente_id,
-                           t.url,
-                           datetime.datetime.strptime(
-                               o["inizio"], "%Y-%m-%dT%H:%M:%S"),
-                           datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre)
-                for code in o["aula_codici"].split():
-                    try:
-                        a = all_aule[code]
-                        l.add_aula(a)
-                    except:
-                        l.add_aula(Aula("-", "UNKNOWN AULA",
-                                        "UNKNOWN ADDRESS", "", "NO LAT", "NO LON"))
+                t = plan.find_teaching_by_componente_id(componente_id)
+                if t != None:
+                    ##### DEBUG #####
+                    # if t.componente_id == '448380':
+                    #     print(t)
+                    #################
+                    l = Lesson(t.corso_codice, t.materia_codice, t.materia_descrizione, t.docente_nome, t.componente_id,
+                            t.url,
+                            datetime.datetime.strptime(
+                                o["inizio"], "%Y-%m-%dT%H:%M:%S"),
+                            datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre)
+                    for code in o["aula_codici"].split():
+                        try:
+                            a = all_aule[code]
+                            l.add_aula(a)
+                        except:
+                            l.add_aula(Aula("-", "UNKNOWN AULA",
+                                            "UNKNOWN ADDRESS", "", "NO LAT", "NO LON"))
 
-                timetable.add_lesson(l)
+                    timetable.add_lesson(l)
+            except:
+                traceback.print_exc()
+                now = datetime.datetime.now()
+                logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                            " ### EXCEPTION = " + traceback.format_exc())
         timetable.lessons.sort(key=lambda x: x.inizio, reverse=False)
         return timetable
     else:
@@ -744,7 +798,7 @@ def on_callback_query(msg):
         traceback.print_exc()
         now = datetime.datetime.now()
         logging.info("TIMESTAMP = " + now.strftime(
-            "%b %d %Y %H:%M:%S") + " ### EXCEPTION from " + chat_id+" = " + traceback.format_exc())
+            "%b %d %Y %H:%M:%S") + " ### EXCEPTION from " + str(chat_id)+" = " + traceback.format_exc())
 
         output_string = emo_wrong + " Oh no! Something bad happend.."
 
@@ -1180,10 +1234,37 @@ def on_chat_message(msg):
         traceback.print_exc()
         now = datetime.datetime.now()
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-                     " ### EXCEPTION from " + chat_id+" = " + traceback.format_exc())
+                     " ### EXCEPTION from " + str(chat_id)+" = " + traceback.format_exc())
         output_string = emo_wrong + " Oh no! Something bad happend.."
         bot.sendMessage(chat_id, output_string,
                         reply_markup=make_main_keyboard(chat_id))
+
+
+def download_csv_orari():
+    now=datetime.datetime.now()
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### DOWNLOADING CSV ORARI") 
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + "  ### DOWNLOADING CSV ORARI")
+
+    if os.path.isfile(current_dir+"orari_"+accademic_year+".csv"):
+        os.remove(current_dir+"orari_"+accademic_year+".csv")
+
+    url_orari_csv = "https://dati.unibo.it/dataset/course-timetable-"+accademic_year + \
+        "/resource/orari_"+accademic_year+"/download/orari_"+accademic_year+".csv"
+
+    csv_orari_filename = wget.download(
+        url_orari_csv, current_dir+"orari_"+accademic_year+".csv")
+        
+    orari.clear()
+
+    with open(csv_orari_filename) as f:
+        csv_reader = csv.reader(f, delimiter=',')
+        for row in csv_reader:
+            o = {}
+            o["componente_id"]=row[0]
+            o["inizio"]=''.join(row[1].split("+")[0])
+            o["fine"]=''.join(row[2].split("+")[0])
+            o["aula_codici"]=row[3]
+            orari.append(o)
 
 
 def check_table(table):
@@ -1246,7 +1327,8 @@ def update():
     if check_table(aule_table):
         get_all_aule()
 
-    check_table(orari_table)
+    if check_table(orari_table):
+        download_csv_orari()
 
 
 def send_good_morning():
