@@ -207,10 +207,17 @@ def get_all_courses():
 
     for key in all_teachings.keys():
         t = all_teachings[key]
-        if (t.anno == None or t.anno == "") and t.componente_padre != None and t.componente_padre != "":
-            t.anno = all_teachings[t.componente_padre].anno
-        if (t.crediti == None or t.crediti == "") and t.componente_padre != None and t.componente_padre != "":
-            t.crediti = all_teachings[t.componente_padre].crediti
+        if (t.anno == None or t.anno == ""):
+            comp_p = t.componente_padre
+            while (t.anno == None or t.anno == "") and comp_p != None and comp_p != "":
+                t.anno = all_teachings[comp_p].anno
+                comp_p = all_teachings[comp_p].componente_padre
+
+        if (t.crediti == None or t.crediti == ""):
+            comp_p = t.componente_padre
+            while (t.crediti == None or t.crediti == "") and comp_p != None and comp_p != "":
+                t.crediti = all_teachings[comp_p].crediti
+                comp_p = all_teachings[comp_p].componente_padre
 
     for key in all_courses.keys():
         all_courses[key].teachings.sort(
@@ -222,8 +229,6 @@ def get_all_courses():
 
     for key in all_courses_group_by_area.keys():
         all_courses_group_by_area[key].sort(key=lambda x: x.corso_codice)
-
-
 
 
 def get_plan_timetable(day, plan):
