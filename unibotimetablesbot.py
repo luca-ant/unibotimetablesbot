@@ -164,6 +164,8 @@ def get_all_courses():
     json_insegnamenti = requests.post(
         url, headers=headers, data='{"sql":'+'"'+sql_insegnamenti+'"}').text
 
+    global all_courses_group_by_area
+
     all_courses.clear()
     all_teachings.clear()
     all_courses_group_by_area.clear()
@@ -213,6 +215,15 @@ def get_all_courses():
     for key in all_courses.keys():
         all_courses[key].teachings.sort(
             key=lambda x: x.materia_descrizione, reverse=False)
+
+    l = list(all_courses_group_by_area.items())
+    l.sort()
+    all_courses_group_by_area = dict(l)
+
+    for key in all_courses_group_by_area.keys():
+        all_courses_group_by_area[key].sort(key=lambda x: x.corso_codice)
+
+
 
 
 def get_plan_timetable(day, plan):
@@ -335,6 +346,49 @@ def get_plan_timetable_web_api(day, plan):
         return timetable
     else:
         return None
+
+
+def get_next_lesson(now, plan):
+    timetable = Timetable()
+
+    if plan.is_empty():
+        return timetable
+
+    up = now + datetime.timedelta(minutes=30)
+
+    for t in plan.teachings:
+        for o in orari[t.componente_id]:
+            try:
+                ##### DEBUG #####
+                # if t.componente_id == '448380':
+                #     print(t)
+                #################
+                inizio = datetime.datetime.strptime(
+                    o["inizio"], "%Y-%m-%dT%H:%M:%S")
+
+                if inizio > now and inizio < up:
+                    l = Lesson(t.corso_codice, t.materia_codice, t.materia_descrizione, t.docente_nome, t.componente_id,
+                               t.url,
+                               datetime.datetime.strptime(
+                                   o["inizio"], "%Y-%m-%dT%H:%M:%S"),
+                               datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre)
+                    for code in o["aula_codici"].split():
+                        try:
+                            a = all_aule[code]
+                            l.add_aula(a)
+                        except:
+                            l.add_aula(Aula("-", "UNKNOWN AULA",
+                                            "UNKNOWN ADDRESS", "", "NO LAT", "NO LON"))
+
+                    timetable.add_lesson(l)
+            except:
+                traceback.print_exc()
+                now = datetime.datetime.now()
+                logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                             " ### EXCEPTION = " + traceback.format_exc())
+
+    timetable.lessons.sort(key=lambda x: x.inizio, reverse=False)
+    return timetable
 
 
 def load_user_plan(chat_id):
@@ -649,6 +703,7 @@ def make_inline_timetable_keyboard(day):
                               callback_data=prec_week.strftime("%d/%m/%YT%H:%M:%S")),
          InlineKeyboardButton(
              text=emo_arrow_back, callback_data=prec_day.strftime("%d/%m/%YT%H:%M:%S")),
+         InlineKeyboardButton(text="TODAY", callback_data="today"),
          InlineKeyboardButton(
              text=emo_arrow_forward, callback_data=next_day.strftime("%d/%m/%YT%H:%M:%S")),
          InlineKeyboardButton(text=emo_double_arrow_forward, callback_data=next_week.strftime("%d/%m/%YT%H:%M:%S"))]
@@ -684,6 +739,8 @@ def make_inline_today_schedule_keyboard(chat_id, day, corso_codice, year):
          InlineKeyboardButton(
              text=emo_arrow_back,  callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + prec_day.strftime(
                  "%d/%m/%YT%H:%M:%S")),
+         InlineKeyboardButton(text="TODAY", callback_data="course_" +
+                              corso_codice + "_year_"+str(year)+"_" + "today"),
          InlineKeyboardButton(
              text=emo_arrow_forward, callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + next_day.strftime(
                  "%d/%m/%YT%H:%M:%S")),
@@ -749,9 +806,12 @@ def on_callback_query(msg):
             array = query_data.split("_")
             corso_codice = array[1]
             year = int(array[3])
-            day_string = array[len(array) - 1]
-
-            day = datetime.datetime.strptime(day_string, "%d/%m/%YT%H:%M:%S")
+            if query_data.endswith("today"):
+                day = datetime.datetime.now()
+            else:
+                day_string = array[len(array) - 1]
+                day = datetime.datetime.strptime(
+                    day_string, "%d/%m/%YT%H:%M:%S")
 
             course = all_courses[corso_codice]
             plan = Plan()
@@ -776,7 +836,12 @@ def on_callback_query(msg):
                 pass
 
         else:
-            day = datetime.datetime.strptime(query_data, "%d/%m/%YT%H:%M:%S")
+            if query_data.endswith("today"):
+                day = datetime.datetime.now()
+            else:
+                day = datetime.datetime.strptime(
+                    query_data, "%d/%m/%YT%H:%M:%S")
+
             plan = load_user_plan(chat_id)
 
             if plan != None:
@@ -1247,7 +1312,7 @@ def download_csv_orari():
     logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
                  " ### DOWNLOADING CSV ORARI")
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-          "  ### DOWNLOADING CSV ORARI")
+          " ### DOWNLOADING CSV ORARI")
 
     if os.path.isfile(current_dir+"orari_"+accademic_year+".csv"):
         os.remove(current_dir+"orari_"+accademic_year+".csv")
@@ -1335,13 +1400,50 @@ def update():
         download_csv_orari()
 
 
-def send_good_morning():
+def send_notifications():
+    now = datetime.datetime.now()
+
     for chat_id in users.keys():
         try:
             u = get_user(chat_id)
 
             if u.notificated:
-                now = datetime.datetime.now()
+
+                plan = load_user_plan(chat_id)
+
+                timetable = get_next_lesson(now, plan)
+
+                output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
+                    int(accademic_year) + 1) + "</code>\n"
+                output_string += emo_calendar + " " + \
+                    now.strftime("%A %B %d, %Y") + "\n\n"
+                output_string += "<b>YOUR NEXT LESSON</b>\n\n"
+
+                output_string += print_output_timetable(timetable)
+                if "NO LESSONS FOR TODAY" not in output_string:
+                    logging.info(
+                        "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SENDING NOTIFICATION TO " + str(chat_id))
+                    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + "  ### SENDING NOTIFICATION TO " + str(
+                        chat_id))
+
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML',
+                                    reply_markup=make_inline_timetable_keyboard(now))
+
+        except:
+            traceback.print_exc()
+            now = datetime.datetime.now()
+            logging.info(
+                "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
+
+
+def send_good_morning():
+    now = datetime.datetime.now()
+
+    for chat_id in users.keys():
+        try:
+            u = get_user(chat_id)
+
+            if u.notificated:
 
                 plan = load_user_plan(chat_id)
 
@@ -1377,12 +1479,28 @@ if os.path.isdir(dir_users_name):
 
 
 update()
-schedule.every().day.at("06:30").do(update)
-schedule.every().monday.at("08:45").do(send_good_morning)
-schedule.every().thursday.at("08:45").do(send_good_morning)
-schedule.every().wednesday.at("08:45").do(send_good_morning)
-schedule.every().thursday.at("08:45").do(send_good_morning)
-schedule.every().friday.at("08:45").do(send_good_morning)
+schedule.every().day.at("07:00").do(update)
+
+for i in range(8, 20, 1):
+
+    h = "%02d" % i
+
+    schedule.every().monday.at(h+":15").do(send_notifications)
+    schedule.every().monday.at(h+":45").do(send_notifications)
+
+    schedule.every().tuesday.at(h+":15").do(send_notifications)
+    schedule.every().tuesday.at(h+":45").do(send_notifications)
+
+    schedule.every().wednesday.at(h+":15").do(send_notifications)
+    schedule.every().wednesday.at(h+":45").do(send_notifications)
+
+    schedule.every().thursday.at(h+":15").do(send_notifications)
+    schedule.every().thursday.at(h+":45").do(send_notifications)
+
+    schedule.every().friday.at(h+":15").do(send_notifications)
+    schedule.every().friday.at(h+":45").do(send_notifications)
+
+
 MessageLoop(bot, {'chat': on_chat_message,
                   'callback_query': on_callback_query}).run_as_thread()
 
