@@ -949,8 +949,7 @@ def on_chat_message(msg):
 
                     output_string += print_output_timetable(timetable)
 
-                    bot.sendMessage(chat_id, important_string,
-                                    parse_mode='HTML')
+                    # bot.sendMessage(chat_id, important_string, parse_mode='HTML')
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                     reply_markup=make_inline_timetable_keyboard(now))
 
@@ -1174,8 +1173,7 @@ def on_chat_message(msg):
 
                         output_string += print_output_timetable(timetable)
 
-                        bot.sendMessage(chat_id, important_string,
-                                        parse_mode='HTML')
+                        # bot.sendMessage(chat_id, important_string, parse_mode='HTML')
                         bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                         reply_markup=make_inline_today_schedule_keyboard(chat_id, now, course.corso_codice, year))
 
