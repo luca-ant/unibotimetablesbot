@@ -164,12 +164,6 @@ def get_all_courses():
     json_insegnamenti = requests.post(
         url, headers=headers, data='{"sql":'+'"'+sql_insegnamenti+'"}').text
 
-    global all_courses_group_by_area
-
-    all_courses.clear()
-    all_teachings.clear()
-    all_courses_group_by_area.clear()
-
     try:
         corsi = json.loads(json_corsi)["result"]["records"]
         insegnamenti = json.loads(json_insegnamenti)["result"]["records"]
@@ -180,10 +174,20 @@ def get_all_courses():
                      " ### EXCEPTION = " + traceback.format_exc())
         return
 
+    global all_courses_group_by_area
+    global all_courses
+    global all_teachings
+
+    all_courses.clear()
+    all_teachings.clear()
+    all_courses_group_by_area.clear()
+
     for c in corsi:
         course = Course(c["corso_codice"], c["corso_descrizione"], c["tipologia"], c["sededidattica"], c["ambiti"],
                         c["url"], c["durata"])
         all_courses[course.corso_codice] = course
+        if course.ambiti not in all_courses_group_by_area.keys():
+            all_courses_group_by_area[course.ambiti] = list()
         all_courses_group_by_area[course.ambiti].append(course)
 
     for i in insegnamenti:
@@ -1324,7 +1328,7 @@ def download_csv_orari():
         "/resource/orari_"+accademic_year+"/download/orari_"+accademic_year+".csv"
 
     csv_orari_filename = wget.download(
-        url_orari_csv, current_dir+"orari_"+accademic_year+".csv")
+        url_orari_csv, current_dir+"orari_"+accademic_year+".csv", bar=None)
 
     orari.clear()
 
