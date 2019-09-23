@@ -228,13 +228,6 @@ def get_all_courses():
         all_courses[key].teachings.sort(
             key=lambda x: x.materia_descrizione, reverse=False)
 
-    l = list(all_courses_group_by_area.items())
-    l.sort()
-    all_courses_group_by_area = dict(l)
-
-    for key in all_courses_group_by_area.keys():
-        all_courses_group_by_area[key].sort(key=lambda x: x.corso_codice)
-
 
 def get_plan_timetable(day, plan):
     timetable = Timetable()
@@ -528,8 +521,8 @@ def make_area_keyboard(mode):
     for i in range(0, len(all_courses_group_by_area.keys()) + 2, 1):
         buttonLists.append(list())
 
-    for i in range(0, len(all_courses_group_by_area.keys()), 1):
-        buttonLists[i + 1].append(list(all_courses_group_by_area.keys())[i])
+    for i, key in enumerate(sorted(all_courses_group_by_area.keys())):
+        buttonLists[i + 1].append(key)
 
     buttonLists[len(all_courses_group_by_area.keys()) + 1].append(BACK_TO_MAIN)
     if mode == Mode.MAKE_PLAN:
@@ -835,10 +828,10 @@ def on_callback_query(msg):
                 "/" + str(int(accademic_year) + 1) + "</code>\n"
             output_string += emo_calendar + " " + \
                 day.strftime("%A %B %d, %Y") + "\n\n"
-            
+
             output_string += emo_pin+" <b>"+str(course)+"</b>\n\n"
 
-            output_string += emo_timetable +" <b>TIMETABLE</b>\n\n"
+            output_string += emo_timetable + " <b>TIMETABLE</b>\n\n"
 
             output_string += print_output_timetable(timetable)
 
@@ -867,7 +860,7 @@ def on_callback_query(msg):
                     "/" + str(int(accademic_year) + 1) + "</code>\n"
                 output_string += emo_calendar + " " + \
                     day.strftime("%A %B %d, %Y") + "\n\n"
-                output_string += emo_timetable+ " <b>YOUR TIMETABLE</b>\n\n"
+                output_string += emo_timetable + " <b>YOUR TIMETABLE</b>\n\n"
 
                 output_string += print_output_timetable(timetable)
                 try:
@@ -1165,7 +1158,7 @@ def on_chat_message(msg):
                         output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                             int(accademic_year) + 1) + "</code>\n\n"
                         output_string += emo_pin+" <b>"+str(course)+"</b>\n\n"
-                        output_string += emo_plan+ " <b>TEACHINGS " + \
+                        output_string += emo_plan + " <b>TEACHINGS " + \
                             str(year) + " YEAR</b> (sorted by name)\n\n"
                         for s in string_list:
                             output_string += s
@@ -1196,10 +1189,8 @@ def on_chat_message(msg):
                             now.strftime("%A %B %d, %Y") + "\n\n"
 
                         output_string += emo_pin+" <b>"+str(course)+"</b>\n\n"
-        
 
-                        output_string += emo_timetable+ " <b>TIMETABLE</b>\n\n"
-
+                        output_string += emo_timetable + " <b>TIMETABLE</b>\n\n"
 
                         output_string += print_output_timetable(timetable)
 
@@ -1215,10 +1206,11 @@ def on_chat_message(msg):
 
                     output_string = emo_ay + " A.Y. <code>" + accademic_year + \
                         "/" + str(int(accademic_year) + 1) + "</code>\n\n"
-                    output_string += "<b>SELECTED COURSE:\n" + emo_pin+" " +str(course)+"</b>"
+                    output_string += "<b>SELECTED COURSE:\n" + \
+                        emo_pin+" " + str(course)+"</b>"
 
                     if course.url != "":
-                        output_string +="\n"+ emo_url + " " + course.url
+                        output_string += "\n" + emo_url + " " + course.url
 
                     output_string += "\n\nChoose your year!"
 
