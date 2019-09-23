@@ -50,6 +50,7 @@ emo_not_on = u'\U0001F514'
 emo_not_off = u'\U0001F515'
 emo_wrong = u'\U0001F914'
 emo_privacy = u'\U0001F50F'
+emo_pin = u'\U0001F4CC'
 
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
@@ -834,6 +835,11 @@ def on_callback_query(msg):
                 "/" + str(int(accademic_year) + 1) + "</code>\n"
             output_string += emo_calendar + " " + \
                 day.strftime("%A %B %d, %Y") + "\n\n"
+            
+            output_string += emo_pin+" <b>"+str(course)+"</b>\n\n"
+
+            output_string += emo_timetable +" <b>TIMETABLE</b>\n\n"
+
             output_string += print_output_timetable(timetable)
 
             try:
@@ -861,6 +867,8 @@ def on_callback_query(msg):
                     "/" + str(int(accademic_year) + 1) + "</code>\n"
                 output_string += emo_calendar + " " + \
                     day.strftime("%A %B %d, %Y") + "\n\n"
+                output_string += emo_timetable+ " <b>YOUR TIMETABLE</b>\n\n"
+
                 output_string += print_output_timetable(timetable)
                 try:
                     bot.editMessageText(msg_edited, output_string, parse_mode='HTML',
@@ -956,6 +964,8 @@ def on_chat_message(msg):
                     output_string += emo_calendar + " " + \
                         now.strftime("%A %B %d, %Y") + "\n\n"
 
+                    output_string += emo_timetable + " <b>YOUR TIMETABLE</b>" + "\n\n"
+
                     output_string += print_output_timetable(timetable)
 
                     # bot.sendMessage(chat_id, important_string, parse_mode='HTML')
@@ -979,8 +989,8 @@ def on_chat_message(msg):
 
                     i = 0
                     output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
-                        int(accademic_year) + 1) + "</code>\n"
-                    output_string += emo_plan + " YOUR STUDY PLAN" + "\n\n"
+                        int(accademic_year) + 1) + "</code>\n\n"
+                    output_string += emo_plan + " <b>YOUR STUDY PLAN</b>" + "\n\n"
 
                     for s in string_list:
                         output_string += s
@@ -1151,7 +1161,11 @@ def on_chat_message(msg):
                             chat_id, course.corso_codice, year)
 
                         i = 0
-                        output_string = "<b>TEACHINGS " + \
+
+                        output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
+                            int(accademic_year) + 1) + "</code>\n\n"
+                        output_string += emo_pin+" <b>"+str(course)+"</b>\n\n"
+                        output_string += emo_plan+ " <b>TEACHINGS " + \
                             str(year) + " YEAR</b> (sorted by name)\n\n"
                         for s in string_list:
                             output_string += s
@@ -1177,8 +1191,15 @@ def on_chat_message(msg):
 
                         output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                             int(accademic_year) + 1) + "</code>\n"
+
                         output_string += emo_calendar + " " + \
                             now.strftime("%A %B %d, %Y") + "\n\n"
+
+                        output_string += emo_pin+" <b>"+str(course)+"</b>\n\n"
+        
+
+                        output_string += emo_timetable+ " <b>TIMETABLE</b>\n\n"
+
 
                         output_string += print_output_timetable(timetable)
 
@@ -1193,14 +1214,13 @@ def on_chat_message(msg):
                 except ValueError:
 
                     output_string = emo_ay + " A.Y. <code>" + accademic_year + \
-                        "/" + str(int(accademic_year) + 1) + "</code>\n"
-                    output_string += "<b>SELECTED COURSE:\n" + \
-                        str(course)+"</b>\n\n"
+                        "/" + str(int(accademic_year) + 1) + "</code>\n\n"
+                    output_string += "<b>SELECTED COURSE:\n" + emo_pin+" " +str(course)+"</b>"
 
                     if course.url != "":
-                        output_string += "WEB SITE -> " + emo_url + " " + course.url+"\n\n"
+                        output_string +="\n"+ emo_url + " " + course.url
 
-                    output_string += "Choose your year!"
+                    output_string += "\n\nChoose your year!"
 
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML', disable_web_page_preview=True, reply_markup=make_year_keyboard(
                         course.corso_codice, get_user(chat_id).mode))
