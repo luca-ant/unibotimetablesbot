@@ -1437,7 +1437,7 @@ def send_notifications():
                     int(accademic_year) + 1) + "</code>\n"
                 output_string += emo_calendar + " " + \
                     now.strftime("%A %B %d, %Y") + "\n\n"
-                output_string += emo_less+"<b>YOUR NEXT LESSON</b>\n\n"
+                output_string += emo_less+" <b>YOUR NEXT LESSON</b>\n\n"
 
                 output_string += print_output_timetable(timetable)
                 if "NO LESSONS FOR TODAY" not in output_string:
