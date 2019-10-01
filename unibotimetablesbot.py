@@ -51,6 +51,7 @@ emo_not_off = u'\U0001F515'
 emo_wrong = u'\U0001F914'
 emo_privacy = u'\U0001F50F'
 emo_pin = u'\U0001F4CC'
+emo_less=u'\U0001F4D6'
 
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
@@ -1436,7 +1437,7 @@ def send_notifications():
                     int(accademic_year) + 1) + "</code>\n"
                 output_string += emo_calendar + " " + \
                     now.strftime("%A %B %d, %Y") + "\n\n"
-                output_string += "<b>YOUR NEXT LESSON</b>\n\n"
+                output_string += emo_less+"<b>YOUR NEXT LESSON</b>\n\n"
 
                 output_string += print_output_timetable(timetable)
                 if "NO LESSONS FOR TODAY" not in output_string:
