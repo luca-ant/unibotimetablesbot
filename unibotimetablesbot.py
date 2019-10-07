@@ -1445,22 +1445,22 @@ def send_notifications():
                 for l in timetable.lessons:
                     output_string += "GO TO "
                     for a in l.lista_aule:
-                        result += emo_room + " <b>" + a.aula_nome+"<\b> "
+                        output_string += emo_room + " <b>" + a.aula_nome+"<\b> "
 
                     output_string += "FOR <b>" + l.materia_descrizione + "</b>"
                     if l.docente_nome != "":
-                        result += " (<i>" + l.docente_nome + "</i>)"
+                        output_string += " (<i>" + l.docente_nome + "</i>)"
                     if l.crediti != None and l.crediti != "":
-                        result += " - " + l.crediti + " CFU"
+                        output_string += " - " + l.crediti + " CFU"
 
-                    result += "\n"
+                    output_string += "\n"
 
-                    result += emo_calendar + " " + l.inizio.strftime("%d/%m/%Y")
-                    result += "\n"
-                    result += emo_clock + " " + l.inizio.strftime("%H:%M")
-                    result += " - "
-                    result += l.fine.strftime("%H:%M")
-                    result += "\n\n"
+                    output_string += emo_calendar + " " + l.inizio.strftime("%d/%m/%Y")
+                    output_string += "\n"
+                    output_string += emo_clock + " " + l.inizio.strftime("%H:%M")
+                    output_string += " - "
+                    output_string += l.fine.strftime("%H:%M")
+                    output_string += "\n\n"
 
                 if output_string:
 
