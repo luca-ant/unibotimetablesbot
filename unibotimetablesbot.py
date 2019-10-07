@@ -1463,12 +1463,14 @@ def send_notifications():
                     result += "\n\n"
 
                 if output_string:
+
                     logging.info(
                         "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SENDING NOTIFICATION TO " + str(chat_id))
                     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + "  ### SENDING NOTIFICATION TO " + str(
                         chat_id))
 
                     # bot.sendMessage(chat_id, output_string, parse_mode='HTML',reply_markup=make_inline_timetable_keyboard(now))
+                    bot.sendMessage(chat_id, output_string, parse_mode='HTML')
 
         except:
             traceback.print_exc()
