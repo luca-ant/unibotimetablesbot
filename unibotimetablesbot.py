@@ -1445,7 +1445,7 @@ def send_notifications():
                 for l in timetable.lessons:
                     output_string += "GO TO "
                     for a in l.lista_aule:
-                        result += emo_room + " " + a.aula_nome+" "
+                        result += emo_room + " <b>" + a.aula_nome+"<\b> "
 
                     output_string += "FOR <b>" + l.materia_descrizione + "</b>"
                     if l.docente_nome != "":
