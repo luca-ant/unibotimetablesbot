@@ -1443,7 +1443,7 @@ def send_notifications():
 
                 output_string= ""
                 for l in timetable.lessons:
-                    output_string += "GO TO"
+                    output_string += "GO TO "
                     for a in l.lista_aule:
                         result += emo_room + " " + a.aula_nome+" "
 
