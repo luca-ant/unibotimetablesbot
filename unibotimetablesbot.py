@@ -1455,11 +1455,11 @@ def send_notifications():
 
                     output_string += "\n"
 
-                    output_string += emo_calendar + " " + l.inizio.strftime("%d/%m/%Y")
-                    output_string += "\n"
                     output_string += emo_clock + " " + l.inizio.strftime("%H:%M")
                     output_string += " - "
                     output_string += l.fine.strftime("%H:%M")
+
+                    output_string += " "+emo_calendar + " " + l.inizio.strftime("%d/%m/%Y")
                     output_string += "\n\n"
 
                 if output_string:
