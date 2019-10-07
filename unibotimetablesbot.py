@@ -1433,21 +1433,42 @@ def send_notifications():
 
                 timetable = get_next_lesson(now, plan)
 
-                output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
-                    int(accademic_year) + 1) + "</code>\n"
-                output_string += emo_calendar + " " + \
-                    now.strftime("%A %B %d, %Y") + "\n\n"
-                output_string += emo_less+"<b>YOUR NEXT LESSON</b>\n\n"
+                # output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
+                #     int(accademic_year) + 1) + "</code>\n"
+                # output_string += emo_calendar + " " + \
+                #     now.strftime("%A %B %d, %Y") + "\n\n"
+                # output_string += emo_less+"<b>YOUR NEXT LESSON</b>\n\n"
 
-                output_string += print_output_timetable(timetable)
-                if "NO LESSONS FOR TODAY" not in output_string:
+                # output_string += print_output_timetable(timetable)
+
+                output_string= ""
+                for l in timetable.lessons:
+                    output_string += "GO TO"
+                    for a in l.lista_aule:
+                        result += emo_room + " " + a.aula_nome+" "
+
+                    output_string += "FOR <b>" + l.materia_descrizione + "</b>"
+                    if l.docente_nome != "":
+                        result += " (<i>" + l.docente_nome + "</i>)"
+                    if l.crediti != None and l.crediti != "":
+                        result += " - " + l.crediti + " CFU"
+
+                    result += "\n"
+
+                    result += emo_calendar + " " + l.inizio.strftime("%d/%m/%Y")
+                    result += "\n"
+                    result += emo_clock + " " + l.inizio.strftime("%H:%M")
+                    result += " - "
+                    result += l.fine.strftime("%H:%M")
+                    result += "\n\n"
+
+                if output_string:
                     logging.info(
                         "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SENDING NOTIFICATION TO " + str(chat_id))
                     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + "  ### SENDING NOTIFICATION TO " + str(
                         chat_id))
 
-                    bot.sendMessage(chat_id, output_string, parse_mode='HTML',
-                                    reply_markup=make_inline_timetable_keyboard(now))
+                    # bot.sendMessage(chat_id, output_string, parse_mode='HTML',reply_markup=make_inline_timetable_keyboard(now))
 
         except:
             traceback.print_exc()
