@@ -358,7 +358,7 @@ def get_next_lesson(now, plan):
     if plan.is_empty():
         return timetable
 
-    up = now + datetime.timedelta(minutes=30)
+    up = now + datetime.timedelta(minutes=15)
 
     for t in plan.teachings:
         for o in orari[t.componente_id]:
@@ -1528,21 +1528,30 @@ for i in range(8, 20, 1):
 
     h = "%02d" % i
 
-    schedule.every().monday.at(h+":15").do(send_notifications)
-    schedule.every().monday.at(h+":45").do(send_notifications)
+    schedule.every().monday.at(h+":05").do(send_notifications)
+    schedule.every().monday.at(h+":20").do(send_notifications)
+    schedule.every().monday.at(h+":35").do(send_notifications)
+    schedule.every().monday.at(h+":50").do(send_notifications)
 
-    schedule.every().tuesday.at(h+":15").do(send_notifications)
-    schedule.every().tuesday.at(h+":45").do(send_notifications)
+    schedule.every().tuesday.at(h+":05").do(send_notifications)
+    schedule.every().tuesday.at(h+":20").do(send_notifications)
+    schedule.every().tuesday.at(h+":35").do(send_notifications)
+    schedule.every().tuesday.at(h+":50").do(send_notifications)
 
-    schedule.every().wednesday.at(h+":15").do(send_notifications)
-    schedule.every().wednesday.at(h+":45").do(send_notifications)
+    schedule.every().wednesday.at(h+":05").do(send_notifications)
+    schedule.every().wednesday.at(h+":20").do(send_notifications)
+    schedule.every().wednesday.at(h+":35").do(send_notifications)
+    schedule.every().wednesday.at(h+":50").do(send_notifications)
 
-    schedule.every().thursday.at(h+":15").do(send_notifications)
-    schedule.every().thursday.at(h+":45").do(send_notifications)
+    schedule.every().thursday.at(h+":05").do(send_notifications)
+    schedule.every().thursday.at(h+":20").do(send_notifications)
+    schedule.every().thursday.at(h+":35").do(send_notifications)
+    schedule.every().thursday.at(h+":50").do(send_notifications)
 
-    schedule.every().friday.at(h+":15").do(send_notifications)
-    schedule.every().friday.at(h+":45").do(send_notifications)
-
+    schedule.every().friday.at(h+":05").do(send_notifications)
+    schedule.every().friday.at(h+":20").do(send_notifications)
+    schedule.every().friday.at(h+":35").do(send_notifications)
+    schedule.every().friday.at(h+":50").do(send_notifications)
 
 MessageLoop(bot, {'chat': on_chat_message,
                   'callback_query': on_callback_query}).run_as_thread()
