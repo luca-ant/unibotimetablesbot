@@ -51,8 +51,10 @@ emo_not_off = u'\U0001F515'
 emo_wrong = u'\U0001F914'
 emo_privacy = u'\U0001F50F'
 emo_pin = u'\U0001F4CC'
-emo_less=u'\U0001F4D6'
+emo_less = u'\U0001F4D6'
 
+
+# BUTTONS
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
 MY_PLAN = emo_plan + " " + "MY STUDY PLAN"
@@ -66,6 +68,11 @@ BACK_TO_MAIN = emo_back + " " + "BACK TO MAIN"
 DONATION = emo_money + " " + "DONATION"
 HELP = emo_help + " " + "HELP"
 PRIVACY = emo_privacy + " " + "PRIVACY POLICY"
+
+# COMMANDS
+
+SET_NOT_TIME_CMD = "/set_notification_time"
+
 
 donation_string = emo_money + \
     " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
@@ -352,14 +359,15 @@ def get_plan_timetable_web_api(day, plan):
         return None
 
 
-def get_next_lesson(now, plan):
+def get_next_lesson(chat_id, now, plan):
     timetable = Timetable()
 
     if plan.is_empty():
         return timetable
 
-    up = now + datetime.timedelta(minutes=15)
+    u = get_user(chat_id)
 
+    lesson_time = now + datetime.timedelta(minutes=u.notification_time)
     for t in plan.teachings:
         for o in orari[t.componente_id]:
             try:
@@ -370,7 +378,7 @@ def get_next_lesson(now, plan):
                 inizio = datetime.datetime.strptime(
                     o["inizio"], "%Y-%m-%dT%H:%M:%S")
 
-                if inizio > now and inizio < up:
+                if inizio == lesson_time:
                     l = Lesson(t.corso_codice, t.materia_codice, t.materia_descrizione, t.docente_nome, t.componente_id,
                                t.url,
                                datetime.datetime.strptime(
@@ -446,7 +454,8 @@ def store_user(chat_id):
         user_dict = {}
         user_dict["chat_id"] = u.chat_id
         user_dict["mode"] = u.mode.name
-        user_dict["notification"] = u.notificated
+        user_dict["notification"] = u.notification
+        user_dict["notification_time"] = u.notification_time
         outfile.write(json.dumps(user_dict))
 
 
@@ -471,7 +480,10 @@ def load_user(chat_id):
             u.mode = Mode[user_dict["mode"]]
 
         elif key == 'notification':
-            u.notificated = user_dict["notification"]
+            u.notification = user_dict["notification"]
+
+        elif key == 'notification_time':
+            u.notification_time = user_dict["notification_time"]
 
     return u
 
@@ -500,7 +512,7 @@ def make_main_keyboard(chat_id):
     buttonLists[0].append(ALL_COURSES)
     buttonLists[1].append(MAKE_PLAN)
     if u.mode != Mode.NORMAL:
-        if u.notificated:
+        if u.notification:
             buttonLists[2].append(NOTIFY_OFF)
         else:
             buttonLists[2].append(NOTIFY_ON)
@@ -1080,7 +1092,7 @@ def on_chat_message(msg):
                 u = get_user(chat_id)
 
                 if os.path.isfile(dir_plans_name + str(chat_id)):
-                    u.notificated = True
+                    u.notification = True
                     store_user(chat_id)
 
                     output_string = "Notifications enabled!"
@@ -1097,8 +1109,8 @@ def on_chat_message(msg):
             elif msg["text"] == NOTIFY_OFF:
                 u = get_user(chat_id)
 
-                if u.notificated:
-                    u.notificated = False
+                if u.notification:
+                    u.notification = False
                     store_user(chat_id)
 
                     output_string = "Notifications disabled!"
@@ -1256,6 +1268,20 @@ def on_chat_message(msg):
 
                 bot.sendMessage(chat_id, output_string,
                                 parse_mode='HTML', disable_notification=True)
+
+            elif msg["text"].startswith(SET_NOT_TIME_CMD):
+                u = get_user(chat_id)
+                try:
+                    u.notification_time = int(msg["text"].split()[1])
+                    store_user(chat_id)
+                    output_string = "Great job! Now you should receive notifications " + \
+                        str(u.notification_time)+" minutes before the lesson!"
+
+                except:
+                    output_string = "use "+SET_NOT_TIME_CMD + " 20"
+
+                bot.sendMessage(chat_id, output_string, parse_mode='HTML',
+                                reply_markup=make_main_keyboard(chat_id))
 
             # elif msg["text"].startswith("/schedule_"):
 
@@ -1422,16 +1448,21 @@ def update():
 
 def send_notifications():
     now = datetime.datetime.now()
+    now.replace(second=0)
+
+    ##### DEBUG #####
+    # now = datetime.datetime.strptime("2019-10-08T13:45:00", "%Y-%m-%dT%H:%M:%S")
+    #################
 
     for chat_id in users.keys():
         try:
             u = get_user(chat_id)
 
-            if u.notificated:
+            if u.notification:
 
                 plan = load_user_plan(chat_id)
 
-                timetable = get_next_lesson(now, plan)
+                timetable = get_next_lesson(chat_id, now, plan)
 
                 # output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                 #     int(accademic_year) + 1) + "</code>\n"
@@ -1441,13 +1472,12 @@ def send_notifications():
 
                 # output_string += print_output_timetable(timetable)
 
-                output_string= ""
+                output_string = ""
                 for l in timetable.lessons:
-                    output_string += "GO TO "
                     for a in l.lista_aule:
-                        output_string += emo_room + " <b>" + a.aula_nome+"</b> "
+                        output_string += emo_room + " <b>" + a.aula_nome+"</b> - "
 
-                    output_string += "FOR <b>" + l.materia_descrizione + "</b>"
+                    output_string += "IS GOING TO START <b>" + l.materia_descrizione + "</b>"
                     if l.docente_nome != "":
                         output_string += " (<i>" + l.docente_nome + "</i>)"
                     if l.crediti != None and l.crediti != "":
@@ -1455,11 +1485,13 @@ def send_notifications():
 
                     output_string += "\n"
 
-                    output_string += emo_clock + " " + l.inizio.strftime("%H:%M")
+                    output_string += emo_clock + " " + \
+                        l.inizio.strftime("%H:%M")
                     output_string += " - "
                     output_string += l.fine.strftime("%H:%M")
 
-                    output_string += " "+emo_calendar + " " + l.inizio.strftime("%d/%m/%Y")
+                    output_string += " "+emo_calendar + \
+                        " " + l.inizio.strftime("%d/%m/%Y")
                     output_string += "\n\n"
 
                 if output_string:
@@ -1486,7 +1518,7 @@ def send_good_morning():
         try:
             u = get_user(chat_id)
 
-            if u.notificated:
+            if u.notification:
 
                 plan = load_user_plan(chat_id)
 
@@ -1528,30 +1560,15 @@ for i in range(8, 20, 1):
 
     h = "%02d" % i
 
-    schedule.every().monday.at(h+":05").do(send_notifications)
-    schedule.every().monday.at(h+":20").do(send_notifications)
-    schedule.every().monday.at(h+":35").do(send_notifications)
-    schedule.every().monday.at(h+":50").do(send_notifications)
+    for j in range (0,60,5):
+        m = "%02d" % j
 
-    schedule.every().tuesday.at(h+":05").do(send_notifications)
-    schedule.every().tuesday.at(h+":20").do(send_notifications)
-    schedule.every().tuesday.at(h+":35").do(send_notifications)
-    schedule.every().tuesday.at(h+":50").do(send_notifications)
+    schedule.every().monday.at(h+":"+m).do(send_notifications)
+    schedule.every().tuesday.at(h+":"+m).do(send_notifications)
+    schedule.every().wednesday.at(h+":"+m).do(send_notifications)
+    schedule.every().thursday.at(h+":"+m).do(send_notifications)
+    schedule.every().friday.at(h+":"+m).do(send_notifications)
 
-    schedule.every().wednesday.at(h+":05").do(send_notifications)
-    schedule.every().wednesday.at(h+":20").do(send_notifications)
-    schedule.every().wednesday.at(h+":35").do(send_notifications)
-    schedule.every().wednesday.at(h+":50").do(send_notifications)
-
-    schedule.every().thursday.at(h+":05").do(send_notifications)
-    schedule.every().thursday.at(h+":20").do(send_notifications)
-    schedule.every().thursday.at(h+":35").do(send_notifications)
-    schedule.every().thursday.at(h+":50").do(send_notifications)
-
-    schedule.every().friday.at(h+":05").do(send_notifications)
-    schedule.every().friday.at(h+":20").do(send_notifications)
-    schedule.every().friday.at(h+":35").do(send_notifications)
-    schedule.every().friday.at(h+":50").do(send_notifications)
 
 MessageLoop(bot, {'chat': on_chat_message,
                   'callback_query': on_callback_query}).run_as_thread()

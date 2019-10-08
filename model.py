@@ -26,10 +26,11 @@ class Mode(Enum):
 
 
 class User:
-    def __init__(self, chat_id, mode=Mode.NORMAL, notificated=False):
+    def __init__(self, chat_id, mode=Mode.NORMAL, notification=False, notification_time=15):
         self.chat_id = chat_id
         self.mode = mode
-        self.notificated = notificated
+        self.notification = notification
+        self.notification_time = notification_time
 
 
 class Teaching:
