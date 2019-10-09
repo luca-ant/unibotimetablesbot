@@ -1563,11 +1563,11 @@ for i in range(8, 20, 1):
     for j in range (0,60,5):
         m = "%02d" % j
 
-    schedule.every().monday.at(h+":"+m).do(send_notifications)
-    schedule.every().tuesday.at(h+":"+m).do(send_notifications)
-    schedule.every().wednesday.at(h+":"+m).do(send_notifications)
-    schedule.every().thursday.at(h+":"+m).do(send_notifications)
-    schedule.every().friday.at(h+":"+m).do(send_notifications)
+        schedule.every().monday.at(h+":"+m).do(send_notifications)
+        schedule.every().tuesday.at(h+":"+m).do(send_notifications)
+        schedule.every().wednesday.at(h+":"+m).do(send_notifications)
+        schedule.every().thursday.at(h+":"+m).do(send_notifications)
+        schedule.every().friday.at(h+":"+m).do(send_notifications)
 
 
 MessageLoop(bot, {'chat': on_chat_message,
