@@ -77,12 +77,20 @@ SET_NOT_TIME_CMD = "/set_notification_time"
 donation_string = emo_money + \
     " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
 
+
+issue_string="For issues send a mail to luca.ant96@libero.it describing the problem in detail."
+
+command_help_string ="<b>AVAILABLE COMMANDS:</b>\n\n* "+ SET_NOT_TIME_CMD +" => to set your favourite notification time\n<i>Example:</i> send \""+SET_NOT_TIME_CMD + " 20\" (without quotes) to set 20 minutes and then will you receive a notification 20 minutes before the lesson"
+
+
 important_string = "<b>IMPORTANT! All data (provided by https://dati.unibo.it) are updated once a day. For suddend changes or extra lessons please check on official Unibo site! (Especially for the first weeks)</b>"
 help_string = "This bot helps you to get your personal timetable of Unibo lessons. First of all <b>you need to make your study plan</b> by pressing " + MAKE_PLAN+". Then you have to add your teachings by pressing \"/add_XXXXXX\" command near the teaching that you want to insert in your plan. After that by simply pressing " + MY_TIMETABLE+" you get your personal  timetable for today!\n\n<b>USE:</b>\n\n" + ALL_COURSES + " to see today's schedule\n\n" + MAKE_PLAN + " to make your study plan\n\n" + MY_PLAN + " to see your study plan and remove teachings\n\n" + MY_TIMETABLE + " to get your personal lesson's schedule\n\n" + NOTIFY_ON + \
     " to receive a notification before every lesson\n\n" + DEL_PLAN + " to delete your plan" + \
-    "\n\nFor issues send a mail to luca.ant96@libero.it describing the problem in detail.\n\n" + important_string
+    "\n\n"+ command_help_string+"\n\n"+issue_string+"\n\n" + important_string
+
 
 privacy_string = "<b>In order to provide you the service, this bot collects user data like your study plan and your preferences (ON/OFF notification...). \nUsing this bot you allow your data to be saved.</b>"
+
 
 
 current_dir = os.getcwd() + "/"
