@@ -80,7 +80,7 @@ donation_string = emo_money + \
 
 issue_string="For issues send a mail to luca.ant96@libero.it describing the problem in detail."
 
-command_help_string ="<b>AVAILABLE COMMANDS:</b>\n\n* "+ SET_NOT_TIME_CMD +" => to set your favourite notification time\n<i>Example:</i> send \""+SET_NOT_TIME_CMD + " 20\" (without quotes) to set 20 minutes and then will you receive a notification 20 minutes before the lesson"
+command_help_string ="<b>AVAILABLE COMMANDS:</b>\n\n"+ SET_NOT_TIME_CMD +" => to set your favourite notification time\n<i>Example:</i> send \""+SET_NOT_TIME_CMD + " 20\" (without quotes) to set 20 minutes and then will you receive a notification 20 minutes before the lesson"
 
 
 important_string = "<b>IMPORTANT! All data (provided by https://dati.unibo.it) are updated once a day. For suddend changes or extra lessons please check on official Unibo site! (Especially for the first weeks)</b>"
@@ -1286,7 +1286,7 @@ def on_chat_message(msg):
                         str(u.notification_time)+" minutes before the lesson!"
 
                 except:
-                    output_string = "use "+SET_NOT_TIME_CMD + " 20"
+                    output_string = command_help_string
 
                 bot.sendMessage(chat_id, output_string, parse_mode='HTML',
                                 reply_markup=make_main_keyboard(chat_id))
