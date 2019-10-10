@@ -78,19 +78,20 @@ donation_string = emo_money + \
     " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
 
 
-issue_string="For issues send a mail to luca.ant96@libero.it describing the problem in detail."
+issue_string = "For issues send a mail to luca.ant96@libero.it describing the problem in detail."
 
-command_help_string ="<b>AVAILABLE COMMANDS:</b>\n\n"+ SET_NOT_TIME_CMD +" => to set your favourite notification time\n<i>Example:</i> send \""+SET_NOT_TIME_CMD + " 20\" (without quotes) to set 20 minutes and then will you receive a notification 20 minutes before the lesson"
+command_help_string = "<b>AVAILABLE COMMANDS:</b>\n\n" + SET_NOT_TIME_CMD + " => to set your favourite notification time\n<i>Example:</i> send \"" + \
+    SET_NOT_TIME_CMD + \
+    " 20\" (without quotes) to set 20 minutes and then will you receive a notification 20 minutes before the lesson"
 
 
 important_string = "<b>IMPORTANT! All data (provided by https://dati.unibo.it) are updated once a day. For suddend changes or extra lessons please check on official Unibo site! (Especially for the first weeks)</b>"
 help_string = "This bot helps you to get your personal timetable of Unibo lessons. First of all <b>you need to make your study plan</b> by pressing " + MAKE_PLAN+". Then you have to add your teachings by pressing \"/add_XXXXXX\" command near the teaching that you want to insert in your plan. After that by simply pressing " + MY_TIMETABLE+" you get your personal  timetable for today!\n\n<b>USE:</b>\n\n" + ALL_COURSES + " to see today's schedule\n\n" + MAKE_PLAN + " to make your study plan\n\n" + MY_PLAN + " to see your study plan and remove teachings\n\n" + MY_TIMETABLE + " to get your personal lesson's schedule\n\n" + NOTIFY_ON + \
     " to receive a notification before every lesson\n\n" + DEL_PLAN + " to delete your plan" + \
-    "\n\n"+ command_help_string+"\n\n"+issue_string+"\n\n" + important_string
+    "\n\n" + command_help_string+"\n\n"+issue_string+"\n\n" + important_string
 
 
 privacy_string = "<b>In order to provide you the service, this bot collects user data like your study plan and your preferences (ON/OFF notification...). \nUsing this bot you allow your data to be saved.</b>"
-
 
 
 current_dir = os.getcwd() + "/"
@@ -101,7 +102,6 @@ logging.info("### WORK DIR " + current_dir)
 
 dir_plans_name = current_dir + 'plans/'
 dir_users_name = current_dir + 'users/'
-
 
 # writer_lock = Lock()
 
@@ -376,6 +376,8 @@ def get_next_lesson(chat_id, now, plan):
     u = get_user(chat_id)
 
     lesson_time = now + datetime.timedelta(minutes=u.notification_time)
+
+
     for t in plan.teachings:
         for o in orari[t.componente_id]:
             try:
@@ -385,6 +387,7 @@ def get_next_lesson(chat_id, now, plan):
                 #################
                 inizio = datetime.datetime.strptime(
                     o["inizio"], "%Y-%m-%dT%H:%M:%S")
+
 
                 if inizio == lesson_time:
                     l = Lesson(t.corso_codice, t.materia_codice, t.materia_descrizione, t.docente_nome, t.componente_id,
@@ -1456,10 +1459,16 @@ def update():
 
 def send_notifications():
     now = datetime.datetime.now()
-    now.replace(second=0)
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                 " ### START SENDING NOTIFICATIONS")
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+          " ### START SENDING NOTIFICATIONS")
+
+    fix_now = datetime.datetime.strptime(
+        str(now.year)+"-"+str(now.month) + "-"+str(now.day)+"T"+str(now.hour)+":"+str(now.minute)+":00", "%Y-%m-%dT%H:%M:%S")
 
     ##### DEBUG #####
-    # now = datetime.datetime.strptime("2019-10-08T13:45:00", "%Y-%m-%dT%H:%M:%S")
+    # fix_now = datetime.datetime.strptime("2019-10-08T13:45:00", "%Y-%m-%dT%H:%M:%S")
     #################
 
     for chat_id in users.keys():
@@ -1470,7 +1479,7 @@ def send_notifications():
 
                 plan = load_user_plan(chat_id)
 
-                timetable = get_next_lesson(chat_id, now, plan)
+                timetable = get_next_lesson(chat_id, fix_now, plan)
 
                 # output_string = emo_ay + " A.Y. <code>" + accademic_year + "/" + str(
                 #     int(accademic_year) + 1) + "</code>\n"
@@ -1511,6 +1520,12 @@ def send_notifications():
 
                     # bot.sendMessage(chat_id, output_string, parse_mode='HTML',reply_markup=make_inline_timetable_keyboard(now))
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML')
+
+            now = datetime.datetime.now()
+            logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                         " ### END SENDING NOTIFICATIONS")
+            print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                  " ### END SENDING NOTIFICATIONS")
 
         except:
             traceback.print_exc()
@@ -1563,13 +1578,12 @@ if os.path.isdir(dir_users_name):
 
 update()
 schedule.every().day.at("07:00").do(update)
-schedule.every().minute.do(send_notifications)
-
+schedule.every().minute.at(":00").do(send_notifications)
 # for i in range(8, 20, 1):
 
 #     h = "%02d" % i
 
-#     for j in range (0,60,5):
+#     for j in range (0,60,1):
 #         m = "%02d" % j
 
 #         schedule.every().monday.at(h+":"+m).do(send_notifications)
