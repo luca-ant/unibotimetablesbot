@@ -23,7 +23,7 @@ from utils import my_round
 import config
 
 
-config.current_dir = os.path.dirname(os.getcwd())
+config.current_dir = os.path.dirname(os.getcwd())+"/"
 bot = telepot.Bot(config.token)
 
 all_courses = dict()
