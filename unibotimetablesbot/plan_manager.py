@@ -10,7 +10,7 @@ from user_manager import get_user
 import config
 
 
-def get_plan_timetable(day, plan, orari):
+def get_plan_timetable(day, plan, orari, all_aule):
     timetable = Timetable()
 
     if plan.is_empty():
