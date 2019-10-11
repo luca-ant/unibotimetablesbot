@@ -1,7 +1,7 @@
 import os
 import logging
 
-token = os.environ['BOT_TOKEN']
+token = os.environ['UNI_BOT_TOKEN']
 
 accademic_year = ""
 

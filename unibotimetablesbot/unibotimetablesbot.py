@@ -61,7 +61,7 @@ def on_callback_query(msg):
                 if t.anno == None or int(t.anno) == year:
                     plan.add_teaching(t)
 
-            timetable = get_plan_timetable(day, plan, orari,all_aule)
+            timetable = get_plan_timetable(day, plan, orari, all_aule)
 
             output_string = config.emo_ay + " A.Y. <code>" + config.accademic_year + \
                 "/" + str(int(config.accademic_year) + 1) + "</code>\n"
@@ -424,7 +424,8 @@ def on_chat_message(msg):
 
                         now = datetime.datetime.now()
 
-                        timetable = get_plan_timetable(now, plan, orari, all_aule)
+                        timetable = get_plan_timetable(
+                            now, plan, orari, all_aule)
 
                         output_string = config.emo_ay + " A.Y. <code>" + config.accademic_year + "/" + str(
                             int(config.accademic_year) + 1) + "</code>\n"
@@ -621,7 +622,8 @@ def send_notifications():
 
                 plan = load_user_plan(chat_id)
 
-                timetable = get_next_lesson(chat_id, fix_now, plan, orari)
+                timetable = get_next_lesson(
+                    chat_id, fix_now, plan, orari, all_aule)
 
                 # output_string = config.emo_ay + " A.Y. <code>" + config.accademic_year + "/" + str(
                 #     int(config.accademic_year) + 1) + "</code>\n"
