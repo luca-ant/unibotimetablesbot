@@ -66,7 +66,7 @@ PRIVACY = emo_privacy + " " + "PRIVACY POLICY"
 
 # COMMANDS
 
-SET_NOT_TIME_CMD = "/set_notification_time"
+SET_NOT_TIME_CMD = "/set_notify_time"
 
 
 # CONSTANT STRINGS
