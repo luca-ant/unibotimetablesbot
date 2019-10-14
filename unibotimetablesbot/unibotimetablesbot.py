@@ -26,7 +26,8 @@ import config
 config.current_dir = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))+"/"
 
-print(config.current_dir)
+logging.info("### WORK DIR " + config.current_dir)
+print("### WORK DIR " + config.current_dir)
 
 bot = telepot.Bot(config.token)
 
@@ -603,9 +604,9 @@ def update():
 def send_notifications():
     now = datetime.datetime.now()
     logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-                 " ### START SENDING NOTIFICATIONS")
+                 " ### START SEND NOTIFICATIONS")
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-          " ### START SENDING NOTIFICATIONS")
+          " ### START SEND NOTIFICATIONS")
 
     fix_now = datetime.datetime.strptime(
         str(now.year)+"-"+str(now.month) + "-"+str(now.day)+"T"+str(now.hour)+":"+str(now.minute)+":00", "%Y-%m-%dT%H:%M:%S")
@@ -673,9 +674,9 @@ def send_notifications():
 
     now = datetime.datetime.now()
     logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-                " ### END SENDING NOTIFICATIONS")
+                " ### END SEND NOTIFICATIONS")
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-        " ### END SENDING NOTIFICATIONS")
+        " ### END SEND NOTIFICATIONS")
 
 
 if __name__ == "__main__":

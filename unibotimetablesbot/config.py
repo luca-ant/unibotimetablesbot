@@ -9,7 +9,7 @@ current_dir = ""
 logging.basicConfig(filename=current_dir +
                     "unibotimetablesbot.log", level=logging.INFO)
 
-logging.info("### WORK DIR " + current_dir)
+
 
 dir_plans_name = current_dir + 'plans/'
 dir_users_name = current_dir + 'users/'
