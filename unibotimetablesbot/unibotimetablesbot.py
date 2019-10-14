@@ -665,17 +665,17 @@ def send_notifications():
                     # bot.sendMessage(chat_id, output_string, parse_mode='HTML',reply_markup=make_inline_timetable_keyboard(now))
                     bot.sendMessage(chat_id, output_string, parse_mode='HTML')
 
-            now = datetime.datetime.now()
-            logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-                         " ### END SENDING NOTIFICATIONS")
-            print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-                  " ### END SENDING NOTIFICATIONS")
-
         except:
             traceback.print_exc()
             now = datetime.datetime.now()
             logging.info(
                 "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
+
+    now = datetime.datetime.now()
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                " ### END SENDING NOTIFICATIONS")
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+        " ### END SENDING NOTIFICATIONS")
 
 
 if __name__ == "__main__":
