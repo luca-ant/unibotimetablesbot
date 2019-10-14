@@ -79,7 +79,7 @@ issue_string = "For issues send a mail to luca.ant96@libero.it describing the pr
 
 command_help_string = "<b>COMMANDS:</b>\n\n" + SET_NOT_TIME_CMD + " - to set your favourite notification time\n<i>Example:</i> send \"" + \
     SET_NOT_TIME_CMD + \
-    " 20\" (without quotes) to set 20 minutes and then will you receive a notification 20 minutes before the lesson. Please set a number of minutes multiple of 5."
+    " 20\" (without quotes) to set 20 minutes and then will you receive notifications 20 minutes before each lesson (Please choose a number of minutes multiple of 5)."
 
 important_string = "<b>IMPORTANT! All data (provided by https://dati.unibo.it) are updated once a day. For suddend changes or extra lessons please check on official Unibo site! (Especially for the first weeks)</b>"
 
