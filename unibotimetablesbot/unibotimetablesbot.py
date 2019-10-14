@@ -509,7 +509,7 @@ def on_chat_message(msg):
                     u.notification_time = my_round(int(msg["text"].split()[1]))
                     store_user(chat_id)
                     output_string = "Great job! Now you should receive notifications " + \
-                        str(u.notification_time)+" minutes before the lesson!"
+                        str(u.notification_time)+" minutes before each lesson!"
 
                 except:
                     output_string = config.command_help_string
