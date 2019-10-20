@@ -38,10 +38,10 @@ python3 -m pip install -r requirements.txt
 ```
 
 
-* Set BOT_TOKEN environment variable with bot's token
+* Set UNI_BOT_TOKEN environment variable with bot's token
 
 ```
-export BOT_TOKEN=YOUR_TOKEN_HERE
+export UNI_BOT_TOKEN=YOUR_TOKEN_HERE
 ```
 * Run the python script as:
 
