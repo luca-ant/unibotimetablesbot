@@ -10,7 +10,7 @@ UNI_BOT_TOKEN="YOUR_TOKEN_HERE"
 if [ $1 == "run"  ]
 then
 	source "$VENV_ACT"
-	python "$CURRENT_DIR"/unibotimetablesbot/unibotimetablesbot.py
+	python3 "$CURRENT_DIR"/unibotimetablesbot/unibotimetablesbot.py
 
 fi
 
