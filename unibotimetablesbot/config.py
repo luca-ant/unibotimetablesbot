@@ -10,9 +10,10 @@ logging.basicConfig(filename=current_dir +
                     "unibotimetablesbot.log", level=logging.INFO)
 
 
+data_dir = current_dir+"unibotimetablesbot_data/"
 
-dir_plans_name = current_dir + 'plans/'
-dir_users_name = current_dir + 'users/'
+dir_plans_name = data_dir + 'plans/'
+dir_users_name = data_dir + 'users/'
 
 
 # EMOJI
