@@ -20,11 +20,6 @@ fi
 
 if [ $1 == "install" ] 
 then
-	if [[ $EUID -ne 0 ]]; 
-	then
-		echo "This script must be run as root" 1>&2
-		exit 1
-	fi
 
 
 
@@ -37,7 +32,7 @@ then
 
 
 
-	echo -e "[Unit]
+	sudo echo -e "[Unit]
 Description=Unibo timetables bot
 After=network.target
 StartLimitIntervalSec=0
