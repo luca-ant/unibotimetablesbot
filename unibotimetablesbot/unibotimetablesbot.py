@@ -763,8 +763,12 @@ def location(update, context):
         " = Classroom empty for another 15 minutes\n"
     output_string += config.emo_black_circle + \
         " = Classroom empty for less than 15 minutes\n\n"
+
+    update.message.reply_html(output_string)
+    output_string = ""
     empty_room.sort(key=lambda x: x.aula_nome, reverse=False)
 
+    string_list = []
     for a in empty_room:
 
         for m in (60, 30, 15):
@@ -772,22 +776,30 @@ def location(update, context):
             day = now + datetime.timedelta(minutes=m)
             free = a.is_empty(day, orari_group_by_aula)
             if free and m == 60:
-                output_string += config.emo_blue_circle + " " + \
-                    str(a)+" /see_room_schedule_"+a.aula_codice+"\n"
+                string_list.append(config.emo_blue_circle + " " +
+                                   str(a)+" /see_room_schedule_"+a.aula_codice+"\n")
                 break
             elif free and m == 30:
-                output_string += config.emo_yellow_square + " " + \
-                    str(a)+" /see_room_schedule_"+a.aula_codice+"\n"
+                string_list.append(config.emo_yellow_square + " " +
+                                   str(a)+" /see_room_schedule_"+a.aula_codice+"\n")
                 break
             elif free and m == 15:
-                output_string += config.emo_red_circle + " " + \
-                    str(a)+" /see_room_schedule_"+a.aula_codice+"\n"
+                string_list.append(config.emo_red_circle + " " +
+                                   str(a)+" /see_room_schedule_"+a.aula_codice+"\n")
                 break
         else:
-            output_string += config.emo_black_circle + " " + \
-                str(a)+" /see_room_schedule_"+a.aula_codice+"\n"
+            string_list.append(config.emo_black_circle + " " +
+                               str(a)+" /see_room_schedule_"+a.aula_codice+"\n")
 
-    update.message.reply_html(output_string)
+    i = 0
+    for s in string_list:
+        output_string += s
+        i += 1
+        if i % 20 == 0:
+            update.message.reply_html(output_string)
+            output_string = ""
+    if output_string != "":
+        update.message.reply_html(output_string)
 
 
 def update():
