@@ -12,11 +12,13 @@ def make_main_keyboard(chat_id):
     u = get_user(chat_id)
 
     buttonLists = list()
-    for i in range(8):
+    for i in range(9):
         buttonLists.append(list())
 
     buttonLists[0].append(config.ALL_COURSES)
-    buttonLists[4].append(config.MAKE_PLAN)
+    buttonLists[4].append(config.EMPTY_ROOMS)
+
+    buttonLists[5].append(config.MAKE_PLAN)
 
     if u.mode != Mode.NORMAL:
         if u.notification:
@@ -25,11 +27,11 @@ def make_main_keyboard(chat_id):
             buttonLists[3].append(config.NOTIFY_ON)
         buttonLists[1].append(config.MY_TIMETABLE)
         buttonLists[2].append(config.MY_PLAN)
-        buttonLists[5].append(config.DEL_PLAN)
+        buttonLists[6].append(config.DEL_PLAN)
 
-    buttonLists[6].append(config.HELP)
-    buttonLists[6].append(config.DONATION)
-    buttonLists[7].append(config.PRIVACY)
+    buttonLists[7].append(config.HELP)
+    buttonLists[7].append(config.DONATION)
+    buttonLists[8].append(config.PRIVACY)
 
     keyboard = ReplyKeyboardMarkup(keyboard=buttonLists, resize_keyboard=True)
     return keyboard

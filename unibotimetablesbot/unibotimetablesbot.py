@@ -583,6 +583,12 @@ def message(update, context):
                 update.message.reply_html(
                     output_string, reply_markup=make_main_keyboard(chat_id))
 
+        elif text == config.EMPTY_ROOMS:
+            u = get_user(chat_id)
+
+            output_string = config.location_string
+            update.message.reply_html(output_string)
+
         elif text == config.DONATION:
             check_user(chat_id)
             store_user(chat_id)
@@ -718,8 +724,7 @@ def location(update, context):
     now = datetime.datetime.now()
 
     ##### DEBUG #####
-    # now = datetime.datetime.strptime(
-        "2019-10-28T10:45:50", "%Y-%m-%dT%H:%M:%S")
+    # now = datetime.datetime.strptime("2019-10-28T10:45:50", "%Y-%m-%dT%H:%M:%S")
     #################
     logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
                  " ### LOCATION from " + str(chat_id)+" = " + str(location.latitude) + ", " + str(location.longitude))
