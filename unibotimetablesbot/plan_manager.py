@@ -36,7 +36,7 @@ def get_plan_timetable(day, plan, orari, all_aule):
                                t.url,
                                datetime.datetime.strptime(
                                    o["inizio"], "%Y-%m-%dT%H:%M:%S"),
-                               datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre)
+                               datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre, t.componente_radice)
                     for code in o["aula_codici"].split():
                         try:
                             a = all_aule[code]
@@ -51,6 +51,45 @@ def get_plan_timetable(day, plan, orari, all_aule):
                 now = datetime.datetime.now()
                 logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
                              " ### EXCEPTION = " + traceback.format_exc())
+
+    timetable.lessons.sort(key=lambda x: x.inizio, reverse=False)
+    return timetable
+
+
+def get_room_timetable(day, aula, orari_group_by_aula, all_teachings):
+
+    timetable = Timetable()
+
+    start = datetime.datetime.strptime(day.strftime(
+        "%Y-%m-%d") + "T00:00:00", "%Y-%m-%dT%H:%M:%S")
+    stop = datetime.datetime.strptime(day.strftime(
+        "%Y-%m-%d") + "T23:59:59", "%Y-%m-%dT%H:%M:%S")
+
+    for o in orari_group_by_aula[aula.aula_codice]:
+        try:
+            inizio = datetime.datetime.strptime(
+                o["inizio"], "%Y-%m-%dT%H:%M:%S")
+            fine = datetime.datetime.strptime(
+                o["fine"], "%Y-%m-%dT%H:%M:%S")
+
+            if inizio > start and inizio < stop and aula.aula_codice in o["aula_codici"]:
+                t = all_teachings[o["componente_id"]]
+
+                l = Lesson(t.corso_codice, t.materia_codice, t.materia_descrizione, t.docente_nome, t.componente_id,
+                           t.url,
+                           datetime.datetime.strptime(
+                               o["inizio"], "%Y-%m-%dT%H:%M:%S"),
+                           datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre, t.componente_radice)
+
+                l.add_aula(aula)
+
+                timetable.add_lesson(l)
+
+        except:
+            traceback.print_exc()
+            now = datetime.datetime.now()
+            logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                         " ### EXCEPTION = " + traceback.format_exc())
 
     timetable.lessons.sort(key=lambda x: x.inizio, reverse=False)
     return timetable
@@ -111,7 +150,7 @@ def get_plan_timetable_web_api(day, plan):
                                t.url,
                                datetime.datetime.strptime(
                                    o["inizio"], "%Y-%m-%dT%H:%M:%S"),
-                               datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre)
+                               datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre, t.componente_radice)
                     for code in o["aula_codici"].split():
                         try:
                             a = all_aule[code]
@@ -157,7 +196,7 @@ def get_next_lesson(chat_id, now, plan, orari, all_aule):
                                t.url,
                                datetime.datetime.strptime(
                                    o["inizio"], "%Y-%m-%dT%H:%M:%S"),
-                               datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre)
+                               datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S"), t.anno, t.crediti, t.componente_padre, t.componente_radice)
                     for code in o["aula_codici"].split():
                         try:
                             a = all_aule[code]
@@ -177,7 +216,7 @@ def get_next_lesson(chat_id, now, plan, orari, all_aule):
     return timetable
 
 
-def load_user_plan(chat_id):
+def load_user_plan(chat_id, all_teachings):
     if os.path.isfile(config.dir_plans_name + str(chat_id)):
         with open(config.dir_plans_name + str(chat_id)) as f:
             plan_dict = json.load(f)
@@ -185,7 +224,7 @@ def load_user_plan(chat_id):
             for t in plan_dict["teachings"]:
                 try:
                     teaching = Teaching(t["corso_codice"], t["materia_codice"], t["materia_descrizione"],
-                                        t["docente_nome"], t["componente_id"], t["url"], t["anno"], t["crediti"], t["componente_padre"])
+                                        t["docente_nome"], t["componente_id"], t["url"], t["anno"], t["crediti"], t["componente_padre"], t["componente_radice"])
                     plan.add_teaching(teaching)
 
                 # to recover plans from componente_id
@@ -194,6 +233,7 @@ def load_user_plan(chat_id):
                         teaching = all_teachings[t["componente_id"]]
                         plan.add_teaching(teaching)
                     except:
+                        traceback.print_exc()
                         pass
 
                 #####
@@ -207,6 +247,19 @@ def load_user_plan(chat_id):
 
     else:
         return None
+
+
+def store_user_plan(chat_id, plan):
+    now = datetime.datetime.now()
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                 " ### STORE PLAN OF USER " + str(chat_id))
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+          " ### STORE PLAN OF USER " + str(chat_id))
+    if not os.path.isdir(config.dir_plans_name):
+        os.mkdir(config.dir_plans_name)
+
+    with open(config.dir_plans_name + str(chat_id), 'w') as outfile:
+        outfile.write(json.dumps(plan, default=lambda x: x.__dict__))
 
 
 def print_plan(chat_id, plan):
@@ -284,3 +337,13 @@ def print_output_timetable(timetable):
         output_string = config.emo_404 + " SCHEDULES DATA NOT FOUND!"
 
     return output_string
+
+
+def check_plans_consistency(all_teachings):
+    if os.path.isdir(config.dir_plans_name):
+        for f in os.listdir(config.dir_plans_name):
+            filename = os.fsdecode(f)
+            plan = load_user_plan(
+                int(filename), all_teachings)
+
+            store_user_plan(int(filename), plan)

@@ -70,15 +70,3 @@ def check_user(chat_id):
     else:
         u.mode = Mode.NORMAL
 
-
-def store_user_plan(chat_id, plan):
-    now = datetime.datetime.now()
-    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-                 " ### STORE PLAN OF USER " + str(chat_id))
-    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-          " ### STORE PLAN OF USER " + str(chat_id))
-    if not os.path.isdir(config.dir_plans_name):
-        os.mkdir(config.dir_plans_name)
-
-    with open(config.dir_plans_name + str(chat_id), 'w') as outfile:
-        outfile.write(json.dumps(plan, default=lambda x: x.__dict__))

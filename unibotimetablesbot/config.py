@@ -48,13 +48,20 @@ emo_wrong = u'\U0001F914'
 emo_privacy = u'\U0001F50F'
 emo_pin = u'\U0001F4CC'
 emo_less = u'\U0001F4D6'
+emo_blue_circle = u'\U0001F535'
+emo_red_circle = u'\U0001F534'
+emo_black_circle = u'\U000026AB'
 
+emo_yellow_square = u'\U0001F536'
+emo_button = u'\U0001F532'
+emo_commands = u'\U00000023' + u'\U000020E3'
 
 # BUTTONS
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
 MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
 MY_PLAN = emo_plan + " " + "MY STUDY PLAN"
 MAKE_PLAN = emo_make + " " + "UPDATE MY STUDY PLAN"
+EMPTY_ROOMS = emo_room + " " + "EMPTY CLASSROOMS"
 NOTIFY_ON = emo_not_on + " " + "ENABLE NOTIFICATIONS"
 NOTIFY_OFF = emo_not_off + " " + "DISABLE NOTIFICATIONS"
 DEL_PLAN = emo_del + " " + "DELETE STUDY PLAN"
@@ -76,17 +83,20 @@ SET_NOT_TIME_CMD = "/set_notify_time"
 donation_string = emo_money + \
     " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
 
-issue_string = "For issues send a mail to luca.ant96@libero.it describing the problem in detail."
 
-command_help_string = "<b>COMMANDS:</b>\n\n" + SET_NOT_TIME_CMD + " - to set your favourite notification time\n<i>Example:</i> send \"" + \
+location_string = emo_gps+" <b>LOCATION</b>\n\nAre you looking for an empty classroom to study? Try to send location and the bot will search empty classroom around you."
+issue_string = "For issues send a mail to luca.antognetti5@gmail.com describing the problem in detail."
+
+command_help_string = emo_commands+" <b>COMMANDS:</b>\n\n" + SET_NOT_TIME_CMD + " - to set your favourite notification time\n<i>Example:</i> send \"" + \
     SET_NOT_TIME_CMD + \
     " 20\" (without quotes) to set 20 minutes and then will you receive notifications 20 minutes before each lesson (Please choose a number of minutes multiple of 5)."
 
 important_string = "<b>IMPORTANT! All data (provided by https://dati.unibo.it) are updated once a day. For suddend changes or extra lessons please check on official Unibo site! (Especially for the first weeks)</b>"
 
-help_string = "This bot helps you to get your personal timetable of Unibo lessons. First of all <b>you need to make your study plan</b> by pressing " + MAKE_PLAN+". Then you have to add your teachings by pressing \"/add_XXXXXX\" command near the teaching that you want to insert in your plan. After that by simply pressing " + MY_TIMETABLE+" you get your personal timetable for today and can navigate through days !\n\n<b>BUTTONS:</b>\n\n" + ALL_COURSES + " - to see today's schedule\n\n" + MAKE_PLAN + " - to make your study plan\n\n" + MY_PLAN + " - to see your study plan and remove teachings\n\n" + MY_TIMETABLE + " - to get your personal lesson's schedule\n\n" + NOTIFY_ON + \
+help_string = "This bot helps you to get your personal timetable of Unibo lessons. First of all <b>you need to make your study plan</b> by pressing " + MAKE_PLAN+". Then you have to add your teachings by pressing \"/add_XXXXXX\" command near the teaching that you want to insert in your plan. After that by simply pressing " + MY_TIMETABLE+" you get your personal timetable for today and can navigate through days!\n\n" + emo_button + " <b>BUTTONS:</b>\n\n" + ALL_COURSES + " - to see today's schedule\n\n" + MAKE_PLAN + " - to make your study plan\n\n" + MY_PLAN + " - to see your study plan and remove teachings\n\n" + MY_TIMETABLE + " - to get your personal lesson's schedule\n\n" + NOTIFY_ON + \
     " - to receive a notification before every lesson\n\n" + DEL_PLAN + " - to delete your plan" + \
-    "\n\n" + command_help_string+"\n\n"+issue_string+"\n\n" + important_string
+    "\n\n" + command_help_string+"\n\n" + location_string + \
+    "\n\n"+issue_string+"\n\n" + important_string
 
 
-privacy_string = "<b>In order to provide you the service, this bot collects user data like your study plan and your preferences (ON/OFF notification...). \nUsing this bot you allow your data to be saved.</b>"
+privacy_string = "<b>In order to provide you the service, this bot collects user data like your study plan and your preferences (ON/OFF notification...). Also your location is logged when you sent it.\nUsing this bot you allow all your data to be saved.</b>"

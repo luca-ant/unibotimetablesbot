@@ -14,6 +14,8 @@ import config
 
 def download_csv_orari():
     orari = collections.defaultdict(list)
+    orari_group_by_aula = collections.defaultdict(list)
+
     now = datetime.datetime.now()
     logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
                  " ### DOWNLOADING CSV ORARI")
@@ -40,7 +42,10 @@ def download_csv_orari():
             o["aula_codici"] = row[3]
             orari[o["componente_id"]].append(o)
 
-    return orari
+            for code in o["aula_codici"].split():
+                orari_group_by_aula[code].append(o)
+
+    return orari, orari_group_by_aula
 
 
 def check_table(table):
@@ -161,8 +166,7 @@ def get_all_courses():
         if "TIROCINIO" not in i['materia_descrizione'].upper():
             teaching = Teaching(i["corso_codice"], i["materia_codice"], i["materia_descrizione"], i["docente_nome"],
                                 i["componente_id"],
-                                i["url"], i["anno"], i["insegnamento_crediti"], i["componente_padre"])
-
+                                i["url"], i["anno"], i["insegnamento_crediti"], i["componente_padre"], i["componente_radice"])
             ##### DEBUG #####
             # if teaching.componente_id == '448379':
             #     print(teaching)

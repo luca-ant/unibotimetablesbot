@@ -4,8 +4,7 @@ import config
 
 from model import Mode
 from user_manager import get_user
-from telepot.namedtuple import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardMarkup, \
-    InlineKeyboardButton
+from telegram import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 
 
 def make_main_keyboard(chat_id):
@@ -17,14 +16,15 @@ def make_main_keyboard(chat_id):
         buttonLists.append(list())
 
     buttonLists[0].append(config.ALL_COURSES)
-    buttonLists[1].append(config.MAKE_PLAN)
+    buttonLists[4].append(config.MAKE_PLAN)
+
     if u.mode != Mode.NORMAL:
         if u.notification:
-            buttonLists[2].append(config.NOTIFY_OFF)
+            buttonLists[3].append(config.NOTIFY_OFF)
         else:
-            buttonLists[2].append(config.NOTIFY_ON)
-        buttonLists[3].append(config.MY_TIMETABLE)
-        buttonLists[4].append(config.MY_PLAN)
+            buttonLists[3].append(config.NOTIFY_ON)
+        buttonLists[1].append(config.MY_TIMETABLE)
+        buttonLists[2].append(config.MY_PLAN)
         buttonLists[5].append(config.DEL_PLAN)
 
     buttonLists[6].append(config.HELP)
@@ -126,7 +126,7 @@ def make_inline_timetable_keyboard(day):
     return keyboard
 
 
-def make_inline_today_schedule_keyboard(chat_id, day, corso_codice, year):
+def make_inline_course_schedule_keyboard(chat_id, day, corso_codice, year):
     next_day = day + datetime.timedelta(days=1)
     prec_day = day - datetime.timedelta(days=1)
     next_week = day + datetime.timedelta(days=7)
@@ -159,6 +159,32 @@ def make_inline_today_schedule_keyboard(chat_id, day, corso_codice, year):
              text=config.emo_arrow_forward, callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + next_day.strftime(
                  "%d/%m/%YT%H:%M:%S")),
          InlineKeyboardButton(text=config.emo_double_arrow_forward, callback_data="course_" + corso_codice + "_year_"+str(year)+"_" + next_week.strftime(
+             "%d/%m/%YT%H:%M:%S"))]
+    ])
+
+    return keyboard
+
+
+def make_inline_room_schedule_keyboard(chat_id, day, aula_codice):
+
+    next_day = day + datetime.timedelta(days=1)
+    prec_day = day - datetime.timedelta(days=1)
+    next_week = day + datetime.timedelta(days=7)
+    prec_week = day - datetime.timedelta(days=7)
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=config.emo_double_arrow_back,
+                              callback_data="room-" + aula_codice + "-" + prec_week.strftime(
+                                  "%d/%m/%YT%H:%M:%S")),
+         InlineKeyboardButton(
+             text=config.emo_arrow_back,  callback_data="room-" + aula_codice + "-" + prec_day.strftime(
+                 "%d/%m/%YT%H:%M:%S")),
+         InlineKeyboardButton(text="TODAY", callback_data="room-" +
+                              aula_codice + "-" + "today"),
+         InlineKeyboardButton(
+             text=config.emo_arrow_forward, callback_data="room-" + aula_codice + "-" + next_day.strftime(
+                 "%d/%m/%YT%H:%M:%S")),
+         InlineKeyboardButton(text=config.emo_double_arrow_forward, callback_data="room-" + aula_codice + "-" + next_week.strftime(
              "%d/%m/%YT%H:%M:%S"))]
     ])
 

@@ -1,3 +1,4 @@
+import datetime
 import config
 from enum import Enum
 
@@ -18,7 +19,7 @@ class User:
 
 
 class Teaching:
-    def __init__(self, corso_codice, materia_codice, materia_descrizione, docente_nome, componente_id, url, anno, crediti, componente_padre):
+    def __init__(self, corso_codice, materia_codice, materia_descrizione, docente_nome, componente_id, url, anno, crediti, componente_padre, componente_radice):
         self.componente_id = componente_id
         self.corso_codice = corso_codice
         self.materia_codice = materia_codice
@@ -28,6 +29,7 @@ class Teaching:
         self.anno = anno
         self.crediti = crediti
         self.componente_padre = componente_padre
+        self.componente_radice = componente_radice
 
     def __str__(self):
         result = self.materia_codice + " - <b>" + self.materia_descrizione + "</b>"
@@ -122,12 +124,38 @@ class Aula:
         self.aula_nome = aula_nome
         self.aula_codice = aula_codice
 
+    def is_empty(self, now, orari_group_by_aula):
+
+        free = True
+
+        start = datetime.datetime.strptime(now.strftime(
+            "%Y-%m-%d") + "T00:00:00", "%Y-%m-%dT%H:%M:%S")
+        stop = datetime.datetime.strptime(now.strftime(
+            "%Y-%m-%d") + "T23:59:59", "%Y-%m-%dT%H:%M:%S")
+        for o in orari_group_by_aula[self.aula_codice]:
+
+            inizio = datetime.datetime.strptime(
+                o["inizio"], "%Y-%m-%dT%H:%M:%S")
+            fine = datetime.datetime.strptime(o["fine"], "%Y-%m-%dT%H:%M:%S")
+
+            if inizio > start and inizio < stop:
+                if now >= inizio and now <= fine:
+                    free = False
+                    break
+        return free
+
+    def __str__(self):
+
+        result = self.aula_nome + " - " + self.aula_indirizzo
+
+        return result
+
 
 class Lesson(Teaching):
     def __init__(self, corso_codice, materia_codice, materia_descrizione, docente_nome, componente_id, url, inizio,
-                 fine, anno, crediti, componente_padre):
+                 fine, anno, crediti, componente_padre, componente_radice):
         Teaching.__init__(self, corso_codice, materia_codice,
-                          materia_descrizione, docente_nome, componente_id, url, anno, crediti, componente_padre)
+                          materia_descrizione, docente_nome, componente_id, url, anno, crediti, componente_padre, componente_radice)
         self.inizio = inizio
         self.fine = fine
         self.lista_aule = list()
