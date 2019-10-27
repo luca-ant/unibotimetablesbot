@@ -13,6 +13,10 @@ import config
 
 
 def download_csv_orari():
+
+    if not os.path.isdir(config.download_dir):
+        os.mkdir(config.download_dir)
+
     orari = collections.defaultdict(list)
     orari_group_by_aula = collections.defaultdict(list)
 
@@ -30,7 +34,7 @@ def download_csv_orari():
         "/download/orari_"+config.accademic_year+".csv"
 
     csv_orari_filename = wget.download(
-        url_orari_csv, config.current_dir+"orari_"+config.accademic_year+".csv", bar=None)
+        url_orari_csv, config.download_dir+"orari_"+config.accademic_year+".csv", bar=None)
 
     with open(csv_orari_filename) as f:
         csv_reader = csv.reader(f, delimiter=',')
@@ -106,6 +110,11 @@ def get_all_aule():
                  aula["lon"])
         all_aule[a.aula_codice] = a
 
+    l = list(all_aule.items())
+
+    l.sort(key=lambda x: x[1].aula_nome, reverse=False)
+    all_aule = dict(l)
+
     return all_aule
 
 
@@ -168,7 +177,7 @@ def get_all_courses():
                                 i["componente_id"],
                                 i["url"], i["anno"], i["insegnamento_crediti"], i["componente_padre"], i["componente_radice"])
             ##### DEBUG #####
-            # if teaching.componente_id == '448379':
+            # if teaching.componente_id == '453573':
             #     print(teaching)
             #################
 

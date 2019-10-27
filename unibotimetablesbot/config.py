@@ -12,6 +12,9 @@ logging.basicConfig(filename=current_dir +
 
 data_dir = current_dir+"unibotimetablesbot_data/"
 
+download_dir=current_dir+"download/"
+
+
 dir_plans_name = data_dir + 'plans/'
 dir_users_name = data_dir + 'users/'
 

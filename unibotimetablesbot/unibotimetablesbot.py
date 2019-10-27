@@ -21,7 +21,6 @@ from keyboards import make_area_keyboard, make_courses_keyboard, make_inline_roo
 from plan_manager import get_next_lesson, get_plan_timetable, get_room_timetable, load_user_plan, print_output_timetable, print_plan, print_plan_message, print_teachings_message, store_user_plan, check_plans_consistency
 from user_manager import add_user, check_user, get_user, load_user, store_user, get_all_users
 from db_query import check_table, download_csv_orari, get_all_aule, get_all_courses
-from scheduler import scheduler_function, send_notifications
 from utils import my_round, distance
 
 import config
@@ -43,7 +42,7 @@ orari = collections.defaultdict(list)
 
 
 def callback_query(update, context):
-
+    
     text = update.callback_query.message.text
     chat_id = update.callback_query.message.chat_id
     message_id = update.callback_query.message.message_id
@@ -119,6 +118,7 @@ def callback_query(update, context):
                                                         reply_markup=make_inline_room_schedule_keyboard(chat_id, day, aula_codice))
             except:
                 update.callback_query.answer(text="SLOW DOWN!!")
+                traceback.print_exc()
                 pass
 
         else:
@@ -209,41 +209,51 @@ def add(update, context):
             plan = load_user_plan(chat_id, all_teachings)
 
             teaching = all_teachings[componente_id]
-            state = plan.add_teaching(teaching)
 
-            if state:
-                output_string += "ADDED " + "<b>"+teaching.materia_descrizione+"</b>\n"
-            else:
-                output_string += "<b>"+teaching.materia_descrizione + \
-                    "</b> ALREADY IN YOUR STUDY PLAN\n"
+            for t in all_teachings.values():
+                if t.componente_radice == teaching.componente_radice:
+                    state = plan.add_teaching(t)
+                    if state:
+                        output_string += "ADDED " + "<b>"+t.materia_descrizione+"</b>\n"
+                    else:
+                        output_string += "<b>"+t.materia_descrizione + \
+                            "</b> ALREADY IN YOUR STUDY PLAN\n"
 
-            while teaching.componente_padre != None and teaching.componente_padre != "":
-                teaching = all_teachings[teaching.componente_padre]
-                state = plan.add_teaching(teaching)
+            # state = plan.add_teaching(teaching)
 
-                if state:
-                    output_string += "ADDED " + "<b>"+teaching.materia_descrizione+"</b>\n"
-                else:
-                    output_string += "<b>"+teaching.materia_descrizione + \
-                        "</b> ALREADY IN YOUR STUDY PLAN\n"
+            # if state:
+            #     output_string += "ADDED " + "<b>"+teaching.materia_descrizione+"</b>\n"
+            # else:
+            #     output_string += "<b>"+teaching.materia_descrizione + \
+            #         "</b> ALREADY IN YOUR STUDY PLAN\n"
 
-            comp_padri = [componente_id]
+            # while teaching.componente_padre != None and teaching.componente_padre != "":
+            #     teaching = all_teachings[teaching.componente_padre]
+            #     state = plan.add_teaching(teaching)
 
-            while comp_padri:
-                comp_padre = comp_padri.pop()
+            #     if state:
+            #         output_string += "ADDED " + "<b>"+teaching.materia_descrizione+"</b>\n"
+            #     else:
+            #         output_string += "<b>"+teaching.materia_descrizione + \
+            #             "</b> ALREADY IN YOUR STUDY PLAN\n"
 
-                for key in all_teachings.keys():
-                    t = all_teachings[key]
-                    if t.componente_padre == comp_padre:
+            # comp_padri = [componente_id]
 
-                        comp_padri.append(t.componente_id)
-                        state = plan.add_teaching(t)
+            # while comp_padri:
+            #     comp_padre = comp_padri.pop()
 
-                        if state:
-                            output_string += "ADDED " + "<b>"+t.materia_descrizione + "</b>\n"
-                        else:
-                            output_string += "<b>"+t.materia_descrizione + \
-                                "</b> ALREADY IN YOUR STUDY PLAN\n"
+            #     for key in all_teachings.keys():
+            #         t = all_teachings[key]
+            #         if t.componente_padre == comp_padre:
+
+            #             comp_padri.append(t.componente_id)
+            #             state = plan.add_teaching(t)
+
+            #             if state:
+            #                 output_string += "ADDED " + "<b>"+t.materia_descrizione + "</b>\n"
+            #             else:
+            #                 output_string += "<b>"+t.materia_descrizione + \
+            #                     "</b> ALREADY IN YOUR STUDY PLAN\n"
 
             store_user_plan(chat_id, plan)
 
@@ -355,19 +365,29 @@ def url(update, context):
 
 
 def commands(update, context):
-    text = update.message.text
-    if text.startswith("/add_"):
-        add(update, context)
-    elif text.startswith("/remove_"):
-        remove(update, context)
-    elif text.startswith("/url_"):
-        url(update, context)
-    elif text.startswith("/see_room_schedule_"):
-        room_schedule(update, context)
-    elif text.startswith(config.SET_NOT_TIME_CMD):
-        set_notify_time(update, context)
+    try:
+        text = update.message.text
+        chat_id = update.message.chat_id
 
+        if text.startswith("/add_"):
+            add(update, context)
+        elif text.startswith("/remove_"):
+            remove(update, context)
+        elif text.startswith("/url_"):
+            url(update, context)
+        elif text.startswith("/see_room_schedule_"):
+            room_schedule(update, context)
+        elif text.startswith(config.SET_NOT_TIME_CMD):
+            set_notify_time(update, context)
 
+    except:
+        traceback.print_exc()
+        now = datetime.datetime.now()
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                     " ### EXCEPTION from " + str(chat_id)+" = " + traceback.format_exc())
+        output_string = config.emo_wrong + " Oh no! Something bad happend.."
+        update.message.reply_html(output_string,
+                                  reply_markup=make_main_keyboard(chat_id))
 def error(update, context):
     logging.warning('MESSAGE "%s" CAUSED ERROR "%s"',
                     update.message, context.error)
@@ -718,88 +738,177 @@ def message(update, context):
 
 
 def location(update, context):
+    try:
 
-    chat_id = update.message.chat_id
-    location = update.message.location
+        chat_id = update.message.chat_id
+        location = update.message.location
+        now = datetime.datetime.now()
+
+        ##### DEBUG #####
+        # now = datetime.datetime.strptime("2019-10-28T10:45:50", "%Y-%m-%dT%H:%M:%S")
+        #################
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                    " ### LOCATION from " + str(chat_id)+" = " + str(location.latitude) + ", " + str(location.longitude))
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+            " ### LOCATION from " + str(chat_id) + " = " + str(location.latitude) + ", " + str(location.longitude))
+        near_classrooms = []
+
+        for key in all_aule.keys():
+            a = all_aule[key]
+
+            try:
+                if a.lat != None and a.lon != None:
+                    lat = float(a.lat)
+                    lon = float(a.lon)
+                    if distance(location.latitude, location.longitude, lat, lon) <= 500:
+                        near_classrooms.append(a)
+
+            except:
+                traceback.print_exc()
+
+        empty_room = []
+
+        for a in near_classrooms:
+
+            free = a.is_empty(now, orari_group_by_aula)
+
+            if free:
+                empty_room.append(a)
+
+        output_string = config.emo_room+" <b>EMPTY CLASSROOM NEAR YOU</b>\n\nLEGEND:\n"
+        output_string += config.emo_blue_circle + \
+            " = Classroom empty for another 60 minutes\n"
+        output_string += config.emo_yellow_square + \
+            " = Classroom empty for another 30 minutes\n"
+        output_string += config.emo_red_circle + \
+            " = Classroom empty for another 15 minutes\n"
+        output_string += config.emo_black_circle + \
+            " = Classroom empty for less than 15 minutes\n\n"
+
+        update.message.reply_html(output_string)
+        output_string = ""
+        empty_room.sort(key=lambda x: x.aula_nome, reverse=False)
+
+        string_list = []
+        for a in empty_room:
+
+            for m in (60, 30, 15):
+
+                day = now + datetime.timedelta(minutes=m)
+                free = a.is_empty(day, orari_group_by_aula)
+                if free and m == 60:
+                    string_list.append(config.emo_blue_circle + " " +
+                                    str(a)+" /see_room_schedule_"+a.aula_codice+"\n\n")
+                    break
+                elif free and m == 30:
+                    string_list.append(config.emo_yellow_square + " " +
+                                    str(a)+" /see_room_schedule_"+a.aula_codice+"\n\n")
+                    break
+                elif free and m == 15:
+                    string_list.append(config.emo_red_circle + " " +
+                                    str(a)+" /see_room_schedule_"+a.aula_codice+"\n\n")
+                    break
+            else:
+                string_list.append(config.emo_black_circle + " " +
+                                str(a)+" /see_room_schedule_"+a.aula_codice+"\n\n")
+
+        i = 0
+        for s in string_list:
+            output_string += s
+            i += 1
+            if i % 20 == 0:
+                update.message.reply_html(output_string)
+                output_string = ""
+        if output_string != "":
+            update.message.reply_html(output_string)
+
+    except:
+        traceback.print_exc()
+        now = datetime.datetime.now()
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                     " ### EXCEPTION from " + str(chat_id)+" = " + traceback.format_exc())
+        output_string = config.emo_wrong + " Oh no! Something bad happend.."
+        update.message.reply_html(output_string,
+                                  reply_markup=make_main_keyboard(chat_id))
+
+def send_notifications():
     now = datetime.datetime.now()
 
+    fix_now = datetime.datetime.strptime(
+        str(now.year)+"-"+str(now.month) + "-"+str(now.day)+"T"+str(now.hour)+":"+str(now.minute)+":00", "%Y-%m-%dT%H:%M:%S")
+
     ##### DEBUG #####
-    # now = datetime.datetime.strptime("2019-10-28T10:45:50", "%Y-%m-%dT%H:%M:%S")
+    # fix_now = datetime.datetime.strptime("2019-10-08T13:45:00", "%Y-%m-%dT%H:%M:%S")
     #################
-    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-                 " ### LOCATION from " + str(chat_id)+" = " + str(location.latitude) + ", " + str(location.longitude))
-    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-          " ### LOCATION from " + str(chat_id) + " = " + str(location.latitude) + ", " + str(location.longitude))
-    near_classrooms = []
 
-    for key in all_aule.keys():
-        a = all_aule[key]
-
+    for chat_id in get_all_users().keys():
         try:
-            if a.lat != None and a.lon != None:
-                lat = float(a.lat)
-                lon = float(a.lon)
-                if distance(location.latitude, location.longitude, lat, lon) <= 500:
-                    near_classrooms.append(a)
+            u = get_user(chat_id)
+
+            if u.notification:
+
+                plan = load_user_plan(
+                    chat_id, all_teachings)
+
+                timetable = get_next_lesson(
+                    chat_id, fix_now, plan, orari, all_aule)
+
+                # output_string = config.emo_ay + " A.Y. <code>" + config.accademic_year + "/" + str(
+                #     int(config.accademic_year) + 1) + "</code>\n"
+                # output_string += config.emo_calendar + " " + \
+                #     now.strftime("%A %B %d, %Y") + "\n\n"
+                # output_string += config.emo_less+"<b>YOUR NEXT LESSON</b>\n\n"
+
+                # output_string += print_output_timetable(timetable)
+
+                output_string = ""
+                for l in timetable.lessons:
+                    for a in l.lista_aule:
+                        output_string += config.emo_room + " <b>" + a.aula_nome+"</b> - "
+
+                    output_string += "IS GOING TO START <b>" + l.materia_descrizione + "</b>"
+                    if l.docente_nome != "":
+                        output_string += " (<i>" + l.docente_nome + "</i>)"
+                    if l.crediti != None and l.crediti != "":
+                        output_string += " - " + l.crediti + " CFU"
+
+                    output_string += "\n"
+
+                    output_string += config.emo_clock + " " + \
+                        l.inizio.strftime("%H:%M")
+                    output_string += " - "
+                    output_string += l.fine.strftime("%H:%M")
+
+                    output_string += " "+config.emo_calendar + \
+                        " " + l.inizio.strftime("%d/%m/%Y")
+                    output_string += "\n\n"
+
+                if output_string:
+
+                    logging.info(
+                        "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SENDING NOTIFICATION TO " + str(chat_id))
+                    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + "  ### SENDING NOTIFICATION TO " + str(
+                        chat_id))
+
+                    update.message.reply_html(output_string)
 
         except:
             traceback.print_exc()
+            now = datetime.datetime.now()
+            logging.info(
+                "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
 
-    empty_room = []
 
-    for a in near_classrooms:
+def scheduler_function():
 
-        free = a.is_empty(now, orari_group_by_aula)
+    for j in range(0, 60, 5):
+        m = "%02d" % j
+        schedule.every().hour.at(":"+m).do(send_notifications)
 
-        if free:
-            empty_room.append(a)
+    while True:
 
-    output_string = config.emo_room+" <b>EMPTY CLASSROOM NEAR YOU</b>\n\nLEGEND:\n"
-    output_string += config.emo_blue_circle + \
-        " = Classroom empty for another 60 minutes\n"
-    output_string += config.emo_yellow_square + \
-        " = Classroom empty for another 30 minutes\n"
-    output_string += config.emo_red_circle + \
-        " = Classroom empty for another 15 minutes\n"
-    output_string += config.emo_black_circle + \
-        " = Classroom empty for less than 15 minutes\n\n"
-
-    update.message.reply_html(output_string)
-    output_string = ""
-    empty_room.sort(key=lambda x: x.aula_nome, reverse=False)
-
-    string_list = []
-    for a in empty_room:
-
-        for m in (60, 30, 15):
-
-            day = now + datetime.timedelta(minutes=m)
-            free = a.is_empty(day, orari_group_by_aula)
-            if free and m == 60:
-                string_list.append(config.emo_blue_circle + " " +
-                                   str(a)+" /see_room_schedule_"+a.aula_codice+"\n")
-                break
-            elif free and m == 30:
-                string_list.append(config.emo_yellow_square + " " +
-                                   str(a)+" /see_room_schedule_"+a.aula_codice+"\n")
-                break
-            elif free and m == 15:
-                string_list.append(config.emo_red_circle + " " +
-                                   str(a)+" /see_room_schedule_"+a.aula_codice+"\n")
-                break
-        else:
-            string_list.append(config.emo_black_circle + " " +
-                               str(a)+" /see_room_schedule_"+a.aula_codice+"\n")
-
-    i = 0
-    for s in string_list:
-        output_string += s
-        i += 1
-        if i % 20 == 0:
-            update.message.reply_html(output_string)
-            output_string = ""
-    if output_string != "":
-        update.message.reply_html(output_string)
+        schedule.run_pending()
+        time.sleep(150)
 
 
 def update():

@@ -73,6 +73,7 @@ def get_room_timetable(day, aula, orari_group_by_aula, all_teachings):
                 o["fine"], "%Y-%m-%dT%H:%M:%S")
 
             if inizio > start and inizio < stop and aula.aula_codice in o["aula_codici"]:
+            
                 t = all_teachings[o["componente_id"]]
 
                 l = Lesson(t.corso_codice, t.materia_codice, t.materia_descrizione, t.docente_nome, t.componente_id,
@@ -86,6 +87,7 @@ def get_room_timetable(day, aula, orari_group_by_aula, all_teachings):
                 timetable.add_lesson(l)
 
         except:
+            print(o)
             traceback.print_exc()
             now = datetime.datetime.now()
             logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
