@@ -393,16 +393,16 @@ def commands(update, context):
 def error(update, context):
     now = datetime.datetime.now()
     logging.error("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-                     " ### MESSAGE " + " = " + update.message + "### ERROR = " + context.error))
+                  " ### MESSAGE " + " = " + update.message + "### ERROR = " + context.error)
 
 
 def message(update, context):
     try:
 
-        chat_id=update.message.chat_id
-        text=update.message.text
+        chat_id = update.message.chat_id
+        text = update.message.text
 
-        now=datetime.datetime.now()
+        now = datetime.datetime.now()
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
                      " ### MESSAGE from " + str(chat_id)+" = " + text)
         print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
