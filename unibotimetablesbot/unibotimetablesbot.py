@@ -366,9 +366,9 @@ def url(update, context):
 
 def commands(update, context):
     try:
+        
         text = update.message.text
         chat_id = update.message.chat_id
-
         if text.startswith("/add_"):
             add(update, context)
         elif text.startswith("/remove_"):
@@ -391,8 +391,8 @@ def commands(update, context):
 
 
 def error(update, context):
-    logging.warning('MESSAGE "%s" CAUSED ERROR "%s"',
-                    update.message, context.error)
+    logging.error('MESSAGE "%s" CAUSED ERROR "%s"',
+                  update.message, context.error)
 
 
 def message(update, context):
