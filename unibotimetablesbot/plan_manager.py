@@ -6,8 +6,10 @@ import os
 import json
 
 from model import Course, Teaching, Mode, Plan, Lesson, Aula, Timetable, User
-from user_manager import get_user
 import config
+from user_manager import UserManager
+
+um = UserManager.get_instance()
 
 
 def get_plan_timetable(day, plan, orari, all_aule):
@@ -73,7 +75,7 @@ def get_room_timetable(day, aula, orari_group_by_aula, all_teachings):
                 o["fine"], "%Y-%m-%dT%H:%M:%S")
 
             if inizio > start and inizio < stop and aula.aula_codice in o["aula_codici"]:
-            
+
                 t = all_teachings[o["componente_id"]]
 
                 l = Lesson(t.corso_codice, t.materia_codice, t.materia_descrizione, t.docente_nome, t.componente_id,
@@ -179,8 +181,8 @@ def get_lessons(chat_id, now, plan, orari, all_aule):
     if plan.is_empty():
         return timetable
 
-    u = get_user(chat_id)
-
+    u = um.get_user(chat_id)
+    print("plan_man " + str(u))
     lesson_time = now + datetime.timedelta(minutes=u.notification_time)
 
     for t in plan.teachings:
@@ -303,7 +305,7 @@ def print_plan_message(chat_id, plan):
 
 def print_teachings_message(chat_id, all_courses, corso_codice, year):
     result = list()
-    mode = get_user(chat_id).mode
+    mode = um.get_user(chat_id).mode
 
     if mode == Mode.MAKE_PLAN:
 

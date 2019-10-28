@@ -2,14 +2,17 @@
 import datetime
 import config
 
+
 from model import Mode
-from user_manager import get_user
 from telegram import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+from user_manager import UserManager
+
+um = UserManager.get_instance()
 
 
 def make_main_keyboard(chat_id):
 
-    u = get_user(chat_id)
+    u = um.get_user(chat_id)
 
     buttonLists = list()
     for i in range(9):

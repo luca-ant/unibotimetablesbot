@@ -17,6 +17,11 @@ class User:
         self.notification = notification
         self.notification_time = notification_time
 
+    def __str__(self):
+        result = str(self.chat_id) + " " + str(self.mode) + " " + \
+            str(self.notification) + " " + str(self.notification_time)
+        return result
+
 
 class Teaching:
     def __init__(self, corso_codice, materia_codice, materia_descrizione, docente_nome, componente_id, url, anno, crediti, componente_padre, componente_radice):

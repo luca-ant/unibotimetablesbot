@@ -11,15 +11,17 @@ import json
 import requests
 import time
 import csv
+import threading
+
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, Handler
 from telegram import ParseMode
-from multiprocessing import Process
 
 from model import Course, Teaching, Mode, Plan, Lesson, Aula, Timetable, User
 from keyboards import make_area_keyboard, make_courses_keyboard, make_inline_room_schedule_keyboard, make_inline_timetable_keyboard, make_inline_course_schedule_keyboard, make_main_keyboard, make_year_keyboard
 from plan_manager import get_lessons, get_plan_timetable, get_room_timetable, load_user_plan, print_output_timetable, print_plan, print_plan_message, print_teachings_message, store_user_plan, check_plans_consistency
-from user_manager import add_user, check_user, get_user, load_user, store_user, get_all_users
+
+from user_manager import UserManager
 from db_query import check_table, download_csv_orari, get_all_aule, get_all_courses
 from utils import my_round, distance
 
@@ -39,6 +41,8 @@ all_teachings = dict()
 all_courses_group_by_area = collections.defaultdict(list)
 orari_group_by_aula = collections.defaultdict(list)
 orari = collections.defaultdict(list)
+
+um = UserManager.get_instance()
 
 
 def callback_query(update, context):
@@ -165,9 +169,9 @@ def start(update, context):
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
           " ### MESSAGE from " + str(chat_id) + " = " + text)
 
-    get_user(chat_id).mode = Mode.NORMAL
+    um.get_user(chat_id).mode = Mode.NORMAL
 
-    store_user(chat_id)
+    um.store_user(chat_id)
 
     output_string = "Hi! Thanks for trying this bot!\n\n" + config.help_string
 
@@ -201,7 +205,7 @@ def add(update, context):
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
           " ### MESSAGE from " + str(chat_id) + " = " + text)
 
-    if get_user(chat_id).mode == Mode.MAKE_PLAN:
+    if um.get_user(chat_id).mode == Mode.MAKE_PLAN:
         array = text.split("_")
         componente_id = array[1]
         output_string = ""
@@ -299,14 +303,16 @@ def set_notify_time(update, context):
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
           " ### MESSAGE from " + str(chat_id) + " = " + text)
 
-    u = get_user(chat_id)
     try:
+        u = um.get_user(chat_id)
         u.notification_time = my_round(int(text.split()[1]))
-        store_user(chat_id)
+
+        um.store_user(chat_id)
         output_string = "Great job! Now you should receive notifications " + \
             str(u.notification_time)+" minutes before each lesson!"
 
     except:
+        traceback.print_exc()
         output_string = config.command_help_string
 
     update.message.reply_html(
@@ -402,15 +408,17 @@ def message(update, context):
         chat_id = update.message.chat_id
         text = update.message.text
 
+        u = um.get_user(chat_id)
+
         now = datetime.datetime.now()
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
                      " ### MESSAGE from " + str(chat_id)+" = " + text)
         print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
               " ### MESSAGE from " + str(chat_id) + " = " + text)
 
-        if chat_id not in get_all_users().keys():
-            check_user(chat_id)
-            store_user(chat_id)
+        if chat_id not in um.get_all_users().keys():
+            um.check_user(chat_id)
+            um.store_user(chat_id)
 
             output_string = config.emo_ay + " A.Y. <code>" + config.accademic_year + "/" + str(
                 int(config.accademic_year) + 1) + "</code>\n"
@@ -420,9 +428,9 @@ def message(update, context):
                 output_string, reply_markup=make_main_keyboard(chat_id))
 
         elif text == config.ALL_COURSES:
-            u = get_user(chat_id)
+            u = um.get_user(chat_id)
 
-            store_user(chat_id)
+            um.store_user(chat_id)
 
             output_string = config.emo_ay + " A.Y. <code>" + config.accademic_year + "/" + str(
                 int(config.accademic_year) + 1) + "</code>\n"
@@ -432,8 +440,8 @@ def message(update, context):
                 all_courses_group_by_area, u.mode))
 
         elif text == config.MY_TIMETABLE:
-            get_user(chat_id).mode = Mode.PLAN
-            store_user(chat_id)
+            um.get_user(chat_id).mode = Mode.PLAN
+            um.store_user(chat_id)
 
             now = datetime.datetime.now()
 
@@ -460,14 +468,14 @@ def message(update, context):
             else:
                 output_string = "You haven't a study plan yet! Use " + \
                     config.MAKE_PLAN + " to make it"
-                get_user(chat_id).mode = Mode.NORMAL
-                store_user(chat_id)
+                um.get_user(chat_id).mode = Mode.NORMAL
+                um.store_user(chat_id)
                 update.message.reply_html(
                     output_string, reply_markup=make_main_keyboard(chat_id))
 
         elif text == config.MY_PLAN:
-            get_user(chat_id).mode = Mode.PLAN
-            store_user(chat_id)
+            um.get_user(chat_id).mode = Mode.PLAN
+            um.store_user(chat_id)
 
             plan = load_user_plan(chat_id, all_teachings)
             if plan != None:
@@ -491,22 +499,22 @@ def message(update, context):
             else:
                 output_string = "You haven't a study plan yet! Use " + \
                     config.MAKE_PLAN + " to make it"
-                get_user(chat_id).mode = Mode.NORMAL
-                store_user(chat_id)
+                um.get_user(chat_id).mode = Mode.NORMAL
+                um.store_user(chat_id)
                 update.message.reply_html(
                     output_string, reply_markup=make_main_keyboard(chat_id))
 
         elif text == config.DEL_PLAN:
 
-            get_user(chat_id).mode = Mode.DEL
+            um.get_user(chat_id).mode = Mode.DEL
 
             output_string = "Are you sure? Send \"<b>YES</b>\" to confirm or \"<b>NO</b>\" to cancel (without quotes)"
             update.message.reply_html(output_string)
 
-        elif text.upper() == "YES" and get_user(chat_id).mode == Mode.DEL:
+        elif text.upper() == "YES" and um.get_user(chat_id).mode == Mode.DEL:
 
-            get_user(chat_id).mode = Mode.NORMAL
-            store_user(chat_id)
+            um.get_user(chat_id).mode = Mode.NORMAL
+            um.store_user(chat_id)
 
             if os.path.isfile(config.dir_plans_name + str(chat_id)):
                 os.remove(config.dir_plans_name + str(chat_id))
@@ -515,8 +523,8 @@ def message(update, context):
             update.message.reply_html(
                 output_string, reply_markup=make_main_keyboard(chat_id))
 
-        elif text == "NO" and get_user(chat_id).mode == Mode.DEL:
-            get_user(chat_id).mode = Mode.PLAN
+        elif text == "NO" and um.get_user(chat_id).mode == Mode.DEL:
+            um.get_user(chat_id).mode = Mode.PLAN
             output_string = config.emo_ay + " A.Y. <code>" + config.accademic_year + "/" + str(
                 int(config.accademic_year) + 1) + "</code>\n"
             output_string += "Choose your action!"
@@ -524,9 +532,9 @@ def message(update, context):
                 output_string, reply_markup=make_main_keyboard(chat_id))
 
         elif text == config.MAKE_PLAN:
-            u = get_user(chat_id)
+            u = um.get_user(chat_id)
             u.mode = Mode.MAKE_PLAN
-            store_user(chat_id)
+            um.store_user(chat_id)
 
             if not os.path.isfile(config.dir_plans_name + str(chat_id)):
                 plan = Plan()
@@ -538,9 +546,9 @@ def message(update, context):
                 all_courses_group_by_area, u.mode))
 
         elif text == config.END_PLAN:
-            u = get_user(chat_id)
+            u = um.get_user(chat_id)
             u.mode = Mode.PLAN
-            store_user(chat_id)
+            um.store_user(chat_id)
             plan = load_user_plan(chat_id, all_teachings)
             store_user_plan(chat_id, plan)
 
@@ -551,8 +559,8 @@ def message(update, context):
                 output_string, reply_markup=make_main_keyboard(chat_id))
 
         elif text == config.BACK_TO_MAIN:
-            check_user(chat_id)
-            store_user(chat_id)
+            um.check_user(chat_id)
+            um.store_user(chat_id)
 
             output_string = config.emo_ay + " A.Y. <code>" + config.accademic_year + "/" + str(
                 int(config.accademic_year) + 1) + "</code>\n"
@@ -562,7 +570,7 @@ def message(update, context):
                 output_string, reply_markup=make_main_keyboard(chat_id))
 
         elif text == config.BACK_TO_AREAS:
-            u = get_user(chat_id)
+            u = um.get_user(chat_id)
             output_string = config.emo_ay + " A.Y. <code>" + config.accademic_year + "/" + str(
                 int(config.accademic_year) + 1) + "</code>\n"
             output_string += "Choose your area!"
@@ -571,11 +579,11 @@ def message(update, context):
                                       reply_markup=make_area_keyboard(all_courses_group_by_area, u.mode))
 
         elif text == config.NOTIFY_ON:
-            u = get_user(chat_id)
+            u = um.get_user(chat_id)
 
             if os.path.isfile(config.dir_plans_name + str(chat_id)):
                 u.notification = True
-                store_user(chat_id)
+                um.store_user(chat_id)
 
                 output_string = "Notifications enabled!"
 
@@ -584,17 +592,17 @@ def message(update, context):
             else:
                 output_string = "You haven't a study plan yet! Use " + \
                     config.MAKE_PLAN + " to make it"
-                get_user(chat_id).mode = Mode.NORMAL
-                store_user(chat_id)
+                um.get_user(chat_id).mode = Mode.NORMAL
+                um.store_user(chat_id)
                 update.message.reply_html(
                     output_string, reply_markup=make_main_keyboard(chat_id))
 
         elif text == config.NOTIFY_OFF:
-            u = get_user(chat_id)
+            u = um.get_user(chat_id)
 
             if u.notification:
                 u.notification = False
-                store_user(chat_id)
+                um.store_user(chat_id)
 
                 output_string = "Notifications disabled!"
 
@@ -607,35 +615,35 @@ def message(update, context):
                     output_string, reply_markup=make_main_keyboard(chat_id))
 
         elif text == config.EMPTY_ROOMS:
-            u = get_user(chat_id)
+            u = um.get_user(chat_id)
 
             output_string = config.location_string
             update.message.reply_html(output_string)
 
         elif text == config.DONATION:
-            check_user(chat_id)
-            store_user(chat_id)
+            um.check_user(chat_id)
+            um.store_user(chat_id)
 
             update.message.reply_html(
                 config.donation_string, reply_markup=make_main_keyboard(chat_id))
 
         elif text == config.HELP:
 
-            check_user(chat_id)
-            store_user(chat_id)
+            um.check_user(chat_id)
+            um.store_user(chat_id)
 
             update.message.reply_html(
                 config.help_string, reply_markup=make_main_keyboard(chat_id))
 
         elif text == config.PRIVACY:
-            check_user(chat_id)
-            store_user(chat_id)
+            um.check_user(chat_id)
+            um.store_user(chat_id)
 
             update.message.reply_html(
                 config.privacy_string, reply_markup=make_main_keyboard(chat_id))
 
         elif text in all_courses_group_by_area.keys():
-            u = get_user(chat_id)
+            u = um.get_user(chat_id)
 
             output_string = config.emo_ay + " A.Y. <code>" + config.accademic_year + "/" + str(
                 int(config.accademic_year) + 1) + "</code>\n"
@@ -646,7 +654,7 @@ def message(update, context):
 
         elif text.split()[0] in all_courses.keys():
             course = all_courses[text.split()[0]]
-            u = get_user(chat_id)
+            u = um.get_user(chat_id)
             try:
 
                 year = int(text.split()[-1])
@@ -701,8 +709,8 @@ def message(update, context):
                         chat_id, now, course.corso_codice, year))
 
                 else:
-                    check_user(chat_id)
-                    store_user(chat_id)
+                    um.check_user(chat_id)
+                    um.store_user(chat_id)
 
             except ValueError:
 
@@ -718,11 +726,11 @@ def message(update, context):
                 output_string += "\n\nChoose your year!"
 
                 update.message.reply_html(output_string, disable_web_page_preview=True,
-                                          reply_markup=make_year_keyboard(all_courses, course.corso_codice, get_user(chat_id).mode))
+                                          reply_markup=make_year_keyboard(all_courses, course.corso_codice, um.get_user(chat_id).mode))
 
         else:
-            check_user(chat_id)
-            store_user(chat_id)
+            um.check_user(chat_id)
+            um.store_user(chat_id)
 
             output_string = config.emo_confused + " Sorry.. I don't understand.."
             output_string += "\n\n" + config.help_string
@@ -849,9 +857,9 @@ def send_notifications(bot):
     # fix_now = datetime.datetime.strptime("2019-10-08T13:45:00", "%Y-%m-%dT%H:%M:%S")
     #################
 
-    for chat_id in get_all_users().keys():
+    for chat_id in um.get_all_users().keys():
         try:
-            u = get_user(chat_id)
+            u = um.get_user(chat_id)
 
             if u.notification:
 
@@ -910,10 +918,14 @@ def send_notifications(bot):
 
 def scheduler_function(bot):
 
+    # for i in range(0, 24, 1):
+    #     h = "%02d" % i
+
     for j in range(0, 60, 5):
         m = "%02d" % j
-
         job = schedule.every().hours.at(":"+m).do(send_notifications, bot)
+
+        # job = schedule.every().day.at(h+":"+m).do(send_notifications, bot)
 
     while True:
 
@@ -966,12 +978,12 @@ def update():
 
 
 def main():
-
+    print(um)
     if os.path.isdir(config.dir_users_name):
         for f in os.listdir(config.dir_users_name):
             filename = os.fsdecode(f)
-            u = load_user(int(filename))
-            add_user(u)
+            u = um.load_user(int(filename))
+            um.add_user(u)
 
     update()
 
@@ -993,8 +1005,9 @@ def main():
 
     check_plans_consistency(all_teachings)
 
-    scheduler_process = Process(target=scheduler_function, args=(updater.bot,))
-    scheduler_process.start()
+    scheduler_thread = threading.Thread(
+        target=scheduler_function, args=(updater.bot,))
+    scheduler_thread.start()
 
     # Start the Bot
     print('Listening ...')
