@@ -12,7 +12,7 @@ logging.basicConfig(filename=current_dir +
 
 data_dir = current_dir+"unibotimetablesbot_data/"
 
-download_dir=current_dir+"download/"
+download_dir = current_dir+"download/"
 
 
 dir_plans_name = data_dir + 'plans/'
@@ -87,7 +87,7 @@ donation_string = emo_money + \
     " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
 
 
-location_string = emo_gps+" <b>LOCATION</b>\n\nAre you looking for an empty classroom to study? Try to send location and the bot will search empty classroom around you."
+location_string = emo_gps+" <b>LOCATION</b>\n\nAre you looking for an empty classroom to study? Try to send location and the bot will search empty classrooms around you."
 issue_string = "For issues send a mail to luca.antognetti5@gmail.com describing the problem in detail."
 
 command_help_string = emo_commands+" <b>COMMANDS:</b>\n\n" + SET_NOT_TIME_CMD + " - to set your favourite notification time\n<i>Example:</i> send \"" + \

@@ -42,7 +42,7 @@ orari = collections.defaultdict(list)
 
 
 def callback_query(update, context):
-    
+
     text = update.callback_query.message.text
     chat_id = update.callback_query.message.chat_id
     message_id = update.callback_query.message.message_id
@@ -388,6 +388,8 @@ def commands(update, context):
         output_string = config.emo_wrong + " Oh no! Something bad happend.."
         update.message.reply_html(output_string,
                                   reply_markup=make_main_keyboard(chat_id))
+
+
 def error(update, context):
     logging.warning('MESSAGE "%s" CAUSED ERROR "%s"',
                     update.message, context.error)
@@ -748,9 +750,9 @@ def location(update, context):
         # now = datetime.datetime.strptime("2019-10-28T10:45:50", "%Y-%m-%dT%H:%M:%S")
         #################
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-                    " ### LOCATION from " + str(chat_id)+" = " + str(location.latitude) + ", " + str(location.longitude))
+                     " ### LOCATION from " + str(chat_id)+" = " + str(location.latitude) + ", " + str(location.longitude))
         print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-            " ### LOCATION from " + str(chat_id) + " = " + str(location.latitude) + ", " + str(location.longitude))
+              " ### LOCATION from " + str(chat_id) + " = " + str(location.latitude) + ", " + str(location.longitude))
         near_classrooms = []
 
         for key in all_aule.keys():
@@ -798,19 +800,19 @@ def location(update, context):
                 free = a.is_empty(day, orari_group_by_aula)
                 if free and m == 60:
                     string_list.append(config.emo_blue_circle + " " +
-                                    str(a)+" /see_room_schedule_"+a.aula_codice+"\n\n")
+                                       str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
                     break
                 elif free and m == 30:
                     string_list.append(config.emo_yellow_square + " " +
-                                    str(a)+" /see_room_schedule_"+a.aula_codice+"\n\n")
+                                       str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
                     break
                 elif free and m == 15:
                     string_list.append(config.emo_red_circle + " " +
-                                    str(a)+" /see_room_schedule_"+a.aula_codice+"\n\n")
+                                       str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
                     break
             else:
                 string_list.append(config.emo_black_circle + " " +
-                                str(a)+" /see_room_schedule_"+a.aula_codice+"\n\n")
+                                   str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
 
         i = 0
         for s in string_list:
@@ -831,11 +833,12 @@ def location(update, context):
         update.message.reply_html(output_string,
                                   reply_markup=make_main_keyboard(chat_id))
 
+
 def send_notifications():
     now = datetime.datetime.now()
 
     fix_now = datetime.datetime.strptime(
-        str(now.year)+"-"+str(now.month) + "-"+str(now.day)+"T"+str(now.hour)+":"+str(now.minute)+":00", "%Y-%m-%dT%H:%M:%S")
+        str(now.year)+"-"+str(now.month) + "-"+str(now.day)+"T"+str(now.hour)+":"+str(my_round(now.minute))+":00", "%Y-%m-%dT%H:%M:%S")
 
     ##### DEBUG #####
     # fix_now = datetime.datetime.strptime("2019-10-08T13:45:00", "%Y-%m-%dT%H:%M:%S")
