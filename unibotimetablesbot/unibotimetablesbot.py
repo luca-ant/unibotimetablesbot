@@ -18,7 +18,7 @@ from multiprocessing import Process
 
 from model import Course, Teaching, Mode, Plan, Lesson, Aula, Timetable, User
 from keyboards import make_area_keyboard, make_courses_keyboard, make_inline_room_schedule_keyboard, make_inline_timetable_keyboard, make_inline_course_schedule_keyboard, make_main_keyboard, make_year_keyboard
-from plan_manager import get_next_lesson, get_plan_timetable, get_room_timetable, load_user_plan, print_output_timetable, print_plan, print_plan_message, print_teachings_message, store_user_plan, check_plans_consistency
+from plan_manager import get_lessons, get_plan_timetable, get_room_timetable, load_user_plan, print_output_timetable, print_plan, print_plan_message, print_teachings_message, store_user_plan, check_plans_consistency
 from user_manager import add_user, check_user, get_user, load_user, store_user, get_all_users
 from db_query import check_table, download_csv_orari, get_all_aule, get_all_courses
 from utils import my_round, distance
@@ -366,7 +366,7 @@ def url(update, context):
 
 def commands(update, context):
     try:
-        
+
         text = update.message.text
         chat_id = update.message.chat_id
         if text.startswith("/add_"):
@@ -391,17 +391,18 @@ def commands(update, context):
 
 
 def error(update, context):
-    logging.error('MESSAGE "%s" CAUSED ERROR "%s"',
-                  update.message, context.error)
+    now = datetime.datetime.now()
+    logging.error("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                     " ### MESSAGE " + " = " + update.message + "### ERROR = " + context.error))
 
 
 def message(update, context):
     try:
 
-        chat_id = update.message.chat_id
-        text = update.message.text
+        chat_id=update.message.chat_id
+        text=update.message.text
 
-        now = datetime.datetime.now()
+        now=datetime.datetime.now()
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
                      " ### MESSAGE from " + str(chat_id)+" = " + text)
         print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
@@ -834,12 +835,16 @@ def location(update, context):
                                   reply_markup=make_main_keyboard(chat_id))
 
 
-def send_notifications():
+def send_notifications(bot):
     now = datetime.datetime.now()
 
     fix_now = datetime.datetime.strptime(
-        str(now.year)+"-"+str(now.month) + "-"+str(now.day)+"T"+str(now.hour)+":"+str(my_round(now.minute))+":00", "%Y-%m-%dT%H:%M:%S")
+        str(now.year) + "-" + str(now.month) + "-" + str(now.day) + "T" + str(now.hour) + ":" + "%02d" % my_round(now.minute) + ":00", "%Y-%m-%dT%H:%M:%S")
 
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                 " ### SENDING NOTIFICATION")
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+          " ### SENDING NOTIFICATION")
     ##### DEBUG #####
     # fix_now = datetime.datetime.strptime("2019-10-08T13:45:00", "%Y-%m-%dT%H:%M:%S")
     #################
@@ -853,7 +858,7 @@ def send_notifications():
                 plan = load_user_plan(
                     chat_id, all_teachings)
 
-                timetable = get_next_lesson(
+                timetable = get_lessons(
                     chat_id, fix_now, plan, orari, all_aule)
 
                 # output_string = config.emo_ay + " A.Y. <code>" + config.accademic_year + "/" + str(
@@ -877,8 +882,8 @@ def send_notifications():
 
                     output_string += "\n"
 
-                    output_string += config.emo_clock + " " + \
-                        l.inizio.strftime("%H:%M")
+                    output_string += config.emo_clock + \
+                        " " + l.inizio.strftime("%H:%M")
                     output_string += " - "
                     output_string += l.fine.strftime("%H:%M")
 
@@ -890,10 +895,11 @@ def send_notifications():
 
                     logging.info(
                         "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SENDING NOTIFICATION TO " + str(chat_id))
-                    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + "  ### SENDING NOTIFICATION TO " + str(
+                    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### SENDING NOTIFICATION TO " + str(
                         chat_id))
 
-                    update.message.reply_html(output_string)
+                    bot.send_message(chat_id, output_string,
+                                     parse_mode=ParseMode.HTML)
 
         except:
             traceback.print_exc()
@@ -902,16 +908,17 @@ def send_notifications():
                 "TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### EXCEPTION = " + traceback.format_exc())
 
 
-def scheduler_function():
+def scheduler_function(bot):
 
     for j in range(0, 60, 5):
         m = "%02d" % j
-        schedule.every().hour.at(":"+m).do(send_notifications)
+
+        job = schedule.every().hours.at(":"+m).do(send_notifications, bot)
 
     while True:
 
         schedule.run_pending()
-        time.sleep(150)
+        time.sleep(60)
 
 
 def update():
@@ -927,6 +934,7 @@ def update():
     ##### DEBUG #####
     # update_day = datetime.datetime.strptime(year + "-08-30T00:00:00", "%Y-%m-%dT%H:%M:%S")
     #################
+
     if now > update_day:
         config.accademic_year = year
     else:
@@ -966,12 +974,6 @@ def main():
             add_user(u)
 
     update()
-    schedule.every().day.at("07:00").do(update)
-
-    check_plans_consistency(all_teachings)
-
-    scheduler_process = Process(target=scheduler_function)
-    scheduler_process.start()
 
     updater = Updater(config.token, use_context=True)
 
@@ -986,6 +988,13 @@ def main():
     updater.dispatcher.add_handler(MessageHandler(Filters.location, location))
 
     updater.dispatcher.add_error_handler(error)
+
+    schedule.every().day.at("07:00").do(update)
+
+    check_plans_consistency(all_teachings)
+
+    scheduler_process = Process(target=scheduler_function, args=(updater.bot,))
+    scheduler_process.start()
 
     # Start the Bot
     print('Listening ...')
