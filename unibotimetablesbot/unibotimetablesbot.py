@@ -399,7 +399,7 @@ def commands(update, context):
 def error(update, context):
     now = datetime.datetime.now()
     logging.error("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
-                  " ### MESSAGE " + " = " + update.message + "### ERROR = " + context.error)
+                  " ### MESSAGE " + " = " + str(update.message) + "### ERROR = " + str(context.error))
 
 
 def message(update, context):
