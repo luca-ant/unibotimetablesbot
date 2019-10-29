@@ -978,7 +978,6 @@ def update():
 
 
 def main():
-    print(um)
     if os.path.isdir(config.dir_users_name):
         for f in os.listdir(config.dir_users_name):
             filename = os.fsdecode(f)
