@@ -191,7 +191,7 @@ def help(update, context):
 
     output_string = config.help_string
 
-    update.message.reply_htm(
+    update.message.reply_html(
         output_string, reply_markup=make_main_keyboard(chat_id))
 
 
