@@ -182,7 +182,6 @@ def get_lessons(chat_id, now, plan, orari, all_aule):
         return timetable
 
     u = um.get_user(chat_id)
-    print("plan_man " + str(u))
     lesson_time = now + datetime.timedelta(minutes=u.notification_time)
 
     for t in plan.teachings:

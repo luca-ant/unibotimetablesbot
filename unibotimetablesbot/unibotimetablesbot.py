@@ -1003,7 +1003,7 @@ def main():
 
     schedule.every().day.at("07:00").do(update)
 
-    check_plans_consistency(all_teachings)
+    # check_plans_consistency(all_teachings)
 
     scheduler_thread = threading.Thread(
         target=scheduler_function, args=(updater.bot,))
