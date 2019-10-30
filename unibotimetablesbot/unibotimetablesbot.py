@@ -15,10 +15,10 @@ import threading
 
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, Handler
-from telegram import ParseMode
+from telegram import ParseMode, KeyboardButton, ReplyKeyboardMarkup
 
 from model import Course, Teaching, Mode, Plan, Lesson, Aula, Timetable, User
-from keyboards import make_area_keyboard, make_courses_keyboard, make_inline_room_schedule_keyboard, make_inline_timetable_keyboard, make_inline_course_schedule_keyboard, make_main_keyboard, make_year_keyboard
+from keyboards import make_area_keyboard,make_send_position_keyboard, make_courses_keyboard, make_inline_room_schedule_keyboard, make_inline_timetable_keyboard, make_inline_course_schedule_keyboard, make_main_keyboard, make_year_keyboard
 from plan_manager import get_lessons, get_plan_timetable, get_room_timetable, load_user_plan, print_output_timetable, print_plan, print_plan_message, print_teachings_message, store_user_plan, check_plans_consistency
 
 from user_manager import UserManager
@@ -51,7 +51,7 @@ def callback_query(update, context):
     chat_id = update.callback_query.message.chat_id
     message_id = update.callback_query.message.message_id
     query_data = update.callback_query.data
-
+    print(query_data)
     try:
 
         if query_data.startswith("course_"):
@@ -92,9 +92,9 @@ def callback_query(update, context):
                 traceback.print_exc()
                 update.callback_query.answer(text="SLOW DOWN!!")
                 pass
-        elif query_data.startswith("room-"):
+        elif query_data.startswith("room "):
 
-            array = query_data.split("-")
+            array = query_data.split(" ")
             aula_codice = array[1]
 
             if query_data.endswith("today"):
@@ -618,7 +618,9 @@ def message(update, context):
             u = um.get_user(chat_id)
 
             output_string = config.location_string
-            update.message.reply_html(output_string)
+
+            keyboard=make_send_position_keyboard(chat_id)
+            update.message.reply_html(output_string,reply_markup=keyboard)
 
         elif text == config.DONATION:
             um.check_user(chat_id)

@@ -179,18 +179,30 @@ def make_inline_room_schedule_keyboard(chat_id, day, aula_codice):
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=config.emo_double_arrow_back,
-                              callback_data="room-" + aula_codice + "-" + prec_week.strftime(
+                              callback_data="room " + aula_codice + " " + prec_week.strftime(
                                   "%d/%m/%YT%H:%M:%S")),
          InlineKeyboardButton(
-             text=config.emo_arrow_back,  callback_data="room-" + aula_codice + "-" + prec_day.strftime(
+             text=config.emo_arrow_back,  callback_data="room " + aula_codice + " " + prec_day.strftime(
                  "%d/%m/%YT%H:%M:%S")),
-         InlineKeyboardButton(text="TODAY", callback_data="room-" +
-                              aula_codice + "-" + "today"),
+         InlineKeyboardButton(text="TODAY", callback_data="room " +
+                              aula_codice + " " + "today"),
          InlineKeyboardButton(
-             text=config.emo_arrow_forward, callback_data="room-" + aula_codice + "-" + next_day.strftime(
+             text=config.emo_arrow_forward, callback_data="room " + aula_codice + " " + next_day.strftime(
                  "%d/%m/%YT%H:%M:%S")),
-         InlineKeyboardButton(text=config.emo_double_arrow_forward, callback_data="room-" + aula_codice + "-" + next_week.strftime(
+         InlineKeyboardButton(text=config.emo_double_arrow_forward, callback_data="room " + aula_codice + " " + next_week.strftime(
              "%d/%m/%YT%H:%M:%S"))]
     ])
+
+    return keyboard
+
+
+def make_send_position_keyboard(chat_id):
+    location_button = KeyboardButton(
+        text=config.SEND_LOCATION, request_location=True)
+    back_button = KeyboardButton(text=config.BACK_TO_MAIN)
+
+    custom_keyboard = [[location_button], [back_button]]
+
+    keyboard = ReplyKeyboardMarkup(custom_keyboard, resize_keyboard=True)
 
     return keyboard
