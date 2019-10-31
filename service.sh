@@ -26,7 +26,7 @@ then
 	python3 -m venv "$CURRENT_DIR"/venv
 	source "$CURRENT_DIR"/venv/bin/activate
 
-	python3 -m pip install -r requirements.txt
+	python3 -m pip install -r "$CURRENT_DIR/"requirements.txt
 	deactivate
 
 
