@@ -48,8 +48,5 @@ ExecStart="$CURRENT_DIR/service.sh run"
 [Install]
 WantedBy=multi-user.target" > /etc/systemd/system/unibotimetablesbot.service
 
-	sudo systemctl daemon-reload
-	sudo systemctl enable unibotimetablesbot.service
-	sudo systemctl start unibotimetablesbot.service
 
 fi
