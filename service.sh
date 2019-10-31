@@ -5,7 +5,6 @@ RP=$(realpath $0)
 CURRENT_DIR=$(dirname $RP)
 VENV_ACT="$CURRENT_DIR/venv/bin/activate"
 
-UNI_BOT_TOKEN="YOUR_TOKEN_HERE"
 
 if [ $1 == "run"  ]
 then
@@ -21,6 +20,7 @@ fi
 if [ $1 == "install" ] 
 then
 
+	UNI_BOT_TOKEN="YOUR_TOKEN_HERE"
 
 
 	python3 -m venv "$CURRENT_DIR"/venv
