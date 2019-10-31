@@ -14,9 +14,6 @@ then
 fi
 
 
-
-
-
 if [ $1 == "install" ] 
 then
 
