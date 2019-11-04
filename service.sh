@@ -40,7 +40,7 @@ then
 	BOT_USER=$(whoami)
 	
 	
-	sudo echo -e "[Unit]
+	echo -e "[Unit]
 Description=Unibo timetables bot
 After=network.target
 StartLimitIntervalSec=0
@@ -54,7 +54,7 @@ User=$BOT_USER
 ExecStart="$CURRENT_DIR/service.sh run"
 
 [Install]
-WantedBy=multi-user.target" > /etc/systemd/system/unibotimetablesbot.service
+WantedBy=multi-user.target" | sudo tee /etc/systemd/system/unibotimetablesbot.service
 
 
 fi
