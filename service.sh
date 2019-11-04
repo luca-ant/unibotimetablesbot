@@ -29,7 +29,6 @@ then
 
 	
 	
-	cd unibotimetalblesbot
 
 	python3 -m venv "$CURRENT_DIR"/venv
 	source "$CURRENT_DIR"/venv/bin/activate
