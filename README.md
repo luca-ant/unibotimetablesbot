@@ -28,9 +28,9 @@ sudo pacman -S python-virtualenv
 * Create a new user and add it to sudoers. Then switch to new user and navigate to its home directory
 
 ```
-sudo adduser unibotimetableuser
-sudo adduser unibotimetableuser sudo
-su unibotimetableuser
+sudo adduser unibotimetablesuser
+sudo adduser unibotimetablesuser sudo
+su unibotimetablesuser
 cd
 ```
 
