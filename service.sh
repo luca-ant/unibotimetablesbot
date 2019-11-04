@@ -6,7 +6,17 @@ CURRENT_DIR=$(dirname $RP)
 VENV_ACT="$CURRENT_DIR/venv/bin/activate"
 
 
-if [ $1 == "run"  ]
+#default option
+OPTION='install'
+
+
+if [ $# == 1 ]
+then
+	OPTION="$1"
+fi
+
+
+if [ $OPTION == "run" ]
 then
 	source "$VENV_ACT"
 	python3 "$CURRENT_DIR"/unibotimetablesbot/unibotimetablesbot.py
@@ -14,7 +24,7 @@ then
 fi
 
 
-if [ $1 == "install" ] 
+if [ $OPTION == "install" ] 
 then
 
 	
