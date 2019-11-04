@@ -6,8 +6,8 @@ CURRENT_DIR=$(dirname $RP)
 VENV_ACT="$CURRENT_DIR/venv/bin/activate"
 
 
-#default option
-OPTION='install'
+
+OPTION=""
 
 
 if [ $# == 1 ]
@@ -26,18 +26,8 @@ fi
 
 if [ $OPTION == "install" ] 
 then
-	BOT_USER='unibotimetablesuser'
+
 	
-	UNI_BOT_TOKEN="YOUR_TOKEN_HERE"
-	
-
-
-	sudo adduser $BOT_USER
-	sudo su $BOT_USER
-	echo $HOME
-	cd $HOME
-
-	git clone https://github.com/luca-ant/unibotimetablesbot.git
 	
 	cd unibotimetalblesbot
 
