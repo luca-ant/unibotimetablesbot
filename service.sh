@@ -17,6 +17,7 @@ fi
 if [ $1 == "install" ] 
 then
 
+	
 	UNI_BOT_TOKEN="YOUR_TOKEN_HERE"
 
 
