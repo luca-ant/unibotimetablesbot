@@ -54,10 +54,10 @@ emo_less = u'\U0001F4D6'
 emo_blue_circle = u'\U0001F535'
 emo_red_circle = u'\U0001F534'
 emo_black_circle = u'\U000026AB'
-
 emo_yellow_square = u'\U0001F536'
 emo_button = u'\U0001F532'
 emo_commands = u'\U00000023' + u'\U000020E3'
+emo_tap = u'\U0001F449' + u'\U0001F3FB'
 
 # BUTTONS
 ALL_COURSES = emo_courses + " " + "ALL COURSES"
@@ -85,7 +85,7 @@ SET_NOT_TIME_CMD = "/set_notify_time"
 
 
 donation_string = emo_money + \
-    " Do you like this bot? If you want to support it you can make a donation here!  -> https://www.paypal.me/lucaant"
+    " Do you like this bot? If you want to support it you can make a donation here! -> https://www.paypal.me/lucaant"
 
 
 location_string = emo_gps+" <b>LOCATION</b>\n\nAre you looking for an empty classroom to study? Try to send your current location and the bot will search empty classrooms around you."

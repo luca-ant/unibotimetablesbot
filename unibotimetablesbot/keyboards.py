@@ -206,3 +206,13 @@ def make_send_position_keyboard(chat_id):
     keyboard = ReplyKeyboardMarkup(custom_keyboard, resize_keyboard=True)
 
     return keyboard
+
+
+def make_inline_see_room_schedule_keyboard(chat_id, aula_nome, aula_codice):
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=config.emo_tap + " SEE ROOM SCHEDULE for " + aula_nome, callback_data="room " +
+                              aula_codice + " " + "today")]
+    ])
+
+    return keyboard

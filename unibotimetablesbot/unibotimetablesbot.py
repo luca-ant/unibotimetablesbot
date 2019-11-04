@@ -18,7 +18,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 from telegram import ParseMode, KeyboardButton, ReplyKeyboardMarkup
 
 from model import Course, Teaching, Mode, Plan, Lesson, Aula, Timetable, User
-from keyboards import make_area_keyboard,make_send_position_keyboard, make_courses_keyboard, make_inline_room_schedule_keyboard, make_inline_timetable_keyboard, make_inline_course_schedule_keyboard, make_main_keyboard, make_year_keyboard
+from keyboards import make_area_keyboard, make_send_position_keyboard, make_inline_see_room_schedule_keyboard, make_courses_keyboard, make_inline_room_schedule_keyboard, make_inline_timetable_keyboard, make_inline_course_schedule_keyboard, make_main_keyboard, make_year_keyboard
 from plan_manager import get_lessons, get_plan_timetable, get_room_timetable, load_user_plan, print_output_timetable, print_plan, print_plan_message, print_teachings_message, store_user_plan, check_plans_consistency
 
 from user_manager import UserManager
@@ -619,8 +619,8 @@ def message(update, context):
 
             output_string = config.location_string
 
-            keyboard=make_send_position_keyboard(chat_id)
-            update.message.reply_html(output_string,reply_markup=keyboard)
+            keyboard = make_send_position_keyboard(chat_id)
+            update.message.reply_html(output_string, reply_markup=keyboard)
 
         elif text == config.DONATION:
             um.check_user(chat_id)
@@ -802,7 +802,40 @@ def location(update, context):
         output_string = ""
         empty_room.sort(key=lambda x: x.aula_nome, reverse=False)
 
-        string_list = []
+        # string_list = []
+
+        # for a in empty_room:
+
+        #     for m in (60, 30, 15):
+
+        #         day = now + datetime.timedelta(minutes=m)
+        #         free = a.is_empty(day, orari_group_by_aula)
+        #         if free and m == 60:
+        #             string_list.append(config.emo_blue_circle + " " +
+        #                                str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
+        #             break
+        #         elif free and m == 30:
+        #             string_list.append(config.emo_yellow_square + " " +
+        #                                str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
+        #             break
+        #         elif free and m == 15:
+        #             string_list.append(config.emo_red_circle + " " +
+        #                                str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
+        #             break
+        #     else:
+        #         string_list.append(config.emo_black_circle + " " +
+        #                            str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
+
+        # i = 0
+        # for s in string_list:
+        #     output_string += s
+        #     i += 1
+        #     if i % 20 == 0:
+        #         update.message.reply_html(output_string)
+        #         output_string = ""
+        # if output_string != "":
+        #     update.message.reply_html(output_string)
+
         for a in empty_room:
 
             for m in (60, 30, 15):
@@ -810,30 +843,27 @@ def location(update, context):
                 day = now + datetime.timedelta(minutes=m)
                 free = a.is_empty(day, orari_group_by_aula)
                 if free and m == 60:
-                    string_list.append(config.emo_blue_circle + " " +
-                                       str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
+                    output_string = config.emo_blue_circle + " " + str(a)
+                    update.message.reply_html(
+                        output_string, reply_markup=make_inline_see_room_schedule_keyboard(chat_id, a.aula_nome, a.aula_codice))
+
                     break
                 elif free and m == 30:
-                    string_list.append(config.emo_yellow_square + " " +
-                                       str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
+                    output_string = config.emo_yellow_square + " " + str(a)
+                    update.message.reply_html(
+                        output_string, reply_markup=make_inline_see_room_schedule_keyboard(chat_id, a.aula_nome, a.aula_codice))
+
                     break
                 elif free and m == 15:
-                    string_list.append(config.emo_red_circle + " " +
-                                       str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
+                    output_string = config.emo_red_circle + " " + str(a)
+                    update.message.reply_html(
+                        output_string, reply_markup=make_inline_see_room_schedule_keyboard(chat_id, a.aula_nome, a.aula_codice))
+
                     break
             else:
-                string_list.append(config.emo_black_circle + " " +
-                                   str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
-
-        i = 0
-        for s in string_list:
-            output_string += s
-            i += 1
-            if i % 20 == 0:
-                update.message.reply_html(output_string)
-                output_string = ""
-        if output_string != "":
-            update.message.reply_html(output_string)
+                output_string = config.emo_black_circle + " " + str(a)
+                update.message.reply_html(
+                    output_string, reply_markup=make_inline_see_room_schedule_keyboard(chat_id, a.aula_nome, a.aula_codice))
 
     except:
         traceback.print_exc()
