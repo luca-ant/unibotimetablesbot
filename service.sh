@@ -33,7 +33,7 @@ then
 
 
 	sudo adduser $BOT_USER
-	su $BOT_USER
+	sudo su $BOT_USER
 	echo $HOME
 	cd $HOME
 
