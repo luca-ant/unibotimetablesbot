@@ -26,7 +26,7 @@ fi
 
 if [ $OPTION == "install" ] 
 then
-	BOT_USER='unibotimetableuser'
+	BOT_USER='unibotimetablesuser'
 	
 	UNI_BOT_TOKEN="YOUR_TOKEN_HERE"
 	
