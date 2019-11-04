@@ -37,8 +37,9 @@ then
 	deactivate
 
 
-
-
+	BOT_USER=$(whoami)
+	
+	
 	sudo echo -e "[Unit]
 Description=Unibo timetables bot
 After=network.target
@@ -49,7 +50,7 @@ WorkingDirectory="$CURRENT_DIR"
 Type=simple
 Restart=always
 RestartSec=1
-User=$USER
+User=$BOT_USER
 ExecStart="$CURRENT_DIR/service.sh run"
 
 [Install]
