@@ -26,10 +26,19 @@ fi
 
 if [ $OPTION == "install" ] 
 then
-
+	BOT_USER='unibotimetableuser'
 	
 	UNI_BOT_TOKEN="YOUR_TOKEN_HERE"
+	
 
+
+	sudo adduser $BOT_USER
+	su $BOT_USER
+	cd $HOME
+
+	git clone https://github.com/luca-ant/unibotimetablesbot.git
+	
+	cd unibotimetalblesbot
 
 	python3 -m venv "$CURRENT_DIR"/venv
 	source "$CURRENT_DIR"/venv/bin/activate
