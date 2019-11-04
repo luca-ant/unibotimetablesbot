@@ -3,24 +3,9 @@
 
 A Telegram bot for Unibo lessons timetables in Bologna.
 
-## Deploy as systemd service
 
-Simply run this command to deploy the bot with a systemd service
-```
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/luca-ant/unibotimetablesbot/master/service.sh)"
-```
 
 ## Getting started
-
-* Clone repository
-```
-git clone https://github.com/luca-ant/unibotimetablesbot.git
-```
-or
-```
-git clone git@github.com:luca-ant/unibotimetablesbot.git
-```
-
 
 * Install dependencies
 ```
@@ -35,6 +20,56 @@ sudo pacman -S python-pip
 sudo pacman -S python-virtualenv
 ```
 
+
+
+## Deploy as systemd service
+
+
+* Create a new user, switch to it and navigate to its home directory
+
+```
+sudo adduser unibotimetableuser
+su unibotimetableuser
+cd
+```
+
+* Clone repository
+```
+git clone https://github.com/luca-ant/unibotimetablesbot.git
+cd unibotimetablesbot
+```
+or
+```
+git clone git@github.com:luca-ant/unibotimetablesbot.git
+cd unibotimetablesbot
+```
+
+* Run service.sh with *install* argument
+```
+./service.sh install
+```
+
+* Check manually the file */etc/systemd/system/unibotimetablesbot.service*. Put the bot token where you see "YOUR_TOKEN_HERE" and 
+
+
+
+
+
+
+
+
+## Run manually
+
+* Clone repository
+```
+git clone https://github.com/luca-ant/unibotimetablesbot.git
+```
+or
+```
+git clone git@github.com:luca-ant/unibotimetablesbot.git
+```
+
+
 * Create a virtual environment and install requirements modules
 ```
 cd unibotimetablesbot
@@ -44,7 +79,6 @@ source venv/bin/activate
 python3 -m pip install -r requirements.txt
 ```
 
-
 * Set UNI_BOT_TOKEN environment variable with bot's token
 
 ```
@@ -53,7 +87,7 @@ export UNI_BOT_TOKEN=YOUR_TOKEN_HERE
 * Run the python script as:
 
 ```
-python unibotimetablesbot.py
+python unibotimetablesbot/unibotimetablesbot.py
 ```
 
 ## Credits
