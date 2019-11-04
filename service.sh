@@ -34,6 +34,7 @@ then
 
 	sudo adduser $BOT_USER
 	su $BOT_USER
+	echo $HOME
 	cd $HOME
 
 	git clone https://github.com/luca-ant/unibotimetablesbot.git
