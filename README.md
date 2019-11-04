@@ -25,10 +25,11 @@ sudo pacman -S python-virtualenv
 ## Deploy as systemd service
 
 
-* Create a new user, switch to it and navigate to its home directory
+* Create a new user and add it to sudoers. Then switch to new user and navigate to its home directory
 
 ```
 sudo adduser unibotimetableuser
+sudo adduser unibotimetableuser sudo
 su unibotimetableuser
 cd
 ```
@@ -46,6 +47,7 @@ cd unibotimetablesbot
 
 * Run service.sh with *install* argument
 ```
+chmod u+x service.sh
 ./service.sh install
 ```
 
