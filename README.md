@@ -3,6 +3,13 @@
 
 A Telegram bot for Unibo lessons timetables in Bologna.
 
+## Deploy as systemd service
+
+Simply run this command to deploy the bot with a systemd service
+```
+bash -c "$(curl -fsSL 'https://raw.githubusercontent.com/luca-ant/unibotimetablesbot/master/service.sh install')"
+```
+
 ## Getting started
 
 * Clone repository
