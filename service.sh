@@ -38,7 +38,8 @@ then
 
 
 	BOT_USER=$(whoami)
-	
+	UNI_BOT_TOKEN="YOUR_TOKEN_HERE"
+
 	
 	echo -e "[Unit]
 Description=Unibo timetables bot
