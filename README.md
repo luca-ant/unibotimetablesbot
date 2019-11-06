@@ -53,7 +53,12 @@ chmod u+x service.sh
 
 * Check manually the file */etc/systemd/system/unibotimetablesbot.service*. Put the bot token where you see "YOUR_TOKEN_HERE".
 
+* Start the service
+```
+sudo systemctl enable unibotimetablesbot.service
+sudo systemctl start unibotimetablesbot.service
 
+```
 
 ## Run manually
 
