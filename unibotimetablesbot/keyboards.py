@@ -19,15 +19,15 @@ def make_main_keyboard(chat_id):
         buttonLists.append(list())
 
     buttonLists[0].append(config.ALL_COURSES)
-    buttonLists[4].append(config.EMPTY_ROOMS)
+    buttonLists[3].append(config.ROOMS)
 
     buttonLists[5].append(config.MAKE_PLAN)
 
     if u.mode != Mode.NORMAL:
         if u.notification:
-            buttonLists[3].append(config.NOTIFY_OFF)
+            buttonLists[4].append(config.NOTIFY_OFF)
         else:
-            buttonLists[3].append(config.NOTIFY_ON)
+            buttonLists[4].append(config.NOTIFY_ON)
         buttonLists[1].append(config.MY_TIMETABLE)
         buttonLists[2].append(config.MY_PLAN)
         buttonLists[6].append(config.DEL_PLAN)
@@ -196,9 +196,24 @@ def make_inline_room_schedule_keyboard(chat_id, day, aula_codice):
     return keyboard
 
 
-def make_send_position_keyboard(chat_id):
+def make_room_keyboard(chat_id):
+    empty_rooms_button = KeyboardButton(
+        text=config.EMPTY_ROOMS)
+    all_rooms_button = KeyboardButton(
+        text=config.ALL_ROOMS)
+    back_button = KeyboardButton(text=config.BACK_TO_MAIN)
+
+    custom_keyboard = [[all_rooms_button], [empty_rooms_button], [back_button]]
+
+    keyboard = ReplyKeyboardMarkup(custom_keyboard, resize_keyboard=True)
+
+    return keyboard
+
+
+def make_location_room_keyboard(chat_id):
     location_button = KeyboardButton(
         text=config.SEND_LOCATION, request_location=True)
+
     back_button = KeyboardButton(text=config.BACK_TO_MAIN)
 
     custom_keyboard = [[location_button], [back_button]]

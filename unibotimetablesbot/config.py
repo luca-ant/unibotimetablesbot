@@ -65,6 +65,8 @@ MY_TIMETABLE = emo_timetable + " " + "MY TIMETABLE"
 MY_PLAN = emo_plan + " " + "MY STUDY PLAN"
 MAKE_PLAN = emo_make + " " + "UPDATE MY STUDY PLAN"
 EMPTY_ROOMS = emo_room + " " + "EMPTY CLASSROOMS"
+ROOMS = emo_room + " " + "CLASSROOMS"
+ALL_ROOMS = emo_room + " " + "ALL CLASSROOMS"
 NOTIFY_ON = emo_not_on + " " + "ENABLE NOTIFICATIONS"
 NOTIFY_OFF = emo_not_off + " " + "DISABLE NOTIFICATIONS"
 DEL_PLAN = emo_del + " " + "DELETE STUDY PLAN"
@@ -97,7 +99,7 @@ command_help_string = emo_commands+" <b>COMMANDS:</b>\n\n" + SET_NOT_TIME_CMD + 
 
 important_string = "<b>IMPORTANT! All data (provided by https://dati.unibo.it) are updated once a day. For suddend changes or extra lessons please check on official Unibo site! (Especially for the first weeks)</b>"
 
-help_string = "This bot helps you to get your personal timetable of Unibo lessons. First of all <b>you need to make your study plan</b> by pressing " + MAKE_PLAN+". Then you have to add your teachings by pressing \"/add_XXXXXX\" command near the teaching that you want to insert in your plan. After that by simply pressing " + MY_TIMETABLE+" you get your personal timetable for today and can navigate through days!\n\n" + emo_button + " <b>BUTTONS:</b>\n\n" + ALL_COURSES + " - to see today's schedule\n\n" + MAKE_PLAN + " - to make your study plan\n\n" + MY_PLAN + " - to see your study plan and remove teachings\n\n" + MY_TIMETABLE + " - to get your personal lesson's schedule\n\n" + NOTIFY_ON + \
+help_string = "This bot helps you to get your personal timetable of Unibo lessons. First of all <b>you need to make your study plan</b> by pressing " + MAKE_PLAN+". Then you have to add your subjects by pressing \"/add_XXXXXX\" command near the subject that you want to insert in your plan. After that by simply pressing " + MY_TIMETABLE+" you get your personal timetable for today and can navigate through days!\n\n" + emo_button + " <b>BUTTONS:</b>\n\n" + ALL_COURSES + " - to see today's schedule\n\n" + MAKE_PLAN + " - to make your study plan\n\n" + MY_PLAN + " - to see your study plan and remove subjects\n\n" + MY_TIMETABLE + " - to get your personal lesson's schedule\n\n" + NOTIFY_ON + \
     " - to receive a notification before every lesson\n\n" + DEL_PLAN + " - to delete your plan" + \
     "\n\n" + command_help_string+"\n\n" + location_string + \
     "\n\n"+issue_string+"\n\n" + important_string

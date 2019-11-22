@@ -18,7 +18,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 from telegram import ParseMode, KeyboardButton, ReplyKeyboardMarkup
 
 from model import Course, Teaching, Mode, Plan, Lesson, Aula, Timetable, User
-from keyboards import make_area_keyboard, make_send_position_keyboard, make_inline_see_room_schedule_keyboard, make_courses_keyboard, make_inline_room_schedule_keyboard, make_inline_timetable_keyboard, make_inline_course_schedule_keyboard, make_main_keyboard, make_year_keyboard
+from keyboards import make_area_keyboard, make_room_keyboard, make_location_room_keyboard, make_inline_see_room_schedule_keyboard, make_courses_keyboard, make_inline_room_schedule_keyboard, make_inline_timetable_keyboard, make_inline_course_schedule_keyboard, make_main_keyboard, make_year_keyboard
 from plan_manager import get_lessons, get_plan_timetable, get_room_timetable, load_user_plan, print_output_timetable, print_plan, print_plan_message, print_teachings_message, store_user_plan, check_plans_consistency
 
 from user_manager import UserManager
@@ -404,7 +404,6 @@ def error(update, context):
 
 def message(update, context):
     try:
-
         chat_id = update.message.chat_id
         text = update.message.text
 
@@ -540,7 +539,7 @@ def message(update, context):
                 plan = Plan()
                 store_user_plan(chat_id, plan)
 
-            output_string = "Find your teachings and add them to your study plan. Send " + \
+            output_string = "Find your subjects and add them to your study plan. Send " + \
                 config.END_PLAN + " when you have finished!"
             update.message.reply_html(output_string, reply_markup=make_area_keyboard(
                 all_courses_group_by_area, u.mode))
@@ -614,12 +613,20 @@ def message(update, context):
                 update.message.reply_html(
                     output_string, reply_markup=make_main_keyboard(chat_id))
 
-        elif text == config.EMPTY_ROOMS:
+        elif text == config.ROOMS:
             u = um.get_user(chat_id)
 
             output_string = config.location_string
 
-            keyboard = make_send_position_keyboard(chat_id)
+            keyboard = make_room_keyboard(chat_id)
+            update.message.reply_html(output_string, reply_markup=keyboard)
+
+        elif text == config.ALL_ROOMS or text == config.EMPTY_ROOMS:
+            u = um.get_user(chat_id)
+
+            output_string = text
+
+            keyboard = make_location_room_keyboard(chat_id)
             update.message.reply_html(output_string, reply_markup=keyboard)
 
         elif text == config.DONATION:
@@ -671,7 +678,7 @@ def message(update, context):
                         int(config.accademic_year) + 1) + "</code>\n\n"
                     output_string += config.emo_pin + \
                         " <b>"+str(course)+"</b>\n\n"
-                    output_string += config.emo_plan + " <b>TEACHINGS " + \
+                    output_string += config.emo_plan + " <b>SUBJECTS " + \
                         str(year) + " YEAR</b> (sorted by name)\n\n"
                     for s in string_list:
                         output_string += s
@@ -757,113 +764,188 @@ def location(update, context):
         location = update.message.location
         now = datetime.datetime.now()
 
-        ##### DEBUG #####
-        # now = datetime.datetime.strptime("2019-10-28T10:45:50", "%Y-%m-%dT%H:%M:%S")
-        #################
+        text = None
+        if update.message.reply_to_message != None:
+            text = update.message.reply_to_message.text
+
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
                      " ### LOCATION from " + str(chat_id)+" = " + str(location.latitude) + ", " + str(location.longitude))
         print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
               " ### LOCATION from " + str(chat_id) + " = " + str(location.latitude) + ", " + str(location.longitude))
-        near_classrooms = []
 
-        for key in all_aule.keys():
-            a = all_aule[key]
+        if text != None and text == config.ALL_ROOMS:
 
-            try:
-                if a.lat != None and a.lon != None:
-                    lat = float(a.lat)
-                    lon = float(a.lon)
-                    if distance(location.latitude, location.longitude, lat, lon) <= 500:
-                        near_classrooms.append(a)
+            ##### DEBUG #####
+            # now = datetime.datetime.strptime("2019-10-28T10:45:50", "%Y-%m-%dT%H:%M:%S")
+            #################
 
-            except:
-                traceback.print_exc()
+            near_classrooms = []
 
-        empty_room = []
+            for key in all_aule.keys():
+                a = all_aule[key]
 
-        for a in near_classrooms:
+                try:
+                    if a.lat != None and a.lon != None:
+                        lat = float(a.lat)
+                        lon = float(a.lon)
+                        if distance(location.latitude, location.longitude, lat, lon) <= 500:
+                            near_classrooms.append(a)
 
-            free = a.is_empty(now, orari_group_by_aula)
+                except:
+                    traceback.print_exc()
 
-            if free:
-                empty_room.append(a)
+            output_string = config.emo_room+" <b>ALL CLASSROOMS NEAR YOU</b>\n"
 
-        output_string = config.emo_room+" <b>EMPTY CLASSROOM NEAR YOU</b>\n\nLEGEND:\n"
-        output_string += config.emo_blue_circle + \
-            " = Classroom empty for another 60 minutes\n"
-        output_string += config.emo_yellow_square + \
-            " = Classroom empty for another 30 minutes\n"
-        output_string += config.emo_red_circle + \
-            " = Classroom empty for another 15 minutes\n"
-        output_string += config.emo_black_circle + \
-            " = Classroom empty for less than 15 minutes\n\n"
+            update.message.reply_html(output_string)
+            output_string = ""
+            near_classrooms.sort(key=lambda x: x.aula_nome, reverse=False)
 
-        update.message.reply_html(output_string)
-        output_string = ""
-        empty_room.sort(key=lambda x: x.aula_nome, reverse=False)
+            # string_list = []
 
-        # string_list = []
+            # for a in empty_room:
 
-        # for a in empty_room:
+            #     for m in (60, 30, 15):
 
-        #     for m in (60, 30, 15):
+            #         day = now + datetime.timedelta(minutes=m)
+            #         free = a.is_empty(day, orari_group_by_aula)
+            #         if free and m == 60:
+            #             string_list.append(config.emo_blue_circle + " " +
+            #                                str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
+            #             break
+            #         elif free and m == 30:
+            #             string_list.append(config.emo_yellow_square + " " +
+            #                                str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
+            #             break
+            #         elif free and m == 15:
+            #             string_list.append(config.emo_red_circle + " " +
+            #                                str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
+            #             break
+            #     else:
+            #         string_list.append(config.emo_black_circle + " " +
+            #                            str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
 
-        #         day = now + datetime.timedelta(minutes=m)
-        #         free = a.is_empty(day, orari_group_by_aula)
-        #         if free and m == 60:
-        #             string_list.append(config.emo_blue_circle + " " +
-        #                                str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
-        #             break
-        #         elif free and m == 30:
-        #             string_list.append(config.emo_yellow_square + " " +
-        #                                str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
-        #             break
-        #         elif free and m == 15:
-        #             string_list.append(config.emo_red_circle + " " +
-        #                                str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
-        #             break
-        #     else:
-        #         string_list.append(config.emo_black_circle + " " +
-        #                            str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
+            # i = 0
+            # for s in string_list:
+            #     output_string += s
+            #     i += 1
+            #     if i % 20 == 0:
+            #         update.message.reply_html(output_string)
+            #         output_string = ""
+            # if output_string != "":
+            #     update.message.reply_html(output_string)
 
-        # i = 0
-        # for s in string_list:
-        #     output_string += s
-        #     i += 1
-        #     if i % 20 == 0:
-        #         update.message.reply_html(output_string)
-        #         output_string = ""
-        # if output_string != "":
-        #     update.message.reply_html(output_string)
+            for a in near_classrooms:
 
-        for a in empty_room:
+                output_string = config.emo_room + " " + str(a)
+                update.message.reply_html(output_string, reply_markup=make_inline_see_room_schedule_keyboard(
+                    chat_id, a.aula_nome, a.aula_codice))
 
-            for m in (60, 30, 15):
+        else:
 
-                day = now + datetime.timedelta(minutes=m)
-                free = a.is_empty(day, orari_group_by_aula)
-                if free and m == 60:
-                    output_string = config.emo_blue_circle + " " + str(a)
+            ##### DEBUG #####
+            # now = datetime.datetime.strptime("2019-10-28T10:45:50", "%Y-%m-%dT%H:%M:%S")
+            #################
+
+            near_classrooms = []
+
+            for key in all_aule.keys():
+                a = all_aule[key]
+
+                try:
+                    if a.lat != None and a.lon != None:
+                        lat = float(a.lat)
+                        lon = float(a.lon)
+                        if distance(location.latitude, location.longitude, lat, lon) <= 500:
+                            near_classrooms.append(a)
+
+                except:
+                    traceback.print_exc()
+
+            empty_room = []
+
+            for a in near_classrooms:
+
+                free = a.is_empty(now, orari_group_by_aula)
+
+                if free:
+                    empty_room.append(a)
+
+            output_string = config.emo_room+" <b>EMPTY CLASSROOMS NEAR YOU</b>\n\nLEGEND:\n"
+            output_string += config.emo_blue_circle + \
+                " = Classroom empty for another 60 minutes\n"
+            output_string += config.emo_yellow_square + \
+                " = Classroom empty for another 30 minutes\n"
+            output_string += config.emo_red_circle + \
+                " = Classroom empty for another 15 minutes\n"
+            output_string += config.emo_black_circle + \
+                " = Classroom empty for less than 15 minutes\n\n"
+
+            update.message.reply_html(output_string)
+            output_string = ""
+            empty_room.sort(key=lambda x: x.aula_nome, reverse=False)
+
+            # string_list = []
+
+            # for a in empty_room:
+
+            #     for m in (60, 30, 15):
+
+            #         day = now + datetime.timedelta(minutes=m)
+            #         free = a.is_empty(day, orari_group_by_aula)
+            #         if free and m == 60:
+            #             string_list.append(config.emo_blue_circle + " " +
+            #                                str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
+            #             break
+            #         elif free and m == 30:
+            #             string_list.append(config.emo_yellow_square + " " +
+            #                                str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
+            #             break
+            #         elif free and m == 15:
+            #             string_list.append(config.emo_red_circle + " " +
+            #                                str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
+            #             break
+            #     else:
+            #         string_list.append(config.emo_black_circle + " " +
+            #                            str(a)+"\n/see_room_schedule_"+a.aula_codice+"\n\n")
+
+            # i = 0
+            # for s in string_list:
+            #     output_string += s
+            #     i += 1
+            #     if i % 20 == 0:
+            #         update.message.reply_html(output_string)
+            #         output_string = ""
+            # if output_string != "":
+            #     update.message.reply_html(output_string)
+
+            for a in empty_room:
+
+                for m in (60, 30, 15):
+
+                    day = now + datetime.timedelta(minutes=m)
+                    free = a.is_empty(day, orari_group_by_aula)
+                    if free and m == 60:
+                        output_string = config.emo_blue_circle + " " + str(a)
+                        update.message.reply_html(
+                            output_string, reply_markup=make_inline_see_room_schedule_keyboard(chat_id, a.aula_nome, a.aula_codice))
+
+                        break
+                    elif free and m == 30:
+                        output_string = config.emo_yellow_square + " " + str(a)
+                        update.message.reply_html(
+                            output_string, reply_markup=make_inline_see_room_schedule_keyboard(chat_id, a.aula_nome, a.aula_codice))
+
+                        break
+                    elif free and m == 15:
+                        output_string = config.emo_red_circle + " " + str(a)
+                        update.message.reply_html(
+                            output_string, reply_markup=make_inline_see_room_schedule_keyboard(chat_id, a.aula_nome, a.aula_codice))
+
+                        break
+                else:
+                    output_string = config.emo_black_circle + " " + str(a)
                     update.message.reply_html(
                         output_string, reply_markup=make_inline_see_room_schedule_keyboard(chat_id, a.aula_nome, a.aula_codice))
-
-                    break
-                elif free and m == 30:
-                    output_string = config.emo_yellow_square + " " + str(a)
-                    update.message.reply_html(
-                        output_string, reply_markup=make_inline_see_room_schedule_keyboard(chat_id, a.aula_nome, a.aula_codice))
-
-                    break
-                elif free and m == 15:
-                    output_string = config.emo_red_circle + " " + str(a)
-                    update.message.reply_html(
-                        output_string, reply_markup=make_inline_see_room_schedule_keyboard(chat_id, a.aula_nome, a.aula_codice))
-
-                    break
-            else:
-                output_string = config.emo_black_circle + " " + str(a)
-                update.message.reply_html(
-                    output_string, reply_markup=make_inline_see_room_schedule_keyboard(chat_id, a.aula_nome, a.aula_codice))
 
     except:
         traceback.print_exc()
@@ -1028,7 +1110,8 @@ def main():
     updater.dispatcher.add_handler(MessageHandler(Filters.text, message))
     updater.dispatcher.add_handler(CallbackQueryHandler(callback_query))
 
-    updater.dispatcher.add_handler(MessageHandler(Filters.location, location))
+    updater.dispatcher.add_handler(MessageHandler(
+        Filters.location, location))
 
     updater.dispatcher.add_error_handler(error)
 
