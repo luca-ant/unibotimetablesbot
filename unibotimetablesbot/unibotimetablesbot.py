@@ -195,6 +195,23 @@ def help(update, context):
         output_string, reply_markup=make_main_keyboard(chat_id))
 
 
+def print_time(update, context):
+
+    chat_id = update.message.chat_id
+    text = update.message.text
+    now = datetime.datetime.now()
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                 " ### MESSAGE from " + str(chat_id)+" = " + text)
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+          " ### MESSAGE from " + str(chat_id) + " = " + text)
+
+    output_string = now.strftime(
+        config.emo_calendar+" %A %B %d, %Y " + config.emo_clock+" %H:%M:%S")
+
+    update.message.reply_html(
+        output_string, reply_markup=make_main_keyboard(chat_id))
+
+
 def add(update, context):
     chat_id = update.message.chat_id
     text = update.message.text
@@ -1104,6 +1121,7 @@ def main():
 
     updater.dispatcher.add_handler(CommandHandler("start", start))
     updater.dispatcher.add_handler(CommandHandler("help", help))
+    updater.dispatcher.add_handler(CommandHandler("time", print_time))
 
     updater.dispatcher.add_handler(MessageHandler(Filters.command, commands))
 

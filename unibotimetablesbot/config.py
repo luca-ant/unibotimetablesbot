@@ -76,7 +76,7 @@ BACK_TO_MAIN = emo_back + " " + "BACK TO MAIN"
 DONATION = emo_money + " " + "DONATION"
 HELP = emo_help + " " + "HELP"
 PRIVACY = emo_privacy + " " + "PRIVACY POLICY"
-SEND_LOCATION = emo_gps + " " + "SEND LOCATION"
+SEND_LOCATION = emo_gps + " " + "TAP HERE TO SEND LOCATION"
 
 # COMMANDS
 
