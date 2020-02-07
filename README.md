@@ -28,9 +28,9 @@ sudo pacman -S python-virtualenv
 * Create a new user and add it to sudoers. Then switch to new user and navigate to its home directory.
 
 ```
-sudo adduser unibotimetablesuser
-sudo adduser unibotimetablesuser sudo
-su unibotimetablesuser
+sudo adduser botuser
+sudo adduser botuser sudo
+su botuser
 cd
 ```
 
@@ -49,6 +49,7 @@ cd unibotimetablesbot
 ```
 chmod u+x service.sh
 ./service.sh install
+sudo deluser botuser sudo
 ```
 
 * Check manually the file */etc/systemd/system/unibotimetablesbot.service*. Put the bot token where you see "YOUR_TOKEN_HERE".
