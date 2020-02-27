@@ -985,7 +985,7 @@ def send_notifications(bot):
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
           " ### SENDING NOTIFICATION")
     ##### DEBUG #####
-    # fix_now = datetime.datetime.strptime("2019-10-08T13:45:00", "%Y-%m-%dT%H:%M:%S")
+    #fix_now = datetime.datetime.strptime("2020-02-28T08:45:00", "%Y-%m-%dT%H:%M:%S")
     #################
 
     for chat_id in um.get_all_users().keys():
@@ -993,10 +993,9 @@ def send_notifications(bot):
             u = um.get_user(chat_id)
 
             if u.notification:
-
+    
                 plan = load_user_plan(
                     chat_id, all_teachings)
-
                 timetable = get_lessons(
                     chat_id, fix_now, plan, orari, all_aule)
 

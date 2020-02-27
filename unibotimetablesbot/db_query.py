@@ -193,13 +193,13 @@ def get_all_courses():
         t = all_teachings[key]
         if (t.anno == None or t.anno == ""):
             comp_p = t.componente_padre
-            while (t.anno == None or t.anno == "") and comp_p != None and comp_p != "":
+            while (t.anno == None or t.anno == "") and comp_p != None and comp_p != "" and comp_p in all_teachings.keys():
                 t.anno = all_teachings[comp_p].anno
                 comp_p = all_teachings[comp_p].componente_padre
 
         if (t.crediti == None or t.crediti == ""):
             comp_p = t.componente_padre
-            while (t.crediti == None or t.crediti == "") and comp_p != None and comp_p != "":
+            while (t.crediti == None or t.crediti == "") and comp_p != None and comp_p != "" and comp_p in all_teachings.keys():
                 t.crediti = all_teachings[comp_p].crediti
                 comp_p = all_teachings[comp_p].componente_padre
 
