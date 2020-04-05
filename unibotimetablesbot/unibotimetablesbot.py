@@ -27,14 +27,6 @@ from utils import my_round, distance
 
 import config
 
-
-config.current_dir = os.path.dirname(
-    os.path.dirname(os.path.abspath(__file__)))+"/"
-
-logging.info("### WORKING DIR " + config.current_dir)
-print("### WORKING DIR " + config.current_dir)
-
-
 all_courses = dict()
 all_aule = dict()
 all_teachings = dict()
