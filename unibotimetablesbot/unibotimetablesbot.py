@@ -1100,6 +1100,9 @@ def update():
 
 
 def main():
+    logging.info("### WORKING DIR " + config.current_dir)
+    print("### WORKING DIR " + config.current_dir)
+
     if os.path.isdir(config.dir_users_name):
         for f in os.listdir(config.dir_users_name):
             filename = os.fsdecode(f)
