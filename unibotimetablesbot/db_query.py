@@ -17,17 +17,14 @@ def download_csv_orari():
     if not os.path.isdir(config.download_dir):
         os.mkdir(config.download_dir)
 
-    orari = collections.defaultdict(list)
-    orari_group_by_aula = collections.defaultdict(list)
-
     now = datetime.datetime.now()
     logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
                  " ### DOWNLOADING CSV ORARI")
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
           " ### DOWNLOADING CSV ORARI")
 
-    if os.path.isfile(config.current_dir+"orari_"+config.accademic_year+".csv"):
-        os.remove(config.current_dir+"orari_"+config.accademic_year+".csv")
+    if os.path.isfile(config.download_dir+"orari_"+config.accademic_year+".csv"):
+        os.remove(config.download_dir+"orari_"+config.accademic_year+".csv")
 
     url_orari_csv = "https://dati.unibo.it/dataset/course-timetable-"+config.accademic_year + \
         "/resource/orari_"+config.accademic_year + \
@@ -36,6 +33,20 @@ def download_csv_orari():
     csv_orari_filename = wget.download(
         url_orari_csv, config.download_dir+"orari_"+config.accademic_year+".csv", bar=None)
 
+    return csv_orari_filename
+
+
+
+def get_all_orari_from_file(csv_orari_filename):
+
+    all_orari = collections.defaultdict(list)
+    all_orari_group_by_aula = collections.defaultdict(list)
+
+    now = datetime.datetime.now()
+    logging.info("TIMESTAMP = " +
+                 now.strftime("%b %d %Y %H:%M:%S") + " ### GETTING ALL ORARI FROM FILE")
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+         " ### GETTING ALL ORARI FROM FILE")
     with open(csv_orari_filename) as f:
         csv_reader = csv.reader(f, delimiter=',')
         for row in csv_reader:
@@ -44,12 +55,62 @@ def download_csv_orari():
             o["inizio"] = ''.join(row[1].split("+")[0])
             o["fine"] = ''.join(row[2].split("+")[0])
             o["aula_codici"] = row[3]
-            orari[o["componente_id"]].append(o)
+            all_orari[o["componente_id"]].append(o)
 
             for code in o["aula_codici"].split():
-                orari_group_by_aula[code].append(o)
+                all_orari_group_by_aula[code].append(o)
 
-    return orari, orari_group_by_aula
+    return all_orari, all_orari_group_by_aula
+
+
+
+
+def get_all_orari():
+
+    if not os.path.isdir(config.download_dir):
+        os.mkdir(config.download_dir)
+
+    all_orari = collections.defaultdict(list)
+    all_orari_group_by_aula = collections.defaultdict(list)
+
+    now = datetime.datetime.now()
+    logging.info("TIMESTAMP = " +
+                 now.strftime("%b %d %Y %H:%M:%S") + " ### GETTING ALL ORARI")
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+         " ### GETTING ALL ORARI")
+
+    orari_table = "orari_" + config.accademic_year
+
+    url = "https://dati.unibo.it/api/action/datastore_search_sql"
+
+    sql_orari = "SELECT * FROM " + orari_table
+
+    headers = {'Content-type': 'application/json',
+               'Accept': 'application/json'}
+    json_orari = requests.post(url, headers=headers, data='{"sql":'+'"'+sql_orari+'"}').text
+
+    try:
+        orari = json.loads(json_orari)["result"]["records"]
+    except:
+        traceback.print_exc()
+        now = datetime.datetime.now()
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                     " ### EXCEPTION = " + traceback.format_exc())
+        return
+
+    for o in orari:
+        current_o = {}
+        current_o["componente_id"] = o["componente_id"]
+        current_o["inizio"] = o["inizio"]
+        current_o["fine"] = o["fine"]
+        current_o["aula_codici"] = o["aula_codici"]
+
+        all_orari[current_o["componente_id"]].append(current_o)
+        for code in o["aula_codici"].split():
+            all_orari_group_by_aula[code].append(current_o)
+
+
+    return all_orari, all_orari_group_by_aula
 
 
 def check_table(table):

@@ -22,7 +22,7 @@ from keyboards import make_area_keyboard, make_room_keyboard, make_location_room
 from plan_manager import get_lessons, get_plan_timetable, get_room_timetable, load_user_plan, print_output_timetable, print_plan, print_plan_message, print_teachings_message, store_user_plan, check_plans_consistency
 
 from user_manager import UserManager
-from db_query import check_table, download_csv_orari, get_all_aule, get_all_courses
+from db_query import check_table, download_csv_orari,get_all_orari, get_all_orari_from_file, get_all_aule, get_all_courses
 from utils import my_round, distance
 
 import config
@@ -1096,8 +1096,10 @@ def update():
         all_aule = get_all_aule()
 
     if check_table(orari_table):
-        orari, orari_group_by_aula = download_csv_orari()
-
+        csv_orari_filename = download_csv_orari()
+        orari, orari_group_by_aula = get_all_orari_from_file(csv_orari_filename)
+        if len(orari) < 10:
+            orari, orari_group_by_aula = get_all_orari()
 
 def main():
     logging.info("### WORKING DIR " + config.current_dir)

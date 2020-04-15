@@ -188,8 +188,8 @@ def get_lessons(chat_id, now, plan, orari, all_aule):
         for o in orari[t.componente_id]:
             try:
                 ##### DEBUG #####
-                # if t.componente_id == '448380':
-                #     print(t)
+                if t.componente_id == '448380':
+                    print(t)
                 #################
                 inizio = datetime.datetime.strptime(
                     o["inizio"], "%Y-%m-%dT%H:%M:%S")
