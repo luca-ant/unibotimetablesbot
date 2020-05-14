@@ -1096,10 +1096,97 @@ def update():
         all_aule = get_all_aule()
 
     if check_table(orari_table):
-        csv_orari_filename = download_csv_orari()
-        orari, orari_group_by_aula = get_all_orari_from_file(csv_orari_filename)
-        if len(orari) < 10:
+#        csv_orari_filename = download_csv_orari()
+#        orari, orari_group_by_aula = get_all_orari_from_file(csv_orari_filename)
+#        if len(orari) < 10:
+        orari, orari_group_by_aula = get_all_orari()
+
+    now = datetime.datetime.now()
+    logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                 " ### UPDATE DONE!")
+    print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+          " ### UPDATE DONE!")
+
+def execute_update(update, context):
+
+    chat_id = update.message.chat_id
+    text = update.message.text
+    now = datetime.datetime.now()
+
+    if chat_id == -404582227:
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                 " ### MESSAGE from " + str(chat_id)+" = " + text +" -> ALLOWED")
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+          " ### MESSAGE from " + str(chat_id) + " = " + text+ " -> ALLOWED")
+
+        output_string = config.emo_yellow_square + " RUNNING UPDATE"
+        update.message.reply_html(output_string, reply_markup=make_main_keyboard(chat_id))
+
+        now = datetime.datetime.now()
+        logging.info("TIMESTAMP = " +
+                     now.strftime("%b %d %Y %H:%M:%S") + " ### RUNNING MANUAL UPDATE")
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### RUNNING MANUAL UPDATE")
+
+        year = now.strftime("%Y")
+        update_day = datetime.datetime.strptime(
+            year + "-08-15T00:00:00", "%Y-%m-%dT%H:%M:%S")
+
+        ##### DEBUG #####
+        # update_day = datetime.datetime.strptime(year + "-08-30T00:00:00", "%Y-%m-%dT%H:%M:%S")
+        #################
+
+        if now > update_day:
+            config.accademic_year = year
+        else:
+            config.accademic_year = str(int(year) - 1)
+
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                     " ### SET ACCADEMIC YEAR TO " + config.accademic_year)
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+              " ### SET ACCADEMIC YEAR TO " + config.accademic_year)
+
+        # check existence table
+
+        corsi_table = "corsi_" + config.accademic_year + "_it"
+        insegnamenti_table = "insegnamenti_" + config.accademic_year + "_it"
+        orari_table = "orari_" + config.accademic_year
+        aule_table = "aule_" + config.accademic_year
+
+        global all_courses, all_teachings, all_courses_group_by_area, all_aule, orari, orari_group_by_aula
+
+        if check_table(corsi_table) and check_table(insegnamenti_table):
+
+            all_courses, all_teachings, all_courses_group_by_area = get_all_courses()
+
+        if check_table(aule_table):
+            all_aule = get_all_aule()
+
+        if check_table(orari_table):
+    #        csv_orari_filename = download_csv_orari()
+    #        orari, orari_group_by_aula = get_all_orari_from_file(csv_orari_filename)
+    #        if len(orari) < 10:
             orari, orari_group_by_aula = get_all_orari()
+
+        now = datetime.datetime.now()
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                 " ### UPDATE DONE!")
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+          " ### UPDATE DONE!")
+
+        n_corsi = len(all_courses)
+        n_orari = len(orari)
+        n_aule = len(all_aule)
+        n_insegnamenti = len(all_teachings)
+        output_string = config.emo_end_plan + " UPDATE DONE!\n\n" + config.emo_courses + " Corsi: {}\n".format(n_corsi) + config.emo_plan + " Insegnamenti: {}\n".format(n_insegnamenti) + config.emo_room +" Aule: {}\n".format(n_aule) + config.emo_clock+" Orari: {}".format(n_orari)
+        update.message.reply_html(output_string, reply_markup=make_main_keyboard(chat_id))
+
+    else:
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                 " ### MESSAGE from " + str(chat_id)+" = " + text +" -> FORBIDDEN!")
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+          " ### MESSAGE from " + str(chat_id) + " = " + text +" -> FORBIDDEN!")
+        output_string = config.emo_red_circle + " FORBIDDEN!"
+        update.message.reply_html(output_string, reply_markup=make_main_keyboard(chat_id))
 
 def main():
     logging.info("### WORKING DIR " + config.current_dir)
@@ -1118,6 +1205,7 @@ def main():
     updater.dispatcher.add_handler(CommandHandler("start", start))
     updater.dispatcher.add_handler(CommandHandler("help", help))
     updater.dispatcher.add_handler(CommandHandler("time", print_time))
+    updater.dispatcher.add_handler(CommandHandler("up", execute_update))
 
     updater.dispatcher.add_handler(MessageHandler(Filters.command, commands))
 

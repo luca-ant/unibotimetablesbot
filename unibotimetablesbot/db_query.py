@@ -82,8 +82,9 @@ def get_all_orari():
     orari_table = "orari_" + config.accademic_year
 
     url = "https://dati.unibo.it/api/action/datastore_search_sql"
-
     sql_orari = "SELECT * FROM " + orari_table
+
+#    print(url+"?sql="+sql_orari)
 
     headers = {'Content-type': 'application/json',
                'Accept': 'application/json'}
