@@ -1104,7 +1104,7 @@ def update():
         year + "-08-01T00:00:00", "%Y-%m-%dT%H:%M:%S")
 
     ##### DEBUG #####
-    update_day = datetime.datetime.strptime(year + "-08-30T00:00:00", "%Y-%m-%dT%H:%M:%S")
+#    update_day = datetime.datetime.strptime(year + "-08-30T00:00:00", "%Y-%m-%dT%H:%M:%S")
     #################
 
     if now > update_day:
