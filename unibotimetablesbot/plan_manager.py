@@ -13,6 +13,8 @@ um = UserManager.get_instance()
 
 
 def get_plan_timetable(day, plan, orari, all_aule):
+    if len(orari) == 0:
+        return None
     timetable = Timetable()
 
     if plan.is_empty():
@@ -59,7 +61,8 @@ def get_plan_timetable(day, plan, orari, all_aule):
 
 
 def get_room_timetable(day, aula, orari_group_by_aula, all_teachings):
-
+    if len(orari_group_by_aula) == 0:
+        return None
     timetable = Timetable()
 
     start = datetime.datetime.strptime(day.strftime(
@@ -188,8 +191,8 @@ def get_lessons(chat_id, now, plan, orari, all_aule):
         for o in orari[t.componente_id]:
             try:
                 ##### DEBUG #####
-                if t.componente_id == '448380':
-                    print(t)
+#                if t.componente_id == '448380':
+#                    print(t)
                 #################
                 inizio = datetime.datetime.strptime(
                     o["inizio"], "%Y-%m-%dT%H:%M:%S")

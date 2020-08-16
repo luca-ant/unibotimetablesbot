@@ -1052,7 +1052,45 @@ def scheduler_function(bot):
     while True:
 
         schedule.run_pending()
-        time.sleep(60)
+        time.sleep(30)
+
+def set_ay(update, context):
+
+    chat_id = update.message.chat_id
+    text = update.message.text
+    now = datetime.datetime.now()
+
+
+    if is_admin(chat_id):
+
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                 " ### MESSAGE from " + str(chat_id)+" = " + text +" -> ALLOWED")
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+          " ### MESSAGE from " + str(chat_id) + " = " + text+ " -> ALLOWED")
+
+        try:
+            new_ay = int(text.split()[1])
+            config.accademic_year = str(new_ay)
+
+            logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                         " ### SET ACCADEMIC YEAR TO " + config.accademic_year)
+            print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                  " ### SET ACCADEMIC YEAR TO " + config.accademic_year)
+
+            output_string = config.emo_ay + " A.Y. <code>" + config.accademic_year + "/" + str(int(config.accademic_year) + 1) + "</code>"
+        except:
+            traceback.print_exc()
+            output_string = config.command_help_string
+
+        update.message.reply_html(output_string, reply_markup=make_main_keyboard(chat_id))
+
+    else:
+        logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+                 " ### MESSAGE from " + str(chat_id)+" = " + text +" -> FORBIDDEN!")
+        print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
+          " ### MESSAGE from " + str(chat_id) + " = " + text +" -> FORBIDDEN!")
+        output_string = config.emo_red_circle + " FORBIDDEN!"
+        update.message.reply_html(output_string, reply_markup=make_main_keyboard(chat_id))
 
 
 def update():
@@ -1063,10 +1101,10 @@ def update():
 
     year = now.strftime("%Y")
     update_day = datetime.datetime.strptime(
-        year + "-08-15T00:00:00", "%Y-%m-%dT%H:%M:%S")
+        year + "-08-01T00:00:00", "%Y-%m-%dT%H:%M:%S")
 
     ##### DEBUG #####
-    # update_day = datetime.datetime.strptime(year + "-08-30T00:00:00", "%Y-%m-%dT%H:%M:%S")
+    update_day = datetime.datetime.strptime(year + "-08-30T00:00:00", "%Y-%m-%dT%H:%M:%S")
     #################
 
     if now > update_day:
@@ -1086,7 +1124,11 @@ def update():
     orari_table = "orari_" + config.accademic_year
     aule_table = "aule_" + config.accademic_year
 
+
     global all_courses, all_teachings, all_courses_group_by_area, all_aule, orari, orari_group_by_aula
+
+    orari_group_by_aula = collections.defaultdict(list)
+    orari = collections.defaultdict(list)
 
     if check_table(corsi_table) and check_table(insegnamenti_table):
 
@@ -1101,19 +1143,21 @@ def update():
 #        if len(orari) < 10:
         orari, orari_group_by_aula = get_all_orari()
 
+
+
     now = datetime.datetime.now()
     logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
                  " ### UPDATE DONE!")
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
           " ### UPDATE DONE!")
 
-def execute_update(update, context):
+def update_data(update, context):
 
     chat_id = update.message.chat_id
     text = update.message.text
     now = datetime.datetime.now()
 
-    if chat_id == -404582227:
+    if is_admin(chat_id):
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
                  " ### MESSAGE from " + str(chat_id)+" = " + text +" -> ALLOWED")
         print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
@@ -1127,18 +1171,17 @@ def execute_update(update, context):
                      now.strftime("%b %d %Y %H:%M:%S") + " ### RUNNING MANUAL UPDATE")
         print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### RUNNING MANUAL UPDATE")
 
-        year = now.strftime("%Y")
-        update_day = datetime.datetime.strptime(
-            year + "-08-15T00:00:00", "%Y-%m-%dT%H:%M:%S")
+#        year = now.strftime("%Y")
+#        update_day = datetime.datetime.strptime(year + "-08-01T00:00:00", "%Y-%m-%dT%H:%M:%S")
 
         ##### DEBUG #####
         # update_day = datetime.datetime.strptime(year + "-08-30T00:00:00", "%Y-%m-%dT%H:%M:%S")
         #################
 
-        if now > update_day:
-            config.accademic_year = year
-        else:
-            config.accademic_year = str(int(year) - 1)
+#        if now > update_day:
+#            config.accademic_year = year
+#        else:
+#            config.accademic_year = str(int(year) - 1)
 
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
                      " ### SET ACCADEMIC YEAR TO " + config.accademic_year)
@@ -1153,6 +1196,9 @@ def execute_update(update, context):
         aule_table = "aule_" + config.accademic_year
 
         global all_courses, all_teachings, all_courses_group_by_area, all_aule, orari, orari_group_by_aula
+
+        orari_group_by_aula = collections.defaultdict(list)
+        orari = collections.defaultdict(list)
 
         if check_table(corsi_table) and check_table(insegnamenti_table):
 
@@ -1177,7 +1223,8 @@ def execute_update(update, context):
         n_orari = len(orari)
         n_aule = len(all_aule)
         n_insegnamenti = len(all_teachings)
-        output_string = config.emo_end_plan + " UPDATE DONE!\n\n" + config.emo_courses + " Corsi: {}\n".format(n_corsi) + config.emo_plan + " Insegnamenti: {}\n".format(n_insegnamenti) + config.emo_room +" Aule: {}\n".format(n_aule) + config.emo_clock+" Orari: {}".format(n_orari)
+
+        output_string = config.emo_ay + " A.Y. <code>" + config.accademic_year + "/" + str(int(config.accademic_year) + 1) + "</code>\n" + config.emo_end_plan + " UPDATE DONE!\n\n" + config.emo_courses + " Corsi: {}\n".format(n_corsi) + config.emo_plan + " Insegnamenti: {}\n".format(n_insegnamenti) + config.emo_room +" Aule: {}\n".format(n_aule) + config.emo_clock+" Orari: {}".format(n_orari)
         update.message.reply_html(output_string, reply_markup=make_main_keyboard(chat_id))
 
     else:
@@ -1187,6 +1234,11 @@ def execute_update(update, context):
           " ### MESSAGE from " + str(chat_id) + " = " + text +" -> FORBIDDEN!")
         output_string = config.emo_red_circle + " FORBIDDEN!"
         update.message.reply_html(output_string, reply_markup=make_main_keyboard(chat_id))
+
+
+def is_admin(chat_id):
+    admins = [ -404582227 ]
+    return chat_id in admins
 
 def main():
     logging.info("### WORKING DIR " + config.current_dir)
@@ -1205,7 +1257,8 @@ def main():
     updater.dispatcher.add_handler(CommandHandler("start", start))
     updater.dispatcher.add_handler(CommandHandler("help", help))
     updater.dispatcher.add_handler(CommandHandler("time", print_time))
-    updater.dispatcher.add_handler(CommandHandler("up", execute_update))
+    updater.dispatcher.add_handler(CommandHandler("update_data", update_data))
+    updater.dispatcher.add_handler(CommandHandler("set_ay", set_ay))
 
     updater.dispatcher.add_handler(MessageHandler(Filters.command, commands))
 
