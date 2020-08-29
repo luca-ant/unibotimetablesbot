@@ -48,6 +48,7 @@ then
     StartLimitIntervalSec=0
     [Service]
     Environment=UNI_BOT_TOKEN=$UNI_BOT_TOKEN
+    Environment=ADMINS='-404582227'
     WorkingDirectory="$CURRENT_DIR"
     Type=simple
     Restart=always

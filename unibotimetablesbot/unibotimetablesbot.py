@@ -1237,8 +1237,13 @@ def update_data(update, context):
 
 
 def is_admin(chat_id):
-    admins = [ -404582227 ]
-    return chat_id in admins
+
+    admins = os.getenv("ADMINS").split()
+
+    if admins == None:
+        admins = []
+
+    return str(chat_id) in admins
 
 def main():
     logging.info("### WORKING DIR " + config.current_dir)
