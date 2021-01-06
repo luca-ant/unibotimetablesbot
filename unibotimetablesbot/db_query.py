@@ -59,7 +59,7 @@ def get_all_orari_from_file(csv_orari_filename):
 
             for code in o["aula_codici"].split():
                 all_orari_group_by_aula[code].append(o)
-
+#    print(all_orari)
     return all_orari, all_orari_group_by_aula
 
 
@@ -84,12 +84,12 @@ def get_all_orari():
     url = "https://dati.unibo.it/api/action/datastore_search_sql"
     sql_orari = "SELECT * FROM " + orari_table
 
-#    print(url+"?sql="+sql_orari)
+    # print(url+"?sql="+sql_orari)
 
     headers = {'Content-type': 'application/json',
                'Accept': 'application/json'}
     json_orari = requests.post(url, headers=headers, data='{"sql":'+'"'+sql_orari+'"}').text
-
+    # print(json_orari)
     try:
         orari = json.loads(json_orari)["result"]["records"]
     except:
@@ -97,7 +97,8 @@ def get_all_orari():
         now = datetime.datetime.now()
         logging.info("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") +
                      " ### EXCEPTION = " + traceback.format_exc())
-        return
+        # print(all_orari)
+        return all_orari, all_orari_group_by_aula
 
     for o in orari:
         current_o = {}
@@ -110,6 +111,7 @@ def get_all_orari():
         for code in o["aula_codici"].split():
             all_orari_group_by_aula[code].append(current_o)
 
+    # print('ok',all_orari, all_orari_group_by_aula)
 
     return all_orari, all_orari_group_by_aula
 

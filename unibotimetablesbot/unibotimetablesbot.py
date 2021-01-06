@@ -22,7 +22,7 @@ from keyboards import make_area_keyboard, make_room_keyboard, make_location_room
 from plan_manager import get_lessons, get_plan_timetable, get_room_timetable, load_user_plan, print_output_timetable, print_plan, print_plan_message, print_teachings_message, store_user_plan, check_plans_consistency
 
 from user_manager import UserManager
-from db_query import check_table, download_csv_orari,get_all_orari, get_all_orari_from_file, get_all_aule, get_all_courses
+from db_query import check_table, download_csv_orari, get_all_orari, get_all_orari_from_file, get_all_aule, get_all_courses
 from utils import my_round, distance
 
 import config
@@ -1052,7 +1052,7 @@ def scheduler_function(bot):
     while True:
 
         schedule.run_pending()
-        time.sleep(30)
+        time.sleep(10)
 
 def set_ay(update, context):
 
@@ -1100,10 +1100,12 @@ def update():
     print("TIMESTAMP = " + now.strftime("%b %d %Y %H:%M:%S") + " ### RUNNING UPDATE")
 
     year = now.strftime("%Y")
+
     update_day = datetime.datetime.strptime(
         year + "-08-01T00:00:00", "%Y-%m-%dT%H:%M:%S")
 
     ##### DEBUG #####
+    year = '2020'
 #    update_day = datetime.datetime.strptime(year + "-08-30T00:00:00", "%Y-%m-%dT%H:%M:%S")
     #################
 

@@ -179,6 +179,7 @@ def get_plan_timetable_web_api(day, plan):
 
 
 def get_lessons(chat_id, now, plan, orari, all_aule):
+
     timetable = Timetable()
 
     if plan.is_empty():
