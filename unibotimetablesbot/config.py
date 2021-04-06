@@ -89,7 +89,7 @@ donation_string = emo_money + \
 
 
 location_string = emo_gps+" <b>LOCATION</b>\n\nAre you looking for an empty classroom to study? Try to send your current location and the bot will search empty classrooms around you."
-issue_string = "For issues send a mail to luca.antognetti5@gmail.com describing the problem in detail."
+issue_string = "For issues send a mail to luca.antognetti2@gmail.com describing the problem in detail."
 
 command_help_string = emo_commands+" <b>COMMANDS:</b>\n\n" + SET_NOT_TIME_CMD + " - to set your favourite notification time\n<i>Example:</i> send \"" + \
     SET_NOT_TIME_CMD + \
