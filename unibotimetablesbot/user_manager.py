@@ -1,17 +1,10 @@
 import os
 import json
 import datetime
-import logging\
+import logging
 
 from model import Course, Teaching, Mode, Plan, Lesson, Aula, Timetable, User
 import config
-
-
-def get_user_manager():
-    if um_instance == None:
-        um_instance = UserManager()
-    else:
-        return um_instance
 
 
 class UserManager:
